@@ -1,0 +1,52 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.c text
+*.h text
+*.cpp text
+*.hpp text
+*.py text
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+
+# Documentation
+*.md text
+*.txt text
+*.rst text
+
+# Configuration files
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.conf text
+*.config text
+*.ini text
+
+# Scripts
+*.py text eol=lf
+*.sh text eol=lf
+configure text eol=lf
+Makefile text eol=lf
+
+# Device tree files
+*.dts text
+*.dtsi text
+
+# Binary files
+*.bin binary
+*.elf binary
+*.hex binary
+*.o binary
+*.a binary
+*.so binary
+*.ko binary
+*.img binary
+*.iso binary
+*.tar binary
+*.gz binary
+*.zip binary
+*.pcap binary
+*.pcapng binary

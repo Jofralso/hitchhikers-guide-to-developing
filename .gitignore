@@ -1,0 +1,107 @@
+# Build artifacts
+build/
+dist/
+*.o
+*.a
+*.so
+*.so.*
+*.ko
+*.obj
+*.elf
+*.hex
+*.bin
+*.map
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and debugging
+*.log
+logs/
+core
+*.dmp
+*.stackdump
+
+# Yocto build directories
+tmp/
+sstate-cache/
+downloads/
+build-*/
+
+# Cross-compilation
+*.cross
+sysroot/
+
+# Hardware specific
+.pio/
+.platformio/
+
+# Secrets and credentials
+secrets.txt
+*.key
+*.pem
+*.p12
+.env
+config/secret_*
+credentials/
+
+# Test and coverage
+*.gcda
+*.gcno
+*.gcov
+coverage/
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+*.egg-info/
+
+# Documentation generated
+docs/_build/
+site/
+.mkdocs_cache/
+
+# Temporary and cache
+tmp/
+temp/
+*.tmp
+*.bak
+*.swn
+.cache/
+
+# Archives
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
+
+# Data files (large binary files)
+*.pcap
+*.pcapng
+*.raw
+artifacts/datasets/*.dat
+artifacts/datasets/*.bin

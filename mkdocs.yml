@@ -1,0 +1,85 @@
+site_name: The Hitchhiker's Guide to Developing
+site_description: A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation
+site_author: Jofralso
+site_url: https://jofralso.github.io/hitchhikers-guide-to-developing/
+
+repo_name: Jofralso/hitchhikers-guide-to-developing
+repo_url: https://github.com/Jofralso/hitchhikers-guide-to-developing
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - The Journey: THE-JOURNEY.md
+  - Roadmap: ROADMAP.md
+  - Architecture: ARCHITECTURE.md
+  - Bibliography: BIBLIOGRAPHY.md
+  - Submodules:
+      - Overview: submodules/index.md
+  - Templates:
+      - Research Note: templates/research-note.md
+      - Technical Procedure: templates/technical-procedure.md
+  - Standards:
+      - Documentation: standards/documentation-standards.md
+  - Contributing: CONTRIBUTING.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Jofralso
+    - icon: fontawesome/solid/mug-hot
+      link: https://buymeacoffee.com/jofralso
+      name: Buy Me A Coffee
+
+copyright: Copyright &copy; 2025 Jofralso. Licensed under MIT.

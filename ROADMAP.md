@@ -73,7 +73,7 @@ The learning journey is divided into phases. Detailed objectives and topics for 
 
 ### In Progress
 
-- [ ] Submodule creation
+- [x] BeaglePlay lab materials (26 labs)
 - [ ] Initial documentation
 
 ### Planned
@@ -106,7 +106,7 @@ Build fundamental understanding of Linux systems, version control, and developme
 
 #### Version Control Mastery
 - Advanced Git operations
-- Submodule management
+- Repository management
 - Branch strategies and workflows
 - Collaboration patterns
 - Repository maintenance
@@ -128,7 +128,7 @@ Build fundamental understanding of Linux systems, version control, and developme
 ### Success Criteria
 
 - Comfortable with command-line operations
-- Proficient in Git operations including submodules
+- Proficient in Git operations
 - Can write and debug basic C programs
 - Understands compilation and linking process
 
@@ -456,7 +456,7 @@ Explore specialized areas and integrate knowledge across domains.
 
 ### In Progress
 
-- [ ] Submodule creation
+- [x] BeaglePlay lab materials (26 labs)
 - [ ] Initial documentation
 
 ### Planned

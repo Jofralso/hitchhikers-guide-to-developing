@@ -44,7 +44,7 @@
 - [Purpose](#purpose)
 - [Getting Started](#getting-started)
 - [Architecture](#architecture)
-- [Planned Submodules](#chapters-in-the-guide-active-research-domains)
+- [Training Tracks](#training-tracks)
 - [Focus Areas](#focus-areas)
 - [Documentation Standards](#documentation-standards)
 - [Learning Path](#learning-path)
@@ -61,7 +61,7 @@
 
 ## Purpose
 
-A meta-repository for organizing learning across multiple engineering domains using Git submodules. Each submodule represents a focused area of study.
+A comprehensive repository for embedded Linux development training with organized tracks and lab materials.
 
 **Read**: [THE-JOURNEY.md](THE-JOURNEY.md) for the philosophy behind this guide.
 
@@ -90,13 +90,12 @@ cd hitchhikers-guide-to-developing
 cat docs/BEAGLEPLAY_SETUP.md
 cat docs/LAB_STRUCTURE.md
 
-# When submodules are ready:
-git submodule update --init --recursive
+# All content is included in main repository
 ```
 
 ## Architecture
 
-This repository aggregates multiple focused research areas as Git submodules. Each submodule is an independent repository with its own documentation and experiments.
+This repository contains comprehensive training materials for embedded Linux development organized into focused tracks.
 
 ### Chapters in the Guide (Active Research Domains)
 
@@ -146,7 +145,7 @@ hitchhikers-guide-to-developing/
 │   ├── configurations/        # Reusable configuration files
 │   ├── scripts/              # Automation scripts
 │   └── datasets/             # Benchmark and test data
-└── [submodules]/             # Individual research domains
+└── labs/                     # Training lab materials
 ```
 
 ## Getting Started
@@ -154,7 +153,7 @@ hitchhikers-guide-to-developing/
 ### Prerequisites
 
 - Linux host system (Ubuntu 22.04 LTS or equivalent)
-- Git with submodule support
+- Git
 - Basic development tools (gcc, make, cmake)
 
 ### Clone Repository
@@ -164,14 +163,14 @@ git clone --recursive https://github.com/Jofralso/hitchhikers-guide-to-developin
 cd hitchhikers-guide-to-developing
 ```
 
-### Work with Submodules
+### Navigate Content
 
 ```bash
-# Initialize specific submodule
-git submodule update --init <submodule-name>
+# Browse lab materials
+cd docs/labs
 
-# Update all submodules
-git submodule update --remote --merge
+# View documentation
+mkdocs serve
 ```
 
 ## Learning Path
@@ -204,7 +203,7 @@ See `docs/templates/` for documentation templates.
 
 ## Hardware Platforms
 
-Available hardware is documented in the `hardware-platforms/` submodule (to be created).
+Available hardware documentation will be added to the repository.
 
 ## Support the Guide
 
@@ -239,7 +238,7 @@ Your support helps maintain this guide, create more comprehensive documentation,
 
 **Next Steps**:
 
-- [TODO] Create first submodules
+- [DONE] Create comprehensive lab materials
 - [TODO] Begin domain-specific documentation
 - [TODO] Set up development environment
 

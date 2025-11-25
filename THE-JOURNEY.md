@@ -28,7 +28,7 @@ Available hardware platforms:
 - Arduino boards
 - ESP32 development boards
 
-Detailed inventory will be documented in the `hardware-platforms/` submodule.
+Detailed inventory will be documented in future hardware documentation.
 
 ## Approach
 
@@ -41,9 +41,7 @@ This repository focuses on:
 
 ## Repository Organization
 
-The repository uses Git submodules to organize different learning domains. Each submodule is an independent repository focused on a specific area.
-
-See [docs/SUBMODULES.md](docs/SUBMODULES.md) for planned submodules.
+The repository organizes training content into focused tracks and domains, all contained within the main repository for ease of use.
 
 ## Documentation Standards
 
@@ -75,7 +73,7 @@ The DevOps homelab will serve as the integration point, providing:
 - Monitoring and metrics
 - Documentation hosting
 
-Detailed plans in the `devops-homelab/` submodule.
+Detailed plans will be added in future documentation.
 
 ## Value Proposition
 
@@ -95,11 +93,11 @@ Completed:
 - Repository structure
 - Documentation standards
 - Template creation
-- Submodule planning
+- Repository structure planning
 
 ## Next Steps
 
-1. Create `hardware-platforms` submodule
+1. Expand hardware platform documentation
 2. Begin embedded Linux labs
 3. Set up initial homelab infrastructure
 4. Document first complete system bring-up

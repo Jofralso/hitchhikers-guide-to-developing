@@ -43,9 +43,9 @@ artifacts/
 └── datasets/
 ```
 
-## Submodule Structure
+## Repository Structure
 
-Each submodule follows a consistent organization pattern. See [docs/SUBMODULES.md](docs/SUBMODULES.md) for detailed planning.
+The repository is organized into clear sections for documentation and training content.
 
 ## Naming Conventions
 
@@ -70,7 +70,7 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
 ## Maintenance
 
-- Regular updates to active submodules
+- Regular updates to documentation and labs
 - Periodic documentation reviews
 - Milestone tagging
 

@@ -1,12 +1,4 @@
 # Git Submodules Configuration
 # 
-# This file tracks the submodules for different research domains.
-# Each submodule is an independent repository focused on a specific area.
-#
-# To clone this repository with all submodules:
-#   git clone --recursive https://github.com/Jofralso/hitchhikers-guide-to-developing.git
-#
-# To initialize submodules after cloning:
-#   git submodule update --init --recursive
-#
-# Submodules will be added here as they are created.
+# This repository does not use submodules.
+# All content is contained within the main repository for simplicity.

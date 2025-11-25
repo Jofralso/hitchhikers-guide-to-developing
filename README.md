@@ -7,6 +7,8 @@
 ![GitHub forks](https://img.shields.io/github/forks/Jofralso/hitchhikers-guide-to-developing?style=social)
 ![License](https://img.shields.io/github/license/Jofralso/hitchhikers-guide-to-developing)
 
+[📚 View Documentation](https://jofralso.github.io/hitchhikers-guide-to-developing/){ .md-button .md-button--primary }
+
 </div>
 
 <!-- LOGO/HEADER -->
@@ -40,11 +42,11 @@
 <summary>📚 Table of Contents</summary>
 
 - [Purpose](#purpose)
+- [Getting Started](#getting-started)
 - [Architecture](#architecture)
 - [Planned Submodules](#chapters-in-the-guide-active-research-domains)
 - [Focus Areas](#focus-areas)
 - [Documentation Standards](#documentation-standards)
-- [Getting Started](#getting-started)
 - [Learning Path](#learning-path)
 - [Research Methodology](#research-methodology)
 - [Hardware Platforms](#hardware-platforms)
@@ -62,6 +64,35 @@
 A meta-repository for organizing learning across multiple engineering domains using Git submodules. Each submodule represents a focused area of study.
 
 **Read**: [THE-JOURNEY.md](THE-JOURNEY.md) for the philosophy behind this guide.
+
+## Getting Started
+
+### Quick Start
+
+1. **Hardware**: See [BeaglePlay Setup Guide](docs/BEAGLEPLAY_SETUP.md)
+2. **Labs**: Review [Lab Structure](docs/LAB_STRUCTURE.md) for learning progression
+3. **Training**: Read [Training Analysis](docs/TRAINING_ANALYSIS.md) for adaptation approach
+
+### Prerequisites
+
+- **Development PC**: Ubuntu 24.04 LTS (or similar Linux distribution)
+- **Hardware**: BeaglePlay board (primary), optional: Raspberry Pi, Pico, ESP32
+- **Skills**: Linux command line, basic C programming, Git fundamentals
+
+### First Steps
+
+```bash
+# Clone this repository
+git clone https://github.com/Jofralso/hitchhikers-guide-to-developing.git
+cd hitchhikers-guide-to-developing
+
+# Read the documentation
+cat docs/BEAGLEPLAY_SETUP.md
+cat docs/LAB_STRUCTURE.md
+
+# When submodules are ready:
+git submodule update --init --recursive
+```
 
 ## Architecture
 

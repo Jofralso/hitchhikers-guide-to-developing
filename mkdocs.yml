@@ -61,6 +61,44 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Getting Started:
+      - Quick Start: QUICK_START.md
+      - BeaglePlay Setup: BEAGLEPLAY_SETUP.md
+      - Lab Structure: LAB_STRUCTURE.md
+      - Training Analysis: TRAINING_ANALYSIS.md
+  - Labs:
+      - Embedded Linux:
+          - Overview: labs/embedded-linux/README.md
+          - Lab 1 - Toolchain: labs/embedded-linux/lab01-toolchain.md
+          - Lab 2 - Hardware Discovery: labs/embedded-linux/lab02-hardware.md
+          - Lab 3 - U-Boot Bootloader: labs/embedded-linux/lab03-bootloader.md
+          - Lab 4 - Linux Kernel: labs/embedded-linux/lab04-kernel.md
+          - Lab 5 - Root Filesystem: labs/embedded-linux/lab05-rootfs.md
+          - Lab 6 - Hardware Devices: labs/embedded-linux/lab06-hardware.md
+          - Lab 7 - Block Filesystems: labs/embedded-linux/lab07-block-filesystems.md
+          - Lab 8 - Buildroot: labs/embedded-linux/lab08-buildroot.md
+          - Lab 9 - App Development: labs/embedded-linux/lab09-application-development.md
+      - Yocto Project:
+          - Overview: labs/yocto/README.md
+          - Lab 10 - First Yocto Build: labs/yocto/lab10-yocto-first-build.md
+          - Lab 11 - Advanced Config: labs/yocto/lab11-yocto-advanced-config.md
+          - Lab 12 - Custom Application: labs/yocto/lab12-yocto-custom-app.md
+          - Lab 13 - Custom Layer: labs/yocto/lab13-yocto-custom-layer.md
+          - Lab 14 - Extend Recipe: labs/yocto/lab14-yocto-extend-recipe.md
+          - Lab 15 - Custom Machine: labs/yocto/lab15-yocto-custom-machine.md
+          - Lab 16 - Custom Image: labs/yocto/lab16-yocto-custom-image.md
+          - Lab 17 - SDK Development: labs/yocto/lab17-yocto-app-development.md
+          - Lab 18 - Devtool: labs/yocto/lab18-yocto-devtool.md
+      - Debugging:
+          - Overview: labs/debugging/README.md
+          - Lab 19 - System Monitoring: labs/debugging/lab19-system-monitoring.md
+          - Lab 20 - GDB Debugging: labs/debugging/lab20-gdb-debugging.md
+          - Lab 21 - strace/ltrace: labs/debugging/lab21-strace-ltrace.md
+          - Lab 22 - Valgrind: labs/debugging/lab22-valgrind.md
+          - Lab 23 - perf & ftrace: labs/debugging/lab23-perf-ftrace.md
+          - Lab 24 - eBPF & BCC: labs/debugging/lab24-ebpf-bcc.md
+          - Lab 25 - Kernel Debugging: labs/debugging/lab25-kernel-debugging.md
+          - Lab 26 - kdump & kexec: labs/debugging/lab26-kdump-kexec.md
   - The Journey: THE-JOURNEY.md
   - Roadmap: ROADMAP.md
   - Architecture: ARCHITECTURE.md
@@ -68,6 +106,7 @@ nav:
   - Submodules:
       - Overview: submodules/index.md
   - Templates:
+      - Lab Template: templates/lab-template.md
       - Research Note: templates/research-note.md
       - Technical Procedure: templates/technical-procedure.md
   - Standards:

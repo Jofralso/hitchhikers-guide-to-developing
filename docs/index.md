@@ -15,14 +15,14 @@ A comprehensive, structured journey through systems engineering, embedded develo
 
 ## What is This?
 
-This is a meta-repository that aggregates multiple focused research areas as Git submodules. Each submodule represents a distinct domain of study with its own documentation and experiments.
+This is a comprehensive repository that contains multiple focused research areas. Each domain represents a distinct area of study with its own documentation and experiments.
 
 ## Quick Links
 
 - **[The Journey](THE-JOURNEY.md)** - Philosophy and approach
 - **[Roadmap](ROADMAP.md)** - Learning progression
 - **[Architecture](ARCHITECTURE.md)** - Repository structure
-- **[Submodules](submodules/index.md)** - Planned research domains
+- **[Future Domains](submodules/index.md)** - Planned research areas
 - **[Bibliography](BIBLIOGRAPHY.md)** - References and resources
 
 ## Focus Areas
@@ -50,7 +50,7 @@ git submodule update --init <submodule-name>
 
 **Next Steps**:
 
-- [TODO] Create first submodules
+- [DONE] Complete BeaglePlay embedded Linux labs
 - [TODO] Begin domain-specific documentation
 - [TODO] Set up development environment
 

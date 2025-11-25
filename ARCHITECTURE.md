@@ -2,11 +2,11 @@
 
 ## Design Philosophy
 
-This meta-repository uses a modular architecture where each engineering domain exists as an independent Git submodule. This provides:
+This repository uses a modular architecture where each engineering domain is organized in dedicated directories. This provides:
 
-- **Isolation**: Independent version control per domain
+- **Isolation**: Clear separation between different domains
 - **Scalability**: Add new areas without affecting existing work
-- **Portability**: Individual modules can be used independently
+- **Simplicity**: All content in one repository
 - **Organization**: Clear separation of concerns
 
 ## Structure
@@ -18,11 +18,11 @@ hitchhikers-guide-to-developing/
 ├── ROADMAP.md            # Learning progression and milestones
 ├── BIBLIOGRAPHY.md       # Centralized reference collection
 ├── LICENSE               # MIT License
-├── .gitmodules           # Submodule configuration
+├── .gitmodules           # Not used (kept for documentation)
 ├── .gitignore            # Global ignore patterns
-├── docs/                 # Meta-documentation
+├── docs/                 # Documentation and labs
 ├── artifacts/            # Shared resources
-└── [submodules]/         # Research domain repositories
+└── tests/                # Test infrastructure
 ```
 
 ### Documentation Directory

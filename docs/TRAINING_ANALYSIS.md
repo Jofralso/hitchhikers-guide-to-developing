@@ -355,7 +355,7 @@ labX-toolchain/
 ### 📋 Planned
 
 - [ ] Labs 4-21 (following LAB_STRUCTURE.md)
-- [ ] Create GitHub repo for each lab (as submodules)
+- [ ] Create GitHub repo for each lab (optional)
 - [ ] Generate lab data files
 - [ ] Create video tutorials (optional)
 - [ ] Build community contributions
@@ -403,7 +403,7 @@ However, we're creating original content to learn through doing, not just copyin
 
 2. **Set Up Lab Infrastructure**
    - Create `embedded-linux-labs` repository
-   - Set up as submodule
+   - Organize within main repository
    - Create directory structure
 
 3. **Document as You Go**

@@ -181,11 +181,11 @@ See [ROADMAP.md](ROADMAP.md) for the recommended learning progression and milest
 
 This is a personal research repository, but like the Hitchhiker's Guide itself, the methodologies and documentation are designed to be useful to other travelers navigating the cosmos of software development.
 
-### Submodule Creation Workflow
+### Domain Creation Workflow
 
-1. Create independent repository for specific domain
+1. Create directory for specific domain
 2. Develop initial structure and documentation
-3. Add as submodule to this meta-repository
+3. Organize content within main repository
 4. Update this README with domain description
 
 ## Research Methodology

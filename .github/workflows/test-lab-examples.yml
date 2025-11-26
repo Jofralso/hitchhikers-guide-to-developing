@@ -1,0 +1,121 @@
+name: 🧪 Test Lab Examples
+
+on:
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'lab-examples/**'
+      - '.github/workflows/test-lab-examples.yml'
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'lab-examples/**'
+      - '.github/workflows/test-lab-examples.yml'
+  workflow_dispatch:
+
+jobs:
+  test-embedded-linux-labs:
+    name: Test Embedded Linux Labs
+    runs-on: ubuntu-24.04
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Install build essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: 🔧 Install ARM64 cross-compiler
+        run: |
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu \
+            g++-aarch64-linux-gnu \
+            qemu-user
+
+      - name: ✅ Verify toolchain installation
+        run: |
+          gcc --version
+          aarch64-linux-gnu-gcc --version
+          qemu-aarch64 --version
+
+      - name: 🏗️ Lab 1 - Build native and cross-compiled binaries
+        working-directory: lab-examples/embedded-linux/lab01-toolchain
+        run: |
+          echo "::group::Building Lab 1 Examples"
+          make check-toolchain
+          make all
+          echo "::endgroup::"
+
+      - name: 🧪 Lab 1 - Test native binary
+        working-directory: lab-examples/embedded-linux/lab01-toolchain
+        run: |
+          echo "::group::Testing Native Binary"
+          make test-native
+          echo "::endgroup::"
+
+      - name: 🧪 Lab 1 - Test cross-compiled binary with QEMU
+        working-directory: lab-examples/embedded-linux/lab01-toolchain
+        run: |
+          echo "::group::Testing ARM64 Binary"
+          make test-cross
+          echo "::endgroup::"
+
+      - name: 🧪 Lab 1 - Build and test static binary
+        working-directory: lab-examples/embedded-linux/lab01-toolchain
+        run: |
+          echo "::group::Testing Static ARM64 Binary"
+          make cross-static
+          make test-static
+          echo "::endgroup::"
+
+      - name: 📊 Display binary information
+        working-directory: lab-examples/embedded-linux/lab01-toolchain
+        run: |
+          echo "::group::Binary Analysis"
+          echo "=== Native Binary ==="
+          file build/hello-x86_64
+          ls -lh build/hello-x86_64
+          echo ""
+          echo "=== ARM64 Dynamic Binary ==="
+          file build/hello-arm64
+          ls -lh build/hello-arm64
+          echo ""
+          echo "=== ARM64 Static Binary ==="
+          file build/hello-arm64-static
+          ls -lh build/hello-arm64-static
+          echo "::endgroup::"
+
+      - name: 🧹 Clean build artifacts
+        working-directory: lab-examples/embedded-linux/lab01-toolchain
+        run: |
+          make clean
+          echo "✓ Cleanup complete"
+
+  # Future: Add more lab tests as they are created
+  # test-yocto-labs:
+  #   name: Test Yocto Labs
+  #   runs-on: ubuntu-24.04
+  #   ...
+  
+  # test-debugging-labs:
+  #   name: Test Debugging Labs
+  #   runs-on: ubuntu-24.04
+  #   ...
+
+  summary:
+    name: 📝 Test Summary
+    runs-on: ubuntu-24.04
+    needs: [test-embedded-linux-labs]
+    if: always()
+    
+    steps:
+      - name: 📊 Report Results
+        run: |
+          echo "::notice::Lab Example Tests Complete!"
+          echo ""
+          echo "DON'T PANIC - CI/CD Results:"
+          echo "✅ Lab 1: Cross-Compilation Toolchain - ${{ needs.test-embedded-linux-labs.result }}"
+          echo ""
+          echo "Remember: The answer to successful CI/CD is always 42 (passing tests)."

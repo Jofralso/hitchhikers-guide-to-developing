@@ -7,13 +7,13 @@
 ![GitHub forks](https://img.shields.io/github/forks/Jofralso/hitchhikers-guide-to-developing?style=social)
 ![License](https://img.shields.io/github/license/Jofralso/hitchhikers-guide-to-developing)
 
-[📚 View Documentation](https://jofralso.github.io/hitchhikers-guide-to-developing/){ .md-button .md-button--primary }
+[📚 View Documentation](https://jofralso.github.io/hitchhikers-guide-to-developing/)
 
 </div>
 
 <!-- LOGO/HEADER -->
 <div align="center">
-  <h1>🚀 The Hitchhiker's Guide to Developing</h1>
+  <h1>The Hitchhiker's Guide to Developing</h1>
   <h3>Don't Panic</h3>
   
   <p>
@@ -43,16 +43,28 @@
 
 - [Purpose](#purpose)
 - [Getting Started](#getting-started)
+  - [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [First Steps](#first-steps)
 - [Architecture](#architecture)
-- [Training Tracks](#training-tracks)
+  - [Chapters in the Guide (Active Research Domains)](#chapters-in-the-guide-active-research-domains)
 - [Focus Areas](#focus-areas)
 - [Documentation Standards](#documentation-standards)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started-1)
+  - [Prerequisites](#prerequisites-1)
+  - [Clone Repository](#clone-repository)
+  - [Navigate Content](#navigate-content)
 - [Learning Path](#learning-path)
+- [Contributing: Mostly Harmless](#contributing-mostly-harmless)
+  - [Domain Creation Workflow](#domain-creation-workflow)
 - [Research Methodology](#research-methodology)
 - [Hardware Platforms](#hardware-platforms)
+- [Support the Guide](#support-the-guide)
+  - [What Your Support Enables](#what-your-support-enables)
 - [Current Status](#current-status)
-- [Contributing](#contributing-mostly-harmless)
-- [Support](#support-the-guide)
+- [Acknowledgments](#acknowledgments)
+- [Statistics](#statistics)
 - [License](#license)
 
 </details>
@@ -71,7 +83,7 @@ A comprehensive repository for embedded Linux development training with organize
 
 1. **Hardware**: See [BeaglePlay Setup Guide](docs/BEAGLEPLAY_SETUP.md)
 2. **Labs**: Review [Lab Structure](docs/LAB_STRUCTURE.md) for learning progression
-3. **Training**: Read [Training Analysis](docs/TRAINING_ANALYSIS.md) for adaptation approach
+3. **Training**: This is personal and unpublished; no public link.
 
 ### Prerequisites
 

@@ -84,6 +84,9 @@ docs/_build/
 site/
 .mkdocs_cache/
 
+# Personal training analysis (exclude from repo)
+TRAINING_ANALYSIS/
+
 # Temporary and cache
 tmp/
 temp/

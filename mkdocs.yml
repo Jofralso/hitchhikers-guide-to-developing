@@ -65,7 +65,6 @@ nav:
       - Quick Start: QUICK_START.md
       - BeaglePlay Setup: BEAGLEPLAY_SETUP.md
       - Lab Structure: LAB_STRUCTURE.md
-      - Training Analysis: TRAINING_ANALYSIS.md
   - Labs:
       - Embedded Linux:
           - Overview: labs/embedded-linux/README.md

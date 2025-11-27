@@ -1,5 +1,7 @@
 # Minimal Makefile for Lab 1
 
+.DEFAULT_GOAL := all
+
 CC ?= gcc
 CFLAGS ?= -O2 -Wall -Wextra -std=c11
 LDFLAGS ?=

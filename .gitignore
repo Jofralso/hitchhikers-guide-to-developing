@@ -102,6 +102,13 @@ temp/
 *.tar.xz
 *.zip
 
+# Allow lab-specific archives and datasets (versioned small samples)
+!labs/**/*.tar
+!labs/**/*.tar.gz
+!labs/**/*.tar.bz2
+!labs/**/*.tar.xz
+!labs/**/*.zip
+
 # Data files (large binary files)
 *.pcap
 *.pcapng

@@ -1,0 +1,5141 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/embedded-linux/lab05-rootfs/">
+      
+      
+        <link rel="prev" href="../lab04-kernel/">
+      
+      
+        <link rel="next" href="../lab06-hardware/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 5 - Root Filesystem - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-5-root-filesystem-with-busybox-and-nfs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 5 - Root Filesystem
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#learning-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-root-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Root Filesystem?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why BusyBox?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why NFS Root?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-well-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What We'll Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workspace-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-understanding-nfs-root-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Understanding NFS Root Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Understanding NFS Root Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kernel-configuration-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Configuration Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfs-root-boot-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFS Root Boot Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-building-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Building BusyBox
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Building BusyBox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-busybox-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get BusyBox Sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explore-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explore BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-base-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Base Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-compile-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Compile BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-creating-root-filesystem-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Creating Root Filesystem Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Creating Root Filesystem Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-essential-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Essential Directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-nfs-server-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: NFS Server Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: NFS Server Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-nfs-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install NFS Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-nfs-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure NFS Export
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-nfs-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply NFS Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-nfs-locally-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test NFS Locally (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-booting-with-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Booting with NFS Root
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Booting with NFS Root">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-u-boot-for-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure U-Boot for NFS Root
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boot the System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-dev-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create /dev Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-init-system-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Init System Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Init System Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-init-symlink" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Init Symlink
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-inittab-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create inittab Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-startup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Startup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-first-successful-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: First Successful Boot!
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: First Successful Boot!">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-your-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Your System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-nfs-live-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test NFS Live Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-virtual-filesystems-deep-dive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Virtual Filesystems Deep Dive
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: Virtual Filesystems Deep Dive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proc-process-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /proc - Process Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sys-kernel-and-device-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /sys - Kernel and Device Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dev-device-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /dev - Device Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-switching-to-shared-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: Switching to Shared Libraries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: Switching to Shared Libraries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-test-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a Test Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-dynamic-linker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Dynamic Linker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dynamic-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dynamic Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild-busybox-dynamically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rebuild BusyBox Dynamically
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dynamic-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dynamic BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-simple-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Simple Web Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 10: Simple Web Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-web-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Web Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Web Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Web Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-to-startup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add to Startup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-cgi-script-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a CGI Script (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nfs-mount-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFS Mount Fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#init-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Init Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shell-prompt-shows-cant-access-tty-job-control-turned-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Prompt Shows "can't access tty; job control turned off"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands Not Working
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-server-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Server Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfs-writes-fail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFS Writes Fail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further-optional-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further (Optional Challenges)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further (Optional Challenges)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-initramfs-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Initramfs Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-custom-init-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Custom Init System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-network-configuration-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Network Configuration Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-persistent-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Persistent Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-5-system-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 5: System Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Next?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#learning-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-root-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Root Filesystem?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why BusyBox?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why NFS Root?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-well-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What We'll Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workspace-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-understanding-nfs-root-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Understanding NFS Root Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Understanding NFS Root Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kernel-configuration-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Configuration Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfs-root-boot-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFS Root Boot Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-building-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Building BusyBox
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Building BusyBox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-busybox-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get BusyBox Sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explore-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explore BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-base-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Base Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-compile-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Compile BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-creating-root-filesystem-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Creating Root Filesystem Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Creating Root Filesystem Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-essential-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Essential Directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-nfs-server-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: NFS Server Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: NFS Server Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-nfs-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install NFS Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-nfs-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure NFS Export
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-nfs-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply NFS Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-nfs-locally-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test NFS Locally (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-booting-with-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Booting with NFS Root
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Booting with NFS Root">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-u-boot-for-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure U-Boot for NFS Root
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boot the System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-dev-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create /dev Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-init-system-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Init System Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Init System Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-init-symlink" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Init Symlink
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-inittab-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create inittab Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-startup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Startup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-first-successful-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: First Successful Boot!
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: First Successful Boot!">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-your-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Your System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-nfs-live-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test NFS Live Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-virtual-filesystems-deep-dive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Virtual Filesystems Deep Dive
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: Virtual Filesystems Deep Dive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proc-process-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /proc - Process Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sys-kernel-and-device-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /sys - Kernel and Device Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dev-device-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /dev - Device Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-switching-to-shared-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: Switching to Shared Libraries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: Switching to Shared Libraries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-test-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a Test Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-dynamic-linker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Dynamic Linker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dynamic-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dynamic Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild-busybox-dynamically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rebuild BusyBox Dynamically
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dynamic-busybox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dynamic BusyBox
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-simple-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Simple Web Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 10: Simple Web Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-web-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Web Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Web Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Web Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-to-startup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add to Startup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-cgi-script-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a CGI Script (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nfs-mount-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFS Mount Fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#init-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Init Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shell-prompt-shows-cant-access-tty-job-control-turned-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Prompt Shows "can't access tty; job control turned off"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands Not Working
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-server-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Server Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfs-writes-fail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFS Writes Fail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further-optional-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further (Optional Challenges)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further (Optional Challenges)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-initramfs-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Initramfs Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-custom-init-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Custom Init System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-network-configuration-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Network Configuration Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-persistent-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Persistent Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-5-system-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 5: System Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Next?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-5-root-filesystem-with-busybox-and-nfs">Lab 5: Root Filesystem with BusyBox and NFS<a class="headerlink" href="#lab-5-root-filesystem-with-busybox-and-nfs" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about root filesystems:</p>
+<p><em>"A root filesystem is where all your files live. Think of it as the contents of your towel bag - essential utilities, helpful tools, and the occasional item whose purpose you've completely forgotten but you're certain you'll need eventually."</em></p>
+<h2 id="learning-objectives">Learning Objectives<a class="headerlink" href="#learning-objectives" title="Permanent link">&para;</a></h2>
+<p>By the end of this lab, you will be able to:</p>
+<ul>
+<li>Understand Linux root filesystem structure and requirements</li>
+<li>Build BusyBox to provide essential Unix utilities</li>
+<li>Create a minimal root filesystem from scratch</li>
+<li>Set up NFS server for network-based root filesystem</li>
+<li>Configure kernel for NFS root boot</li>
+<li>Create init scripts and system startup configuration</li>
+<li>Mount virtual filesystems (proc, sysfs, devtmpfs)</li>
+<li>Switch between static and dynamic linking</li>
+<li>Set up a simple web server on the embedded system</li>
+</ul>
+<p><strong>Estimated Time:</strong> 3-4 hours</p>
+<p><strong>Prerequisites:</strong>
+- Completed Lab 1 (Custom Toolchain)
+- Completed Lab 2 (Hardware Discovery)
+- Completed Lab 3 (U-Boot Bootloader)
+- Completed Lab 4 (Linux Kernel)
+- Understanding of filesystem hierarchy
+- Basic shell scripting knowledge</p>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-a-root-filesystem">What is a Root Filesystem?<a class="headerlink" href="#what-is-a-root-filesystem" title="Permanent link">&para;</a></h3>
+<p>In Lab 4, our kernel successfully booted but panicked with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+</code></pre></div>
+<p>This happened because the kernel needs a <strong>root filesystem</strong> - a directory tree containing:
+- <strong><code>/sbin/init</code></strong> - The first userspace program (PID 1)
+- <strong>Essential commands</strong> - ls, cp, cat, mount, etc.
+- <strong>Libraries</strong> - Shared libraries for dynamically linked programs
+- <strong>Configuration files</strong> - System startup scripts, network config, etc.
+- <strong>Device files</strong> - In <code>/dev</code> (or created dynamically)</p>
+<p>Without a root filesystem, the kernel has no userspace to run!</p>
+<h3 id="why-busybox">Why BusyBox?<a class="headerlink" href="#why-busybox" title="Permanent link">&para;</a></h3>
+<p>BusyBox is the "Swiss Army Knife of Embedded Linux":</p>
+<p><strong>Single Binary, Multiple Tools</strong>
+- One executable provides 300+ Unix utilities
+- <code>busybox ls</code>, <code>busybox cp</code>, <code>busybox mount</code>, etc.
+- Symbolic links allow <code>ls</code> → <code>busybox</code></p>
+<p><strong>Tiny Size</strong>
+- Full-featured: ~900KB static binary
+- Minimal config: ~400KB
+- Compare to GNU coreutils: ~14MB!</p>
+<p><strong>Perfect for Embedded</strong>
+- Low memory footprint
+- No dependencies when built static
+- Configurable features (like kernel menuconfig)</p>
+<h3 id="why-nfs-root">Why NFS Root?<a class="headerlink" href="#why-nfs-root" title="Permanent link">&para;</a></h3>
+<p>During development, NFS (Network File System) root is invaluable:</p>
+<p><strong>Instant Updates</strong>
+- Edit files on PC, changes immediately visible on target
+- No reflashing, no SD card swapping
+- Edit-test cycle in seconds, not minutes</p>
+<p><strong>Easy Debugging</strong>
+- Access target filesystem from PC
+- Copy files in/out effortlessly
+- Inspect logs, add debugging tools</p>
+<p><strong>Flexibility</strong>
+- Try different configurations quickly
+- Revert changes instantly
+- Share root filesystem between multiple boards</p>
+<p><strong>Production Note:</strong> NFS root is for development only. Production systems use local storage (eMMC, SD, flash).</p>
+<h3 id="what-well-build">What We'll Build<a class="headerlink" href="#what-well-build" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Development PC                    BeaglePlay
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>┌─────────────────┐              ┌──────────────┐
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│                 │              │              │
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│ /home/you/      │              │ Kernel boots │
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│  nfsroot/       │              │              │
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   bin/          │  NFS mount   │ Mounts NFS   │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   sbin/     ◄───┼──────────────┼─ as /       │
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   etc/          │  Ethernet    │              │
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   lib/          │              │ Runs init    │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   ...           │              │              │
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│                 │              │ Shell prompt!│
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>└─────────────────┘              └──────────────┘
+</code></pre></div>
+<p>The BeaglePlay will mount your PC's directory as its root filesystem over the network!</p>
+<h2 id="workspace-setup">Workspace Setup<a class="headerlink" href="#workspace-setup" title="Permanent link">&para;</a></h2>
+<p>Create root filesystem lab directory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>tinysystem
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>tinysystem
+</code></pre></div>
+<p>All root filesystem work happens here.</p>
+<h2 id="part-1-understanding-nfs-root-requirements">Part 1: Understanding NFS Root Requirements<a class="headerlink" href="#part-1-understanding-nfs-root-requirements" title="Permanent link">&para;</a></h2>
+<h3 id="kernel-configuration-check">Kernel Configuration Check<a class="headerlink" href="#kernel-configuration-check" title="Permanent link">&para;</a></h3>
+<p>First, verify our kernel has NFS client support.</p>
+<p>Check if NFS is enabled:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/kernel/linux
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;CONFIG_NFS_FS|CONFIG_ROOT_NFS|CONFIG_IP_PNP&quot;</span><span class="w"> </span>.config
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>CONFIG_NFS_FS=y
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>CONFIG_ROOT_NFS=y
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>CONFIG_IP_PNP=y
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>CONFIG_IP_PNP_DHCP=y
+</code></pre></div>
+<p>If any are missing or set to <code>=m</code> (module), enable them:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>menuconfig
+</code></pre></div>
+<p>Navigate to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>File systems →
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  Network File Systems →
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    [*] NFS client support
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    [*] NFS client support for NFS version 3
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    [*] Root file system on NFS
+</code></pre></div>
+<p>And:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Networking support →
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  Networking options →
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    [*] IP: kernel level autoconfiguration
+</code></pre></div>
+<p>Also verify <code>devtmpfs</code> is configured to auto-mount:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>grep<span class="w"> </span>CONFIG_DEVTMPFS<span class="w"> </span>.config
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>CONFIG_DEVTMPFS=y
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>CONFIG_DEVTMPFS_MOUNT=y
+</code></pre></div>
+<p>If you made changes, rebuild the kernel:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>cp<span class="w"> </span>arch/arm64/boot/Image.gz<span class="w"> </span>/srv/tftp/
+</code></pre></div>
+<h3 id="nfs-root-boot-flow">NFS Root Boot Flow<a class="headerlink" href="#nfs-root-boot-flow" title="Permanent link">&para;</a></h3>
+<p>Here's what happens when booting with NFS root:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>1. U-Boot loads kernel via TFTP
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>2. Kernel boots, initializes network
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>3. Kernel contacts NFS server (IP from bootargs)
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>4. Kernel mounts NFS export as root filesystem
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>5. Kernel executes /sbin/init from NFS
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>6. System boots normally!
+</code></pre></div>
+<p>The kernel needs these boot arguments:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>root=/dev/nfs                    ← Use NFS for root
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>nfsroot=192.168.1.1:/path,opts   ← NFS server and path
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>ip=192.168.1.100::::eth0         ← Board IP config
+</code></pre></div>
+<h2 id="part-2-building-busybox">Part 2: Building BusyBox<a class="headerlink" href="#part-2-building-busybox" title="Permanent link">&para;</a></h2>
+<h3 id="get-busybox-sources">Get BusyBox Sources<a class="headerlink" href="#get-busybox-sources" title="Permanent link">&para;</a></h3>
+<p>Clone the stable BusyBox repository:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://git.busybox.net/busybox
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nb">cd</span><span class="w"> </span>busybox/
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>git<span class="w"> </span>checkout<span class="w"> </span>1_37_stable
+</code></pre></div>
+<p>Version 1.37 is the latest stable branch.</p>
+<p>Check the version:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>head<span class="w"> </span>-5<span class="w"> </span>Makefile<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>VERSION
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>VERSION = 1
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>PATCHLEVEL = 37
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>SUBLEVEL = 0
+</code></pre></div>
+<h3 id="explore-busybox">Explore BusyBox<a class="headerlink" href="#explore-busybox" title="Permanent link">&para;</a></h3>
+<p>BusyBox uses Kconfig like the kernel. Check available commands:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>ls<span class="w"> </span>-1<span class="w"> </span>*/Config.in<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+<p>You'll see configuration files for:
+- <code>archival/Config.in</code> - tar, gzip, unzip
+- <code>console-tools/Config.in</code> - loadfont, setconsole
+- <code>coreutils/Config.in</code> - ls, cp, mv, cat, etc.
+- <code>editors/Config.in</code> - vi, sed, awk
+- <code>networking/Config.in</code> - wget, ifconfig, ping</p>
+<h3 id="load-base-configuration">Load Base Configuration<a class="headerlink" href="#load-base-configuration" title="Permanent link">&para;</a></h3>
+<p>Start with a default config optimized for embedded systems:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>make<span class="w"> </span>defconfig
+</code></pre></div>
+<p>This creates <code>.config</code> with reasonable defaults.</p>
+<h3 id="configure-busybox">Configure BusyBox<a class="headerlink" href="#configure-busybox" title="Permanent link">&para;</a></h3>
+<p>Customize the configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>make<span class="w"> </span>menuconfig
+</code></pre></div>
+<p><strong>Critical Changes:</strong></p>
+<p><strong>1. Enable Static Linking (for now)</strong></p>
+<p>Navigate to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>Settings →
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  [*] Build static binary (no shared libs)
+</code></pre></div>
+<p>Press Space to enable (asterisk should appear).</p>
+<p><strong>Why static?</strong> Initially we have no C library in our root filesystem. Static linking embeds everything into the BusyBox binary. Later we'll switch to dynamic linking.</p>
+<p><strong>2. Set Installation Prefix</strong></p>
+<p>Navigate to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Settings →
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  Installation Options (&quot;make install&quot; behavior) →
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    Destination path for &#39;make install&#39;
+</code></pre></div>
+<p>Set this to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>/home/YOUR_USERNAME/embedded-labs/tinysystem/nfsroot
+</code></pre></div>
+<p><strong>Replace YOUR_USERNAME!</strong> This is where BusyBox will be installed.</p>
+<p><strong>3. Enable Useful Commands (optional but recommended)</strong></p>
+<p>Navigate and enable these if not already enabled:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Archival Utilities →
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>  [*] tar
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>  [*] gunzip
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>  [*] gzip
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>Editors →
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>  [*] vi
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>Networking Utilities →
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>  [*] ping
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>  [*] wget
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>  [*] httpd (we&#39;ll use this later!)
+</code></pre></div>
+<p>Save and exit menuconfig.</p>
+<h3 id="cross-compile-busybox">Cross-Compile BusyBox<a class="headerlink" href="#cross-compile-busybox" title="Permanent link">&para;</a></h3>
+<p>Set up cross-compilation environment:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ARCH</span><span class="o">=</span>arm64
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span>aarch64-beagleplay-linux-musl-
+</code></pre></div>
+<p>Build BusyBox:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</code></pre></div>
+<p>Build time: ~1-2 minutes.</p>
+<p>Check the binary size:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span>busybox
+</code></pre></div>
+<p>Should be around <strong>900KB-1.2MB</strong> for a static build with most features enabled.</p>
+<p>Verify it's statically linked:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>file<span class="w"> </span>busybox
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>busybox: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, not stripped
+</code></pre></div>
+<p>"statically linked" confirms it has no library dependencies.</p>
+<h3 id="install-busybox">Install BusyBox<a class="headerlink" href="#install-busybox" title="Permanent link">&para;</a></h3>
+<p>Install to our NFS root directory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>make<span class="w"> </span>install
+</code></pre></div>
+<p>This creates the directory structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>ls<span class="w"> </span>-la<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/
+</code></pre></div>
+<p>You should see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>total 12
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>drwxr-xr-x  4 you you 4096 bin
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>drwxr-xr-x  2 you you 4096 sbin
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>lrwxrwxrwx  1 you you   11 linuxrc -&gt; bin/busybox
+</code></pre></div>
+<p>Check what's in <code>bin/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>ls<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+<p>You'll see hundreds of symlinks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>ls -&gt; busybox
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>cp -&gt; busybox
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>mv -&gt; busybox
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>cat -&gt; busybox
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>...
+</code></pre></div>
+<p>Check the actual BusyBox binary:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/busybox
+</code></pre></div>
+<p>Should show the same ~900KB size.</p>
+<p><strong>How it works:</strong>
+- All commands are symlinks to <code>busybox</code>
+- BusyBox checks <code>argv[0]</code> (program name)
+- Executes appropriate functionality</p>
+<p>Test locally (won't fully work on x86, but demonstrates the concept):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/busybox<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello from BusyBox&quot;</span>
+</code></pre></div>
+<h2 id="part-3-creating-root-filesystem-structure">Part 3: Creating Root Filesystem Structure<a class="headerlink" href="#part-3-creating-root-filesystem-structure" title="Permanent link">&para;</a></h2>
+<p>BusyBox installed <code>bin/</code> and <code>sbin/</code>, but we need more directories.</p>
+<h3 id="create-essential-directories">Create Essential Directories<a class="headerlink" href="#create-essential-directories" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>dev<span class="w"> </span>etc<span class="w"> </span>lib<span class="w"> </span>proc<span class="w"> </span>sys<span class="w"> </span>tmp<span class="w"> </span>usr/lib<span class="w"> </span>usr/bin
+</code></pre></div>
+<p>Explanation of each directory:</p>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>/dev</strong></td>
+<td>Device files (will be auto-populated by devtmpfs)</td>
+</tr>
+<tr>
+<td><strong>/etc</strong></td>
+<td>Configuration files (init scripts, network config)</td>
+</tr>
+<tr>
+<td><strong>/lib</strong></td>
+<td>Shared libraries (for dynamic linking later)</td>
+</tr>
+<tr>
+<td><strong>/proc</strong></td>
+<td>Virtual filesystem for process information</td>
+</tr>
+<tr>
+<td><strong>/sys</strong></td>
+<td>Virtual filesystem for kernel/device information</td>
+</tr>
+<tr>
+<td><strong>/tmp</strong></td>
+<td>Temporary files</td>
+</tr>
+<tr>
+<td><strong>/usr/lib</strong></td>
+<td>Additional libraries</td>
+</tr>
+<tr>
+<td><strong>/usr/bin</strong></td>
+<td>User commands</td>
+</tr>
+</tbody>
+</table>
+<p>Set proper permissions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>chmod<span class="w"> </span><span class="m">1777</span><span class="w"> </span>tmp
+</code></pre></div>
+<p>The <code>1777</code> sets:
+- <code>1</code> - Sticky bit (only owner can delete files)
+- <code>777</code> - Read/write/execute for everyone</p>
+<p>Verify the structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>tree<span class="w"> </span>-L<span class="w"> </span><span class="m">1</span><span class="w"> </span>.
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>.
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>├── bin -&gt; usr/bin
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>├── dev
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>├── etc
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>├── lib -&gt; usr/lib
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>├── linuxrc -&gt; bin/busybox
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>├── proc
+<a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>├── sbin -&gt; usr/sbin
+<a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>├── sys
+<a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a>├── tmp
+<a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>└── usr
+</code></pre></div>
+<h2 id="part-4-nfs-server-setup">Part 4: NFS Server Setup<a class="headerlink" href="#part-4-nfs-server-setup" title="Permanent link">&para;</a></h2>
+<p>Now we'll export this directory via NFS so BeaglePlay can mount it.</p>
+<h3 id="install-nfs-server">Install NFS Server<a class="headerlink" href="#install-nfs-server" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>nfs-kernel-server
+</code></pre></div>
+<p>Verify it's running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>nfs-kernel-server
+</code></pre></div>
+<p>Should show "active (running)".</p>
+<h3 id="configure-nfs-export">Configure NFS Export<a class="headerlink" href="#configure-nfs-export" title="Permanent link">&para;</a></h3>
+<p>Edit the NFS exports file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/exports
+</code></pre></div>
+<p>Add this line (all on ONE line):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>/home/YOUR_USERNAME/embedded-labs/tinysystem/nfsroot 192.168.1.100(rw,no_root_squash,no_subtree_check,sync)
+</code></pre></div>
+<p><strong>Replace YOUR_USERNAME</strong> with your actual username!</p>
+<p>Parameters explained:
+- <strong>192.168.1.100</strong> - Only allow this IP (our BeaglePlay)
+- <strong>rw</strong> - Read-write access
+- <strong>no_root_squash</strong> - Don't map root to anonymous user (allows root to create files)
+- <strong>no_subtree_check</strong> - Faster, less secure (OK for development)
+- <strong>sync</strong> - Write changes immediately (safer but slower)</p>
+<p><strong>Important (like knowing where your towel is):</strong> Make sure there's <strong>NO SPACE</strong> between the IP and the opening parenthesis! Otherwise default (read-only) options will be used.</p>
+<h3 id="apply-nfs-configuration">Apply NFS Configuration<a class="headerlink" href="#apply-nfs-configuration" title="Permanent link">&para;</a></h3>
+<p>Reload the NFS server configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-ra
+</code></pre></div>
+<p>The <code>-ra</code> means "re-export all directories".</p>
+<p>Verify the export:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-v
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>/home/you/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>        192.168.1.100(rw,wdelay,no_root_squash,no_subtree_check,sec=sys,...)
+</code></pre></div>
+<h3 id="test-nfs-locally-optional">Test NFS Locally (Optional)<a class="headerlink" href="#test-nfs-locally-optional" title="Permanent link">&para;</a></h3>
+<p>Before testing on BeaglePlay, verify NFS works locally:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/mnt/test
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>sudo<span class="w"> </span>mount<span class="w"> </span>-t<span class="w"> </span>nfs<span class="w"> </span>localhost:/home/<span class="nv">$USER</span>/embedded-labs/tinysystem/nfsroot<span class="w"> </span>/mnt/test
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>ls<span class="w"> </span>/mnt/test
+</code></pre></div>
+<p>Should show <code>bin</code>, <code>sbin</code>, <code>etc</code>, etc.</p>
+<p>Unmount:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>sudo<span class="w"> </span>umount<span class="w"> </span>/mnt/test
+</code></pre></div>
+<p>Success! NFS server is ready.</p>
+<h2 id="part-5-booting-with-nfs-root">Part 5: Booting with NFS Root<a class="headerlink" href="#part-5-booting-with-nfs-root" title="Permanent link">&para;</a></h2>
+<h3 id="configure-u-boot-for-nfs-root">Configure U-Boot for NFS Root<a class="headerlink" href="#configure-u-boot-for-nfs-root" title="Permanent link">&para;</a></h3>
+<p>Power on BeaglePlay, hold USR button, stop at U-Boot prompt.</p>
+<p>Set kernel boot arguments for NFS root:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>=&gt; setenv bootargs console=ttyS2,115200n8 root=/dev/nfs ip=192.168.1.100::::eth0 nfsroot=192.168.1.1:/home/YOUR_USERNAME/embedded-labs/tinysystem/nfsroot,nfsvers=3,tcp rw
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>=&gt; saveenv
+</code></pre></div>
+<p><strong>Adjust these values:</strong>
+- <strong>YOUR_USERNAME</strong> - Your actual username
+- <strong>192.168.1.100</strong> - BeaglePlay IP
+- <strong>192.168.1.1</strong> - Your PC IP</p>
+<p>Bootargs breakdown:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>console=ttyS2,115200n8</code></td>
+<td>Serial console configuration</td>
+</tr>
+<tr>
+<td><code>root=/dev/nfs</code></td>
+<td>Use NFS for root filesystem</td>
+</tr>
+<tr>
+<td><code>ip=192.168.1.100::::eth0</code></td>
+<td>Static IP for eth0 (format: ip:server:gateway:netmask:hostname:device)</td>
+</tr>
+<tr>
+<td><code>nfsroot=192.168.1.1:/path,nfsvers=3,tcp</code></td>
+<td>NFS server, path, version 3, TCP protocol</td>
+</tr>
+<tr>
+<td><code>rw</code></td>
+<td>Mount read-write</td>
+</tr>
+</tbody>
+</table>
+<h3 id="boot-the-system">Boot the System<a class="headerlink" href="#boot-the-system" title="Permanent link">&para;</a></h3>
+<p>Load kernel and DTB:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>=&gt; run netboot
+</code></pre></div>
+<p>(Or manually: <code>tftp 0x82000000 Image.gz; tftp 0x88000000 k3-am625-beagleplay.dtb; booti 0x82000000 - 0x88000000</code>)</p>
+<p>Watch the boot messages closely. You should see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>[    0.000000] Kernel command line: console=ttyS2,115200n8 root=/dev/nfs ip=192.168.1.100::::eth0 nfsroot=192.168.1.1:/home/you/embedded-labs/tinysystem/nfsroot,nfsvers=3,tcp rw
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>...
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>[    2.456789] am65-cpsw-nuss 8000000.ethernet eth0: Link is Up - 1Gbps/Full - flow control off
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>...
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>[    3.123456] IP-Config: Complete:
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>[    3.123500]      device=eth0, hwaddr=xx:xx:xx:xx:xx:xx, ipaddr=192.168.1.100, mask=255.255.255.0, gw=255.255.255.255
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>...
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>[    4.567890] VFS: Mounted root (nfs filesystem) on device 0:18.
+<a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a>...
+<a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a>[    5.234567] devtmpfs: mounted
+<a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a>[    5.678901] Freeing unused kernel image (initmem) memory: 6464K
+<a id="__codelineno-50-12" name="__codelineno-50-12" href="#__codelineno-50-12"></a>[    5.678950] Run /sbin/init as init process
+</code></pre></div>
+<p><strong>Expected failure:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>[    6.123456] Kernel panic - not syncing: No working init found.  Try passing init= option to kernel. See Linux Documentation/admin-guide/init.rst for guidance.
+</code></pre></div>
+<p><strong>This is progress!</strong> The kernel:
+✅ Configured networking<br />
+✅ Mounted NFS root<br />
+✅ Tried to run <code>/sbin/init</code><br />
+❌ But <code>/sbin/init</code> doesn't exist yet!</p>
+<h3 id="create-dev-directory">Create /dev Directory<a class="headerlink" href="#create-dev-directory" title="Permanent link">&para;</a></h3>
+<p>The panic might also mention:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>[    5.123456] devtmpfs: error mounting -2
+</code></pre></div>
+<p>This is because <code>/dev</code> doesn't exist. Create it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>dev
+</code></pre></div>
+<p>Reboot BeaglePlay. The devtmpfs error should be gone, but init panic remains.</p>
+<h2 id="part-6-init-system-configuration">Part 6: Init System Configuration<a class="headerlink" href="#part-6-init-system-configuration" title="Permanent link">&para;</a></h2>
+<p>Linux needs <code>/sbin/init</code> - the first userspace program. BusyBox provides a simple init system.</p>
+<h3 id="create-init-symlink">Create Init Symlink<a class="headerlink" href="#create-init-symlink" title="Permanent link">&para;</a></h3>
+<p>BusyBox init is just the busybox binary called as <code>init</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>ln<span class="w"> </span>-s<span class="w"> </span>../bin/busybox<span class="w"> </span>sbin/init
+</code></pre></div>
+<p>Verify:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>sbin/init
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>lrwxrwxrwx 1 you you 14 sbin/init -&gt; ../bin/busybox
+</code></pre></div>
+<h3 id="create-inittab-configuration">Create inittab Configuration<a class="headerlink" href="#create-inittab-configuration" title="Permanent link">&para;</a></h3>
+<p>BusyBox init reads <code>/etc/inittab</code> for configuration.</p>
+<p>Create it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>etc/inittab<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a><span class="s"># /etc/inittab for BusyBox init</span>
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="s"># Mount proc and sysfs at boot</span>
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="s">::sysinit:/etc/init.d/rcS</span>
+<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>
+<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a><span class="s"># Start a shell on console</span>
+<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a><span class="s">::askfirst:/bin/sh</span>
+<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>
+<a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a><span class="s"># Reboot on Ctrl-Alt-Del</span>
+<a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a><span class="s">::ctrlaltdel:/sbin/reboot</span>
+<a id="__codelineno-57-12" name="__codelineno-57-12" href="#__codelineno-57-12"></a>
+<a id="__codelineno-57-13" name="__codelineno-57-13" href="#__codelineno-57-13"></a><span class="s"># Shutdown cleanly</span>
+<a id="__codelineno-57-14" name="__codelineno-57-14" href="#__codelineno-57-14"></a><span class="s">::shutdown:/bin/umount -a -r</span>
+<a id="__codelineno-57-15" name="__codelineno-57-15" href="#__codelineno-57-15"></a><span class="s">EOF</span>
+</code></pre></div>
+<p><strong>Inittab format:</strong> <code>&lt;id&gt;:&lt;runlevels&gt;:&lt;action&gt;:&lt;process&gt;</code></p>
+<ul>
+<li><strong>::sysinit:</strong> - Run <code>/etc/init.d/rcS</code> at system initialization</li>
+<li><strong>::askfirst:</strong> - Start <code>/bin/sh</code>, ask for Enter first (prevents boot spam from covering prompt)</li>
+<li><strong>::ctrlaltdel:</strong> - Handle Ctrl-Alt-Del</li>
+<li><strong>::shutdown:</strong> - Unmount filesystems cleanly on shutdown</li>
+</ul>
+<h3 id="create-startup-script">Create Startup Script<a class="headerlink" href="#create-startup-script" title="Permanent link">&para;</a></h3>
+<p>Create the <code>rcS</code> startup script referenced in inittab:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>etc/init.d
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>etc/init.d/rcS<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a><span class="s">#!/bin/sh</span>
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a><span class="s"># BeaglePlay system startup script</span>
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a><span class="s">echo &quot;Starting BeaglePlay system...&quot;</span>
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>
+<a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a><span class="s"># Mount proc filesystem (process information)</span>
+<a id="__codelineno-58-10" name="__codelineno-58-10" href="#__codelineno-58-10"></a><span class="s">mount -t proc proc /proc</span>
+<a id="__codelineno-58-11" name="__codelineno-58-11" href="#__codelineno-58-11"></a>
+<a id="__codelineno-58-12" name="__codelineno-58-12" href="#__codelineno-58-12"></a><span class="s"># Mount sysfs filesystem (kernel/device information)</span>
+<a id="__codelineno-58-13" name="__codelineno-58-13" href="#__codelineno-58-13"></a><span class="s">mount -t sysfs sysfs /sys</span>
+<a id="__codelineno-58-14" name="__codelineno-58-14" href="#__codelineno-58-14"></a>
+<a id="__codelineno-58-15" name="__codelineno-58-15" href="#__codelineno-58-15"></a><span class="s"># Mount devtmpfs if not already mounted by kernel</span>
+<a id="__codelineno-58-16" name="__codelineno-58-16" href="#__codelineno-58-16"></a><span class="s">mount -t devtmpfs devtmpfs /dev 2&gt;/dev/null || true</span>
+<a id="__codelineno-58-17" name="__codelineno-58-17" href="#__codelineno-58-17"></a>
+<a id="__codelineno-58-18" name="__codelineno-58-18" href="#__codelineno-58-18"></a><span class="s"># Set hostname</span>
+<a id="__codelineno-58-19" name="__codelineno-58-19" href="#__codelineno-58-19"></a><span class="s">hostname beagleplay</span>
+<a id="__codelineno-58-20" name="__codelineno-58-20" href="#__codelineno-58-20"></a>
+<a id="__codelineno-58-21" name="__codelineno-58-21" href="#__codelineno-58-21"></a><span class="s">echo &quot;System initialization complete.&quot;</span>
+<a id="__codelineno-58-22" name="__codelineno-58-22" href="#__codelineno-58-22"></a><span class="s">EOF</span>
+</code></pre></div>
+<p>Make it executable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>etc/init.d/rcS
+</code></pre></div>
+<p><strong>What this script does:</strong>
+1. Mounts <code>/proc</code> - Virtual FS for process info (<code>ps</code> needs this)
+2. Mounts <code>/sys</code> - Virtual FS for device info
+3. Mounts <code>/dev</code> - Device files (may already be mounted by kernel)
+4. Sets hostname</p>
+<h2 id="part-7-first-successful-boot">Part 7: First Successful Boot!<a class="headerlink" href="#part-7-first-successful-boot" title="Permanent link">&para;</a></h2>
+<p>Reboot BeaglePlay. You should now see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>[    5.678901] Run /sbin/init as init process
+<a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>Starting BeaglePlay system...
+<a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>System initialization complete.
+<a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>
+<a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>Please press Enter to activate this console.
+</code></pre></div>
+<p><strong>Press Enter</strong> and you'll get a shell prompt:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>/ #
+</code></pre></div>
+<p><strong>Success!</strong> You now have a working embedded Linux system!</p>
+<h3 id="test-your-system">Test Your System<a class="headerlink" href="#test-your-system" title="Permanent link">&para;</a></h3>
+<p>Try some commands:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>ls<span class="w"> </span>/
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a><span class="nb">pwd</span>
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>cat<span class="w"> </span>/proc/cpuinfo
+<a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>cat<span class="w"> </span>/proc/meminfo
+<a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>free
+<a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>ps
+<a id="__codelineno-62-7" name="__codelineno-62-7" href="#__codelineno-62-7"></a>uname<span class="w"> </span>-a
+</code></pre></div>
+<p>Each command is actually BusyBox:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>/bin/ls
+</code></pre></div>
+<p>Shows it's a symlink to busybox.</p>
+<p>Check mounted filesystems:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>mount
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>192.168.1.1:/home/you/.../nfsroot on / type nfs (rw,...)
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>proc on /proc type proc (rw,...)
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>sysfs on /sys type sysfs (rw,...)
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>devtmpfs on /dev type devtmpfs (rw,...)
+</code></pre></div>
+<p>Your root filesystem is mounted via NFS!</p>
+<h3 id="test-nfs-live-updates">Test NFS Live Updates<a class="headerlink" href="#test-nfs-live-updates" title="Permanent link">&para;</a></h3>
+<p>On your PC, create a test file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello from NFS!&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/tmp/test.txt
+</code></pre></div>
+<p>On BeaglePlay:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>cat<span class="w"> </span>/tmp/test.txt
+</code></pre></div>
+<p>You immediately see the file! No reboot, no copying. This is the power of NFS root for development.</p>
+<p>Edit on PC, see changes instantly on target. Try it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="c1"># On PC</span>
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updated content&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/tmp/test.txt
+<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>
+<a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a><span class="c1"># On BeaglePlay</span>
+<a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a>cat<span class="w"> </span>/tmp/test.txt
+</code></pre></div>
+<h2 id="part-8-virtual-filesystems-deep-dive">Part 8: Virtual Filesystems Deep Dive<a class="headerlink" href="#part-8-virtual-filesystems-deep-dive" title="Permanent link">&para;</a></h2>
+<p>Let's understand what we mounted in <code>rcS</code>.</p>
+<h3 id="proc-process-information">/proc - Process Information<a class="headerlink" href="#proc-process-information" title="Permanent link">&para;</a></h3>
+<p>Explore <code>/proc</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>ls<span class="w"> </span>/proc
+</code></pre></div>
+<p>You'll see numbered directories (PIDs) and special files.</p>
+<p>See all processes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>cat<span class="w"> </span>/proc/1/cmdline<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span>
+</code></pre></div>
+<p>Shows PID 1's command line (<code>/sbin/init</code>).</p>
+<p>CPU information:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>cat<span class="w"> </span>/proc/cpuinfo
+</code></pre></div>
+<p>Shows all 4 Cortex-A53 cores.</p>
+<p>Memory info:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>cat<span class="w"> </span>/proc/meminfo
+</code></pre></div>
+<p>Shows total, free, cached memory.</p>
+<p>Current kernel command line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>cat<span class="w"> </span>/proc/cmdline
+</code></pre></div>
+<p>Shows the bootargs we set in U-Boot!</p>
+<h3 id="sys-kernel-and-device-information">/sys - Kernel and Device Information<a class="headerlink" href="#sys-kernel-and-device-information" title="Permanent link">&para;</a></h3>
+<p>Explore <code>/sys</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>ls<span class="w"> </span>/sys
+</code></pre></div>
+<p>Check network interface info:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>cat<span class="w"> </span>/sys/class/net/eth0/address
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>cat<span class="w"> </span>/sys/class/net/eth0/speed
+<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>cat<span class="w"> </span>/sys/class/net/eth0/statistics/rx_bytes
+</code></pre></div>
+<p>Shows MAC address, link speed (1000 Mbps), received bytes.</p>
+<p>See all I2C buses:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>ls<span class="w"> </span>/sys/bus/i2c/devices/
+</code></pre></div>
+<p>Check MMC devices:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>ls<span class="w"> </span>/sys/class/mmc_host/
+</code></pre></div>
+<h3 id="dev-device-files">/dev - Device Files<a class="headerlink" href="#dev-device-files" title="Permanent link">&para;</a></h3>
+<p>List device files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>/dev/<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+<p>Key devices:
+- <strong>console</strong> - System console
+- <strong>ttyS0, ttyS1, ttyS2</strong> - Serial ports (we're using ttyS2)
+- <strong>null</strong> - Null device (discards all writes)
+- <strong>zero</strong> - Provides infinite zeros
+- <strong>random, urandom</strong> - Random number generators
+- <strong>mmcblk0, mmcblk0p1, etc.</strong> - MMC/SD card and partitions</p>
+<p>These are created by <code>devtmpfs</code> - the kernel automatically populates <code>/dev</code>.</p>
+<h2 id="part-9-switching-to-shared-libraries">Part 9: Switching to Shared Libraries<a class="headerlink" href="#part-9-switching-to-shared-libraries" title="Permanent link">&para;</a></h2>
+<p>Currently BusyBox is statically linked (~900KB). Let's rebuild with shared libraries to reduce size.</p>
+<h3 id="create-a-test-program">Create a Test Program<a class="headerlink" href="#create-a-test-program" title="Permanent link">&para;</a></h3>
+<p>First, let's see how dynamic linking works.</p>
+<p>On your PC, create a test program:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem
+<a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>hello.c<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-79-3" name="__codelineno-79-3" href="#__codelineno-79-3"></a><span class="s">#include &lt;stdio.h&gt;</span>
+<a id="__codelineno-79-4" name="__codelineno-79-4" href="#__codelineno-79-4"></a>
+<a id="__codelineno-79-5" name="__codelineno-79-5" href="#__codelineno-79-5"></a><span class="s">int main(void) {</span>
+<a id="__codelineno-79-6" name="__codelineno-79-6" href="#__codelineno-79-6"></a><span class="s">    printf(&quot;Hello from BeaglePlay with dynamic linking!\n&quot;);</span>
+<a id="__codelineno-79-7" name="__codelineno-79-7" href="#__codelineno-79-7"></a><span class="s">    return 0;</span>
+<a id="__codelineno-79-8" name="__codelineno-79-8" href="#__codelineno-79-8"></a><span class="s">}</span>
+<a id="__codelineno-79-9" name="__codelineno-79-9" href="#__codelineno-79-9"></a><span class="s">EOF</span>
+</code></pre></div>
+<p>Compile it dynamically:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>aarch64-beagleplay-linux-musl-gcc<span class="w"> </span>hello.c<span class="w"> </span>-o<span class="w"> </span>hello
+</code></pre></div>
+<p>Check what it needs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>file<span class="w"> </span>hello
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>hello: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-aarch64.so.1, not stripped
+</code></pre></div>
+<p>It needs <code>/lib/ld-musl-aarch64.so.1</code> - the dynamic linker!</p>
+<p>Copy to target:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>cp<span class="w"> </span>hello<span class="w"> </span>nfsroot/usr/bin/
+</code></pre></div>
+<p>On BeaglePlay, try to run it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>/usr/bin/hello
+</code></pre></div>
+<p>Error:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>/usr/bin/hello: No such file or directory
+</code></pre></div>
+<p><strong>Misleading error!</strong> It's not the program that's missing - it's the dynamic linker!</p>
+<h3 id="install-dynamic-linker">Install Dynamic Linker<a class="headerlink" href="#install-dynamic-linker" title="Permanent link">&para;</a></h3>
+<p>The dynamic linker is part of our toolchain. Find it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>find<span class="w"> </span><span class="nv">$HOME</span>/x-tools/aarch64-beagleplay-linux-musl<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;ld-musl-aarch64.so.1&quot;</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>/home/you/x-tools/aarch64-beagleplay-linux-musl/aarch64-beagleplay-linux-musl/lib/ld-musl-aarch64.so.1
+</code></pre></div>
+<p>Copy it to the target:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>cp<span class="w"> </span><span class="nv">$HOME</span>/x-tools/aarch64-beagleplay-linux-musl/aarch64-beagleplay-linux-musl/lib/ld-musl-aarch64.so.1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-88-2" name="__codelineno-88-2" href="#__codelineno-88-2"></a><span class="w">   </span>nfsroot/lib/
+</code></pre></div>
+<p><strong>With Musl</strong>, the dynamic linker contains the entire C library! So this one file is all we need.</p>
+<h3 id="test-dynamic-program">Test Dynamic Program<a class="headerlink" href="#test-dynamic-program" title="Permanent link">&para;</a></h3>
+<p>On BeaglePlay, try again:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>/usr/bin/hello
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>Hello from BeaglePlay with dynamic linking!
+</code></pre></div>
+<p>Success! Dynamic linking works.</p>
+<p>If you get an error, wait 30-60 seconds (NFS cache delay) and try again.</p>
+<h3 id="rebuild-busybox-dynamically">Rebuild BusyBox Dynamically<a class="headerlink" href="#rebuild-busybox-dynamically" title="Permanent link">&para;</a></h3>
+<p>Measure current BusyBox size:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/busybox
+</code></pre></div>
+<p>Note the size (~900KB static).</p>
+<p>Reconfigure BusyBox:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/busybox
+<a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a>make<span class="w"> </span>menuconfig
+</code></pre></div>
+<p>Navigate to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>Settings →
+<a id="__codelineno-93-2" name="__codelineno-93-2" href="#__codelineno-93-2"></a>  [ ] Build static binary (no shared libs)
+</code></pre></div>
+<p>Press Space to <strong>disable</strong> static linking (no asterisk).</p>
+<p>Save and exit.</p>
+<p>Rebuild and reinstall:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+<a id="__codelineno-94-2" name="__codelineno-94-2" href="#__codelineno-94-2"></a>make<span class="w"> </span>install
+</code></pre></div>
+<p>Check new size:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/busybox
+</code></pre></div>
+<p>Should be <strong>~600KB</strong> - about 30% smaller!</p>
+<p>Verify it's dynamic:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>file<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/busybox
+</code></pre></div>
+<p>Should show "dynamically linked".</p>
+<h3 id="test-dynamic-busybox">Test Dynamic BusyBox<a class="headerlink" href="#test-dynamic-busybox" title="Permanent link">&para;</a></h3>
+<p>Reboot BeaglePlay. Everything should still work:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>ls<span class="w"> </span>/
+<a id="__codelineno-97-2" name="__codelineno-97-2" href="#__codelineno-97-2"></a>ps
+<a id="__codelineno-97-3" name="__codelineno-97-3" href="#__codelineno-97-3"></a>cat<span class="w"> </span>/proc/cpuinfo
+</code></pre></div>
+<p>Now check what libraries are needed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>ldd<span class="w"> </span>/bin/busybox
+</code></pre></div>
+<p>BusyBox will show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>ldd: /bin/busybox: Not a valid dynamic program (error 1)
+</code></pre></div>
+<p>This error is because BusyBox's <code>ldd</code> implementation is basic. But the program works, so dynamic linking is functioning!</p>
+<h2 id="part-10-simple-web-server">Part 10: Simple Web Server<a class="headerlink" href="#part-10-simple-web-server" title="Permanent link">&para;</a></h2>
+<p>BusyBox includes a simple HTTP server. Let's set it up!</p>
+<h3 id="create-web-content">Create Web Content<a class="headerlink" href="#create-web-content" title="Permanent link">&para;</a></h3>
+<p>Create web directory and a simple page:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-100-2" name="__codelineno-100-2" href="#__codelineno-100-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>www
+<a id="__codelineno-100-3" name="__codelineno-100-3" href="#__codelineno-100-3"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>www/index.html<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-100-4" name="__codelineno-100-4" href="#__codelineno-100-4"></a><span class="s">&lt;!DOCTYPE html&gt;</span>
+<a id="__codelineno-100-5" name="__codelineno-100-5" href="#__codelineno-100-5"></a><span class="s">&lt;html&gt;</span>
+<a id="__codelineno-100-6" name="__codelineno-100-6" href="#__codelineno-100-6"></a><span class="s">&lt;head&gt;</span>
+<a id="__codelineno-100-7" name="__codelineno-100-7" href="#__codelineno-100-7"></a><span class="s">    &lt;title&gt;BeaglePlay Web Server&lt;/title&gt;</span>
+<a id="__codelineno-100-8" name="__codelineno-100-8" href="#__codelineno-100-8"></a><span class="s">    &lt;style&gt;</span>
+<a id="__codelineno-100-9" name="__codelineno-100-9" href="#__codelineno-100-9"></a><span class="s">        body {</span>
+<a id="__codelineno-100-10" name="__codelineno-100-10" href="#__codelineno-100-10"></a><span class="s">            font-family: Arial, sans-serif;</span>
+<a id="__codelineno-100-11" name="__codelineno-100-11" href="#__codelineno-100-11"></a><span class="s">            max-width: 800px;</span>
+<a id="__codelineno-100-12" name="__codelineno-100-12" href="#__codelineno-100-12"></a><span class="s">            margin: 50px auto;</span>
+<a id="__codelineno-100-13" name="__codelineno-100-13" href="#__codelineno-100-13"></a><span class="s">            padding: 20px;</span>
+<a id="__codelineno-100-14" name="__codelineno-100-14" href="#__codelineno-100-14"></a><span class="s">            background: #f5f5f5;</span>
+<a id="__codelineno-100-15" name="__codelineno-100-15" href="#__codelineno-100-15"></a><span class="s">        }</span>
+<a id="__codelineno-100-16" name="__codelineno-100-16" href="#__codelineno-100-16"></a><span class="s">        h1 {</span>
+<a id="__codelineno-100-17" name="__codelineno-100-17" href="#__codelineno-100-17"></a><span class="s">            color: #333;</span>
+<a id="__codelineno-100-18" name="__codelineno-100-18" href="#__codelineno-100-18"></a><span class="s">            border-bottom: 2px solid #0066cc;</span>
+<a id="__codelineno-100-19" name="__codelineno-100-19" href="#__codelineno-100-19"></a><span class="s">            padding-bottom: 10px;</span>
+<a id="__codelineno-100-20" name="__codelineno-100-20" href="#__codelineno-100-20"></a><span class="s">        }</span>
+<a id="__codelineno-100-21" name="__codelineno-100-21" href="#__codelineno-100-21"></a><span class="s">        .info {</span>
+<a id="__codelineno-100-22" name="__codelineno-100-22" href="#__codelineno-100-22"></a><span class="s">            background: white;</span>
+<a id="__codelineno-100-23" name="__codelineno-100-23" href="#__codelineno-100-23"></a><span class="s">            padding: 15px;</span>
+<a id="__codelineno-100-24" name="__codelineno-100-24" href="#__codelineno-100-24"></a><span class="s">            border-radius: 5px;</span>
+<a id="__codelineno-100-25" name="__codelineno-100-25" href="#__codelineno-100-25"></a><span class="s">            margin: 10px 0;</span>
+<a id="__codelineno-100-26" name="__codelineno-100-26" href="#__codelineno-100-26"></a><span class="s">        }</span>
+<a id="__codelineno-100-27" name="__codelineno-100-27" href="#__codelineno-100-27"></a><span class="s">    &lt;/style&gt;</span>
+<a id="__codelineno-100-28" name="__codelineno-100-28" href="#__codelineno-100-28"></a><span class="s">&lt;/head&gt;</span>
+<a id="__codelineno-100-29" name="__codelineno-100-29" href="#__codelineno-100-29"></a><span class="s">&lt;body&gt;</span>
+<a id="__codelineno-100-30" name="__codelineno-100-30" href="#__codelineno-100-30"></a><span class="s">    &lt;h1&gt;Welcome to BeaglePlay!&lt;/h1&gt;</span>
+<a id="__codelineno-100-31" name="__codelineno-100-31" href="#__codelineno-100-31"></a><span class="s">    &lt;div class=&quot;info&quot;&gt;</span>
+<a id="__codelineno-100-32" name="__codelineno-100-32" href="#__codelineno-100-32"></a><span class="s">        &lt;h2&gt;System Information&lt;/h2&gt;</span>
+<a id="__codelineno-100-33" name="__codelineno-100-33" href="#__codelineno-100-33"></a><span class="s">        &lt;p&gt;&lt;strong&gt;Board:&lt;/strong&gt; BeagleBoard.org BeaglePlay&lt;/p&gt;</span>
+<a id="__codelineno-100-34" name="__codelineno-100-34" href="#__codelineno-100-34"></a><span class="s">        &lt;p&gt;&lt;strong&gt;SoC:&lt;/strong&gt; TI AM625 (ARM Cortex-A53)&lt;/p&gt;</span>
+<a id="__codelineno-100-35" name="__codelineno-100-35" href="#__codelineno-100-35"></a><span class="s">        &lt;p&gt;&lt;strong&gt;Root FS:&lt;/strong&gt; NFS from development PC&lt;/p&gt;</span>
+<a id="__codelineno-100-36" name="__codelineno-100-36" href="#__codelineno-100-36"></a><span class="s">        &lt;p&gt;&lt;strong&gt;Web Server:&lt;/strong&gt; BusyBox httpd&lt;/p&gt;</span>
+<a id="__codelineno-100-37" name="__codelineno-100-37" href="#__codelineno-100-37"></a><span class="s">    &lt;/div&gt;</span>
+<a id="__codelineno-100-38" name="__codelineno-100-38" href="#__codelineno-100-38"></a><span class="s">    &lt;div class=&quot;info&quot;&gt;</span>
+<a id="__codelineno-100-39" name="__codelineno-100-39" href="#__codelineno-100-39"></a><span class="s">        &lt;h2&gt;Lab Progress&lt;/h2&gt;</span>
+<a id="__codelineno-100-40" name="__codelineno-100-40" href="#__codelineno-100-40"></a><span class="s">        &lt;p&gt;✅ Custom toolchain built&lt;/p&gt;</span>
+<a id="__codelineno-100-41" name="__codelineno-100-41" href="#__codelineno-100-41"></a><span class="s">        &lt;p&gt;✅ U-Boot compiled and installed&lt;/p&gt;</span>
+<a id="__codelineno-100-42" name="__codelineno-100-42" href="#__codelineno-100-42"></a><span class="s">        &lt;p&gt;✅ Linux kernel cross-compiled&lt;/p&gt;</span>
+<a id="__codelineno-100-43" name="__codelineno-100-43" href="#__codelineno-100-43"></a><span class="s">        &lt;p&gt;✅ Root filesystem created&lt;/p&gt;</span>
+<a id="__codelineno-100-44" name="__codelineno-100-44" href="#__codelineno-100-44"></a><span class="s">        &lt;p&gt;✅ BusyBox configured and built&lt;/p&gt;</span>
+<a id="__codelineno-100-45" name="__codelineno-100-45" href="#__codelineno-100-45"></a><span class="s">        &lt;p&gt;✅ NFS root working&lt;/p&gt;</span>
+<a id="__codelineno-100-46" name="__codelineno-100-46" href="#__codelineno-100-46"></a><span class="s">        &lt;p&gt;✅ Web server running!&lt;/p&gt;</span>
+<a id="__codelineno-100-47" name="__codelineno-100-47" href="#__codelineno-100-47"></a><span class="s">    &lt;/div&gt;</span>
+<a id="__codelineno-100-48" name="__codelineno-100-48" href="#__codelineno-100-48"></a><span class="s">&lt;/body&gt;</span>
+<a id="__codelineno-100-49" name="__codelineno-100-49" href="#__codelineno-100-49"></a><span class="s">&lt;/html&gt;</span>
+<a id="__codelineno-100-50" name="__codelineno-100-50" href="#__codelineno-100-50"></a><span class="s">EOF</span>
+</code></pre></div>
+<h3 id="start-web-server">Start Web Server<a class="headerlink" href="#start-web-server" title="Permanent link">&para;</a></h3>
+<p>On BeaglePlay, start the HTTP server:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>/usr/sbin/httpd<span class="w"> </span>-h<span class="w"> </span>/www<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>
+</code></pre></div>
+<p>Parameters:
+- <strong>-h /www</strong> - Document root
+- <strong>-p 8080</strong> - Port 8080</p>
+<p>The server automatically backgrounds itself.</p>
+<p>Verify it's running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>httpd
+</code></pre></div>
+<p>Should show the httpd process.</p>
+<h3 id="test-web-server">Test Web Server<a class="headerlink" href="#test-web-server" title="Permanent link">&para;</a></h3>
+<p>From your development PC, open a browser and navigate to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>http://192.168.1.100:8080/
+</code></pre></div>
+<p>You should see your webpage!</p>
+<p>If you're using a proxy, make sure to bypass it for <code>192.168.1.100</code>:
+- Firefox: Preferences → Network Settings → No proxy for: <code>192.168.1.100</code>
+- Chrome: Use system proxy settings and configure in system network settings</p>
+<h3 id="add-to-startup-script">Add to Startup Script<a class="headerlink" href="#add-to-startup-script" title="Permanent link">&para;</a></h3>
+<p>Make the web server start automatically:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>cat<span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/etc/init.d/rcS<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-104-2" name="__codelineno-104-2" href="#__codelineno-104-2"></a>
+<a id="__codelineno-104-3" name="__codelineno-104-3" href="#__codelineno-104-3"></a><span class="s"># Start web server</span>
+<a id="__codelineno-104-4" name="__codelineno-104-4" href="#__codelineno-104-4"></a><span class="s">/usr/sbin/httpd -h /www -p 8080</span>
+<a id="__codelineno-104-5" name="__codelineno-104-5" href="#__codelineno-104-5"></a><span class="s">echo &quot;Web server started on port 8080&quot;</span>
+<a id="__codelineno-104-6" name="__codelineno-104-6" href="#__codelineno-104-6"></a><span class="s">EOF</span>
+</code></pre></div>
+<p>Reboot and verify the web server starts automatically.</p>
+<h3 id="create-a-cgi-script-optional">Create a CGI Script (Optional)<a class="headerlink" href="#create-a-cgi-script-optional" title="Permanent link">&para;</a></h3>
+<p>BusyBox httpd supports CGI scripts. Create a dynamic page:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>nfsroot/www/cgi-bin
+<a id="__codelineno-105-2" name="__codelineno-105-2" href="#__codelineno-105-2"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>nfsroot/www/cgi-bin/info.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-105-3" name="__codelineno-105-3" href="#__codelineno-105-3"></a><span class="s">#!/bin/sh</span>
+<a id="__codelineno-105-4" name="__codelineno-105-4" href="#__codelineno-105-4"></a>
+<a id="__codelineno-105-5" name="__codelineno-105-5" href="#__codelineno-105-5"></a><span class="s">echo &quot;Content-type: text/html&quot;</span>
+<a id="__codelineno-105-6" name="__codelineno-105-6" href="#__codelineno-105-6"></a><span class="s">echo &quot;&quot;</span>
+<a id="__codelineno-105-7" name="__codelineno-105-7" href="#__codelineno-105-7"></a><span class="s">echo &quot;&lt;html&gt;&lt;head&gt;&lt;title&gt;System Info&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&quot;</span>
+<a id="__codelineno-105-8" name="__codelineno-105-8" href="#__codelineno-105-8"></a><span class="s">echo &quot;&lt;h1&gt;BeaglePlay System Information&lt;/h1&gt;&quot;</span>
+<a id="__codelineno-105-9" name="__codelineno-105-9" href="#__codelineno-105-9"></a><span class="s">echo &quot;&lt;pre&gt;&quot;</span>
+<a id="__codelineno-105-10" name="__codelineno-105-10" href="#__codelineno-105-10"></a><span class="s">echo &quot;&lt;b&gt;Hostname:&lt;/b&gt; $(hostname)&quot;</span>
+<a id="__codelineno-105-11" name="__codelineno-105-11" href="#__codelineno-105-11"></a><span class="s">echo &quot;&lt;b&gt;Uptime:&lt;/b&gt; $(uptime)&quot;</span>
+<a id="__codelineno-105-12" name="__codelineno-105-12" href="#__codelineno-105-12"></a><span class="s">echo &quot;&lt;b&gt;Memory:&lt;/b&gt;&quot;</span>
+<a id="__codelineno-105-13" name="__codelineno-105-13" href="#__codelineno-105-13"></a><span class="s">free</span>
+<a id="__codelineno-105-14" name="__codelineno-105-14" href="#__codelineno-105-14"></a><span class="s">echo &quot;&quot;</span>
+<a id="__codelineno-105-15" name="__codelineno-105-15" href="#__codelineno-105-15"></a><span class="s">echo &quot;&lt;b&gt;Processes:&lt;/b&gt;&quot;</span>
+<a id="__codelineno-105-16" name="__codelineno-105-16" href="#__codelineno-105-16"></a><span class="s">ps</span>
+<a id="__codelineno-105-17" name="__codelineno-105-17" href="#__codelineno-105-17"></a><span class="s">echo &quot;&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>
+<a id="__codelineno-105-18" name="__codelineno-105-18" href="#__codelineno-105-18"></a><span class="s">EOF</span>
+<a id="__codelineno-105-19" name="__codelineno-105-19" href="#__codelineno-105-19"></a>
+<a id="__codelineno-105-20" name="__codelineno-105-20" href="#__codelineno-105-20"></a>chmod<span class="w"> </span>+x<span class="w"> </span>nfsroot/www/cgi-bin/info.sh
+</code></pre></div>
+<p>Browse to: <code>http://192.168.1.100:8080/cgi-bin/info.sh</code></p>
+<p>You'll see live system information!</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p><em>Marvin's note: "I've calculated your chances of success. You won't like them. But here's how to improve the odds anyway."</em></p>
+<h3 id="nfs-mount-fails">NFS Mount Fails<a class="headerlink" href="#nfs-mount-fails" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> Kernel panics with "VFS: Unable to mount root (nfs)"</p>
+<p><strong>Causes:</strong>
+1. NFS server not running
+2. Wrong IP addresses in bootargs
+3. Export path incorrect
+4. Firewall blocking NFS</p>
+<p><strong>Solutions:</strong></p>
+<p>Check NFS server status:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>nfs-kernel-server
+</code></pre></div>
+<p>Verify export:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-v
+</code></pre></div>
+<p>Check firewall (Ubuntu):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span>from<span class="w"> </span><span class="m">192</span>.168.1.100
+</code></pre></div>
+<p>Test NFS mount locally:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>sudo<span class="w"> </span>mount<span class="w"> </span>-t<span class="w"> </span>nfs<span class="w"> </span>localhost:/home/<span class="nv">$USER</span>/embedded-labs/tinysystem/nfsroot<span class="w"> </span>/mnt
+<a id="__codelineno-109-2" name="__codelineno-109-2" href="#__codelineno-109-2"></a>ls<span class="w"> </span>/mnt
+<a id="__codelineno-109-3" name="__codelineno-109-3" href="#__codelineno-109-3"></a>sudo<span class="w"> </span>umount<span class="w"> </span>/mnt
+</code></pre></div>
+<h3 id="init-not-found">Init Not Found<a class="headerlink" href="#init-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> "No working init found"</p>
+<p><strong>Cause:</strong> <code>/sbin/init</code> doesn't exist or isn't executable</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-110-2" name="__codelineno-110-2" href="#__codelineno-110-2"></a>ls<span class="w"> </span>-l<span class="w"> </span>sbin/init
+<a id="__codelineno-110-3" name="__codelineno-110-3" href="#__codelineno-110-3"></a><span class="c1"># Should be a symlink to ../bin/busybox</span>
+<a id="__codelineno-110-4" name="__codelineno-110-4" href="#__codelineno-110-4"></a>
+<a id="__codelineno-110-5" name="__codelineno-110-5" href="#__codelineno-110-5"></a><span class="c1"># If missing:</span>
+<a id="__codelineno-110-6" name="__codelineno-110-6" href="#__codelineno-110-6"></a>ln<span class="w"> </span>-s<span class="w"> </span>../bin/busybox<span class="w"> </span>sbin/init
+</code></pre></div>
+<h3 id="shell-prompt-shows-cant-access-tty-job-control-turned-off">Shell Prompt Shows "can't access tty; job control turned off"<a class="headerlink" href="#shell-prompt-shows-cant-access-tty-job-control-turned-off" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Wrong console device in inittab</p>
+<p><strong>Solution:</strong></p>
+<p>Edit <code>etc/inittab</code>, change:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>::askfirst:/bin/sh
+</code></pre></div>
+<p>To:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a>ttyS2::askfirst:/bin/sh
+</code></pre></div>
+<p>This specifies the exact console device.</p>
+<h3 id="commands-not-working">Commands Not Working<a class="headerlink" href="#commands-not-working" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> "sh: command not found" for basic commands</p>
+<p><strong>Cause:</strong> BusyBox not installed or PATH wrong</p>
+<p><strong>Solution:</strong></p>
+<p>Check BusyBox installation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a>ls<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot/bin/busybox
+</code></pre></div>
+<p>On target, check PATH:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PATH</span>
+</code></pre></div>
+<p>Should include <code>/bin</code> and <code>/sbin</code>.</p>
+<h3 id="web-server-wont-start">Web Server Won't Start<a class="headerlink" href="#web-server-wont-start" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> httpd exits immediately</p>
+<p><strong>Cause:</strong> Port already in use or wrong path</p>
+<p><strong>Solution:</strong></p>
+<p>Check if port 8080 is available:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a>netstat<span class="w"> </span>-tuln<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">8080</span>
+</code></pre></div>
+<p>Try a different port:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>/usr/sbin/httpd<span class="w"> </span>-h<span class="w"> </span>/www<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>
+</code></pre></div>
+<p>Verify /www exists:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a>ls<span class="w"> </span>-ld<span class="w"> </span>/www
+</code></pre></div>
+<h3 id="nfs-writes-fail">NFS Writes Fail<a class="headerlink" href="#nfs-writes-fail" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> "Read-only file system" when creating files</p>
+<p><strong>Cause:</strong> <code>no_root_squash</code> not set in exports</p>
+<p><strong>Solution:</strong></p>
+<p>Edit <code>/etc/exports</code>, ensure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>/path/to/nfsroot 192.168.1.100(rw,no_root_squash,no_subtree_check)
+</code></pre></div>
+<p>No space between IP and <code>(</code> !</p>
+<p>Reload exports:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-ra
+</code></pre></div>
+<h2 id="verification-checklist">Verification Checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">&para;</a></h2>
+<p><em>Ford Prefect says: "Always verify your work. It's the difference between a working system and a very expensive paperweight."</em></p>
+<p>Before moving to the next lab, ensure:</p>
+<ul>
+<li>[ ] BusyBox compiled and installed with all essential commands</li>
+<li>[ ] Root filesystem directory structure created</li>
+<li>[ ] NFS server configured and exporting nfsroot directory</li>
+<li>[ ] Kernel configured with NFS client and root support</li>
+<li>[ ] BeaglePlay boots with NFS root successfully</li>
+<li>[ ] Shell prompt accessible on serial console</li>
+<li>[ ] /proc, /sys, and /dev mounted correctly</li>
+<li>[ ] <code>ps</code>, <code>free</code>, <code>ls</code> commands working</li>
+<li>[ ] Files created on PC instantly visible on target (NFS live update)</li>
+<li>[ ] Dynamic linking working with shared libraries</li>
+<li>[ ] BusyBox rebuilt dynamically and system still boots</li>
+<li>[ ] Web server running and accessible from PC browser</li>
+<li>[ ] System startup script (rcS) executes on boot</li>
+</ul>
+<h2 id="going-further-optional-challenges">Going Further (Optional Challenges)<a class="headerlink" href="#going-further-optional-challenges" title="Permanent link">&para;</a></h2>
+<h3 id="challenge-1-initramfs-boot">Challenge 1: Initramfs Boot<a class="headerlink" href="#challenge-1-initramfs-boot" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Boot from initramfs instead of NFS</p>
+<p><strong>Tasks:</strong>
+1. Configure kernel with <code>CONFIG_INITRAMFS_SOURCE</code> pointing to nfsroot
+2. Create <code>/init</code> symlink to <code>/sbin/init</code>
+3. Rebuild kernel - initramfs will be embedded
+4. Boot without NFS (bootargs without nfsroot)</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-120-1" name="__codelineno-120-1" href="#__codelineno-120-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/tinysystem/nfsroot
+<a id="__codelineno-120-2" name="__codelineno-120-2" href="#__codelineno-120-2"></a>ln<span class="w"> </span>-s<span class="w"> </span>sbin/init<span class="w"> </span>init
+<a id="__codelineno-120-3" name="__codelineno-120-3" href="#__codelineno-120-3"></a>
+<a id="__codelineno-120-4" name="__codelineno-120-4" href="#__codelineno-120-4"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/kernel/linux
+<a id="__codelineno-120-5" name="__codelineno-120-5" href="#__codelineno-120-5"></a>make<span class="w"> </span>menuconfig
+<a id="__codelineno-120-6" name="__codelineno-120-6" href="#__codelineno-120-6"></a><span class="c1"># General setup → Initramfs source file(s)</span>
+<a id="__codelineno-120-7" name="__codelineno-120-7" href="#__codelineno-120-7"></a><span class="c1"># Enter: /home/you/embedded-labs/tinysystem/nfsroot</span>
+</code></pre></div>
+<p><strong>The Guide notes:</strong> Switch back to NFS root after testing - it's more convenient for development!</p>
+<h3 id="challenge-2-custom-init-system">Challenge 2: Custom Init System<a class="headerlink" href="#challenge-2-custom-init-system" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Write your own init replacement</p>
+<p><strong>Tasks:</strong>
+1. Create a C program that mounts filesystems
+2. Spawns a shell
+3. Handles reaping zombie processes (wait())
+4. Use it instead of BusyBox init</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-121-1" name="__codelineno-121-1" href="#__codelineno-121-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<a id="__codelineno-121-2" name="__codelineno-121-2" href="#__codelineno-121-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/mount.h&gt;</span>
+<a id="__codelineno-121-3" name="__codelineno-121-3" href="#__codelineno-121-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;unistd.h&gt;</span>
+<a id="__codelineno-121-4" name="__codelineno-121-4" href="#__codelineno-121-4"></a>
+<a id="__codelineno-121-5" name="__codelineno-121-5" href="#__codelineno-121-5"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-121-6" name="__codelineno-121-6" href="#__codelineno-121-6"></a><span class="w">    </span><span class="n">mount</span><span class="p">(</span><span class="s">&quot;proc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/proc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;proc&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<a id="__codelineno-121-7" name="__codelineno-121-7" href="#__codelineno-121-7"></a><span class="w">    </span><span class="n">mount</span><span class="p">(</span><span class="s">&quot;sysfs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/sys&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sysfs&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<a id="__codelineno-121-8" name="__codelineno-121-8" href="#__codelineno-121-8"></a><span class="w">    </span><span class="c1">// ... spawn shell with fork()/execve()</span>
+<a id="__codelineno-121-9" name="__codelineno-121-9" href="#__codelineno-121-9"></a><span class="w">    </span><span class="c1">// ... wait() in loop for child processes</span>
+<a id="__codelineno-121-10" name="__codelineno-121-10" href="#__codelineno-121-10"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="challenge-3-network-configuration-script">Challenge 3: Network Configuration Script<a class="headerlink" href="#challenge-3-network-configuration-script" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Set up networking from init script</p>
+<p><strong>Tasks:</strong>
+1. Create <code>/etc/network/interfaces</code> config
+2. Write script to parse it and configure interfaces
+3. Add to rcS
+4. Support static IP and DHCP</p>
+<p><strong>Hints:</strong></p>
+<p>BusyBox includes <code>ifconfig</code>, <code>route</code>, and <code>udhcpc</code> (DHCP client).</p>
+<h3 id="challenge-4-persistent-storage">Challenge 4: Persistent Storage<a class="headerlink" href="#challenge-4-persistent-storage" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Mount SD card partition for persistent storage</p>
+<p><strong>Tasks:</strong>
+1. Create mount point <code>/mnt/data</code>
+2. Add to rcS: <code>mount /dev/mmcblk0p3 /mnt/data</code>
+3. Create files that survive reboot
+4. Handle mount failure gracefully</p>
+<p><strong>Hints:</strong></p>
+<p>Check available partitions: <code>cat /proc/partitions</code></p>
+<h3 id="challenge-5-system-logging">Challenge 5: System Logging<a class="headerlink" href="#challenge-5-system-logging" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Implement syslog for system logging</p>
+<p><strong>Tasks:</strong>
+1. Enable <code>CONFIG_SYSLOGD</code> in BusyBox
+2. Configure syslogd in rcS
+3. Make kernel log to /var/log/messages
+4. Add log rotation</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-122-1" name="__codelineno-122-1" href="#__codelineno-122-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/log
+<a id="__codelineno-122-2" name="__codelineno-122-2" href="#__codelineno-122-2"></a>syslogd<span class="w"> </span>-O<span class="w"> </span>/var/log/messages
+</code></pre></div>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>In this lab, you:</p>
+<p>✅ Built BusyBox to provide essential Unix utilities<br />
+✅ Created a minimal root filesystem from scratch<br />
+✅ Set up NFS server for network-based development<br />
+✅ Configured kernel to boot with NFS root<br />
+✅ Created init system with startup scripts<br />
+✅ Mounted virtual filesystems (proc, sysfs, devtmpfs)<br />
+✅ Understood the difference between static and dynamic linking<br />
+✅ Switched BusyBox from static to dynamic to reduce size<br />
+✅ Set up a simple web server on the embedded system<br />
+✅ Experienced the power of NFS root for rapid development  </p>
+<h3 id="key-takeaways">Key Takeaways<a class="headerlink" href="#key-takeaways" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Root filesystem is essential</strong> - Kernel is useless without userspace</li>
+<li><strong>BusyBox is incredibly powerful</strong> - 300+ utilities in one small binary</li>
+<li><strong>NFS root accelerates development</strong> - Edit on PC, test instantly on target</li>
+<li><strong>Init system can be simple</strong> - Just mount filesystems and spawn shell</li>
+<li><strong>Virtual filesystems provide kernel info</strong> - /proc and /sys are invaluable</li>
+<li><strong>Dynamic linking saves space</strong> - But requires runtime libraries</li>
+</ol>
+<h3 id="whats-next">What's Next?<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h3>
+<p>In <strong>Lab 6</strong>, we'll:
+- Explore hardware devices in <code>/dev</code> and <code>/sys</code>
+- Control GPIOs and LEDs from userspace
+- Use I2C to communicate with sensors
+- Add a Nunchuk joystick as an input device
+- Compile and load kernel modules
+- Modify Device Tree to enable hardware</p>
+<p>The system is running - now let's make it interact with hardware!</p>
+<hr />
+<p><strong>Estimated completion time:</strong> 3-4 hours<br />
+<strong>Difficulty:</strong> ⭐⭐⭐ (Intermediate)</p>
+<p><strong>Questions?</strong> Refer to:
+- <a href="https://busybox.net/docs/">BusyBox Documentation</a>
+- <a href="https://linux-nfs.org/wiki/">NFS Documentation</a>
+- <a href="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html">Linux Filesystem Hierarchy</a></p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

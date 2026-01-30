@@ -1,0 +1,4761 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/yocto/lab11-yocto-advanced-config/">
+      
+      
+        <link rel="prev" href="../lab10-yocto-first-build/">
+      
+      
+        <link rel="next" href="../lab12-yocto-custom-app/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 11 - Advanced Config - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-11-advanced-yocto-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 11 - Advanced Config
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../embedded-linux/" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-yocto-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding Yocto Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding Yocto Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-configuration-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Configuration Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-key-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Key Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-variable-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Variable Exploration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-customizing-package-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Customizing Package Selection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Customizing Package Selection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-understanding-image_install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Understanding IMAGE_INSTALL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-add-packages-to-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Add Packages to Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-rebuild-with-new-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Rebuild with New Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-verify-package-inclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Verify Package Inclusion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-remove-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Remove Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-setting-up-network-boot-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Setting Up Network Boot (NFS Root)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Setting Up Network Boot (NFS Root)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-why-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Why NFS Root?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-install-nfs-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Install NFS Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-configure-nfs-exports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Configure NFS Exports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-extract-rootfs-to-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Extract Rootfs to NFS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-configure-network-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Configure Network Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-configuring-beagleplay-for-nfs-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Configuring BeaglePlay for NFS Boot
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Configuring BeaglePlay for NFS Boot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-update-sd-card-boot-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Update SD Card Boot Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-connect-hardware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Connect Hardware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-verify-nfs-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Verify NFS Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-rapid-development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Rapid Development Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Rapid Development Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-modify-rootfs-without-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Modify Rootfs Without Rebuild
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-test-package-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Test Package Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-debugging-with-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Debugging with NFS Root
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-preferred-package-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Preferred Package Providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Preferred Package Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-understanding-virtual-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Understanding Virtual Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-change-preferred-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Change Preferred Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-version-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Version Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-bitbake-deep-dive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. BitBake Deep Dive
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. BitBake Deep Dive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-task-execution-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Task Execution Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-execute-specific-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Execute Specific Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-dependency-graphing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Dependency Graphing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-dry-run-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Dry Run Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Performance Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-parallel-build-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Parallel Build Tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-shared-state-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Shared State Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-download-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Download Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-remove-work-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Remove Work Directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-use-buildhistory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 Use Buildhistory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-network-boot-with-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Network Boot with TFTP
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Network Boot with TFTP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-install-tftp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Install TFTP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-copy-kernel-and-device-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Copy Kernel and Device Tree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-configure-u-boot-for-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Configure U-Boot for TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-package-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Package Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Package Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-image-package-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Image Package Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-runtime-package-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Runtime Package Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-package-inspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Package Inspection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-nfs-boot-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 NFS Boot Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-tftp-boot-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 TFTP Boot Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-bitbake-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 BitBake Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-advanced-image_install-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Advanced IMAGE_INSTALL Techniques
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-create-custom-package-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Create Custom Package Group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-license-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 License Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-yocto-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding Yocto Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding Yocto Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-configuration-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Configuration Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-key-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Key Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-variable-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Variable Exploration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-customizing-package-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Customizing Package Selection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Customizing Package Selection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-understanding-image_install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Understanding IMAGE_INSTALL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-add-packages-to-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Add Packages to Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-rebuild-with-new-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Rebuild with New Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-verify-package-inclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Verify Package Inclusion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-remove-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Remove Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-setting-up-network-boot-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Setting Up Network Boot (NFS Root)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Setting Up Network Boot (NFS Root)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-why-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Why NFS Root?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-install-nfs-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Install NFS Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-configure-nfs-exports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Configure NFS Exports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-extract-rootfs-to-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Extract Rootfs to NFS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-configure-network-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Configure Network Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-configuring-beagleplay-for-nfs-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Configuring BeaglePlay for NFS Boot
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Configuring BeaglePlay for NFS Boot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-update-sd-card-boot-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Update SD Card Boot Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-connect-hardware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Connect Hardware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-verify-nfs-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Verify NFS Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-rapid-development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Rapid Development Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Rapid Development Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-modify-rootfs-without-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Modify Rootfs Without Rebuild
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-test-package-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Test Package Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-debugging-with-nfs-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Debugging with NFS Root
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-preferred-package-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Preferred Package Providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Preferred Package Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-understanding-virtual-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Understanding Virtual Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-change-preferred-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Change Preferred Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-version-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Version Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-bitbake-deep-dive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. BitBake Deep Dive
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. BitBake Deep Dive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-task-execution-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Task Execution Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-execute-specific-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Execute Specific Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-dependency-graphing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Dependency Graphing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-dry-run-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Dry Run Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Performance Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-parallel-build-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Parallel Build Tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-shared-state-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Shared State Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-download-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Download Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-remove-work-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Remove Work Directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-use-buildhistory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 Use Buildhistory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-network-boot-with-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Network Boot with TFTP
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Network Boot with TFTP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-install-tftp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Install TFTP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-copy-kernel-and-device-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Copy Kernel and Device Tree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-configure-u-boot-for-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Configure U-Boot for TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-package-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Package Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Package Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-image-package-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Image Package Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-runtime-package-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Runtime Package Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-package-inspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Package Inspection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-nfs-boot-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 NFS Boot Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-tftp-boot-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 TFTP Boot Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-bitbake-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 BitBake Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-advanced-image_install-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Advanced IMAGE_INSTALL Techniques
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-create-custom-package-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Create Custom Package Group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-license-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 License Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-11-advanced-yocto-configuration">Lab 11: Advanced Yocto Configuration<a class="headerlink" href="#lab-11-advanced-yocto-configuration" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about Yocto:</p>
+<p><em>"The Yocto Project is a build system of such staggering complexity that it makes the Infinite Improbability Drive look straightforward. However, once you understand it (which will take approximately 42 tries), it's actually quite brilliant."</em></p>
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>Master advanced BitBake configuration techniques, package management, and network-based development workflows to accelerate iteration cycles.</p>
+<p><strong>What You'll Learn:</strong>
+- Customize package selection with <code>IMAGE_INSTALL</code>
+- Configure preferred package providers
+- Set up NFS root filesystem for rapid testing
+- Use TFTP for kernel/bootloader development
+- Optimize BitBake build performance
+- Understand BitBake task execution model</p>
+<p><strong>Time Required:</strong> 2-3 hours (or approximately 42 minutes in improbable circumstances)</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p><strong>Completed Labs:</strong>
+- Lab 10: First Yocto Project Build</p>
+<p><strong>Hardware:</strong>
+- BeaglePlay with SD card (from Lab 10)
+- Ethernet cable
+- Development workstation with Ethernet port (or USB-Ethernet adapter)</p>
+<p><strong>Software:</strong>
+- Working Yocto build environment
+- <code>core-image-minimal</code> successfully built</p>
+<hr />
+<h2 id="1-understanding-yocto-configuration">1. Understanding Yocto Configuration<a class="headerlink" href="#1-understanding-yocto-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="11-configuration-hierarchy">1.1 Configuration Hierarchy<a class="headerlink" href="#11-configuration-hierarchy" title="Permanent link">&para;</a></h3>
+<p>Yocto's configuration comes from multiple sources with defined precedence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│  BitBake Variables (Highest)        │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  1. Environment (BB_ENV_PASSTHROUGH) │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  2. local.conf                       │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  3. auto.conf                        │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  4. Machine config (.conf)           │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  5. Distribution config (poky.conf)  │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  6. Layer config (layer.conf)        │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  7. Recipe (.bb) files               │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  8. Default values (Lowest)          │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>└─────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Assignment operators:</strong>
+- <code>=</code>: Simple assignment (evaluated when accessed)
+- <code>:=</code>: Immediate expansion
+- <code>+=</code>: Append with space
+- <code>=+</code>: Prepend with space
+- <code>.=</code>: Append without space
+- <code>=.</code>: Prepend without space
+- <code>??=</code>: Weak default (only if not set)
+- <code>?=</code>: Default (overridable)</p>
+<h3 id="12-key-configuration-files">1.2 Key Configuration Files<a class="headerlink" href="#12-key-configuration-files" title="Permanent link">&para;</a></h3>
+<p><strong><code>conf/local.conf</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># Build-specific settings
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>MACHINE = &quot;beagleplay&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>DL_DIR = &quot;${TOPDIR}/downloads&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>SSTATE_DIR = &quot;${TOPDIR}/sstate-cache&quot;
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>DISTRO = &quot;poky&quot;
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>PACKAGE_CLASSES = &quot;package_ipk&quot;
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>IMAGE_INSTALL:append = &quot; dropbear strace&quot;
+</code></pre></div></p>
+<p><strong><code>conf/bblayers.conf</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a># Layer inclusion
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>BBLAYERS ?= &quot; \
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  ${TOPDIR}/../poky/meta \
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  ${TOPDIR}/../meta-ti/meta-ti-bsp \
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  ...
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>&quot;
+</code></pre></div></p>
+<p><strong>Why two files?</strong>
+- <code>bblayers.conf</code>: What layers to use (rarely changes)
+- <code>local.conf</code>: Build customization (frequently modified)</p>
+<h3 id="13-variable-exploration">1.3 Variable Exploration<a class="headerlink" href="#13-variable-exploration" title="Permanent link">&para;</a></h3>
+<p><strong>View all variables for a recipe:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>bitbake<span class="w"> </span>-e<span class="w"> </span>core-image-minimal<span class="w"> </span><span class="p">|</span><span class="w"> </span>less
+</code></pre></div></p>
+<p><strong>Search for specific variable:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>bitbake<span class="w"> </span>-e<span class="w"> </span>core-image-minimal<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^IMAGE_INSTALL=&quot;</span>
+</code></pre></div></p>
+<p><strong>Show where variable is set:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>bitbake<span class="w"> </span>-e<span class="w"> </span>core-image-minimal<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="s2">&quot;^# IMAGE_INSTALL&quot;</span>
+</code></pre></div></p>
+<hr />
+<h2 id="2-customizing-package-selection">2. Customizing Package Selection<a class="headerlink" href="#2-customizing-package-selection" title="Permanent link">&para;</a></h2>
+<h3 id="21-understanding-image_install">2.1 Understanding IMAGE_INSTALL<a class="headerlink" href="#21-understanding-image_install" title="Permanent link">&para;</a></h3>
+<p><strong><code>IMAGE_INSTALL</code></strong> controls which packages go into the final rootfs.</p>
+<p><strong>View default packages:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>bitbake<span class="w"> </span>-e<span class="w"> </span>core-image-minimal<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^IMAGE_INSTALL=&quot;</span>
+</code></pre></div></p>
+<p><strong>Output (example):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>IMAGE_INSTALL=&quot;packagegroup-core-boot packagegroup-base-extended dropbear&quot;
+</code></pre></div></p>
+<p><strong>Package groups are meta-packages</strong> that pull in multiple related packages.</p>
+<h3 id="22-add-packages-to-image">2.2 Add Packages to Image<a class="headerlink" href="#22-add-packages-to-image" title="Permanent link">&para;</a></h3>
+<p><strong>Edit local.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>nano<span class="w"> </span>conf/local.conf
+</code></pre></div></p>
+<p><strong>Add Dropbear SSH server:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a># Append to IMAGE_INSTALL (note the space before dropbear)
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>IMAGE_INSTALL:append = &quot; dropbear&quot;
+</code></pre></div></p>
+<p><strong>Why <code>:append</code> instead of <code>+=</code>?</strong>
+- <code>:append</code> is applied after all parsing (can't be overridden)
+- <code>+=</code> can be overridden by recipes
+- Leading space in <code>:append</code> is critical (avoids "packagedropbear")</p>
+<p><strong>Add multiple packages:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>IMAGE_INSTALL:append = &quot; \
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    dropbear \
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    strace \
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    htop \
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    nano \
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    mtd-utils \
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    i2c-tools \
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    can-utils \
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>&quot;
+</code></pre></div></p>
+<h3 id="23-rebuild-with-new-packages">2.3 Rebuild with New Packages<a class="headerlink" href="#23-rebuild-with-new-packages" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div>
+<p><strong>BitBake is intelligent:</strong>
+- Only rebuilds rootfs assembly
+- Reuses previously built packages
+- Downloads new package sources as needed</p>
+<p><strong>Build takes ~5-10 minutes</strong> (not full rebuild).</p>
+<h3 id="24-verify-package-inclusion">2.4 Verify Package Inclusion<a class="headerlink" href="#24-verify-package-inclusion" title="Permanent link">&para;</a></h3>
+<p><strong>After build completes:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>tar<span class="w"> </span>-tf<span class="w"> </span>core-image-minimal-beagleplay.rootfs.tar.xz<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;(dropbear|strace|htop)&quot;</span>
+</code></pre></div></p>
+<p><strong>Expected output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>./usr/sbin/dropbear
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>./usr/bin/strace
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>./usr/bin/htop
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>...
+</code></pre></div></p>
+<h3 id="25-remove-packages">2.5 Remove Packages<a class="headerlink" href="#25-remove-packages" title="Permanent link">&para;</a></h3>
+<p><strong>Use <code>IMAGE_INSTALL:remove</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>IMAGE_INSTALL:remove = &quot;packagegroup-core-boot-dev&quot;
+</code></pre></div></p>
+<p><strong>Or override completely:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>IMAGE_INSTALL = &quot;packagegroup-core-boot dropbear&quot;
+</code></pre></div></p>
+<p><strong>⚠️  WARNING (in large, friendly letters):</strong> Complete override breaks things - use <code>:append</code>/<code>:remove</code> instead.</p>
+<hr />
+<h2 id="3-setting-up-network-boot-nfs-root">3. Setting Up Network Boot (NFS Root)<a class="headerlink" href="#3-setting-up-network-boot-nfs-root" title="Permanent link">&para;</a></h2>
+<h3 id="31-why-nfs-root">3.1 Why NFS Root?<a class="headerlink" href="#31-why-nfs-root" title="Permanent link">&para;</a></h3>
+<p><strong>Benefits:</strong>
+- <strong>No reflashing</strong>: Changes visible immediately
+- <strong>Fast iteration</strong>: Edit → sync → reboot (seconds)
+- <strong>Easy debugging</strong>: Full access to rootfs from host
+- <strong>Unlimited space</strong>: No SD card size constraints</p>
+<p><strong>When to use:</strong>
+- Active development
+- Kernel/driver debugging
+- Application testing</p>
+<p><strong>When NOT to use:</strong>
+- Production deployment
+- Performance benchmarking (network overhead)
+- Testing storage-specific features</p>
+<h3 id="32-install-nfs-server">3.2 Install NFS Server<a class="headerlink" href="#32-install-nfs-server" title="Permanent link">&para;</a></h3>
+<p><strong>On development workstation:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>nfs-kernel-server
+</code></pre></div></p>
+<p><strong>Create NFS export directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/nfs/beagleplay
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>/nfs/beagleplay
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>/nfs/beagleplay
+</code></pre></div></p>
+<h3 id="33-configure-nfs-exports">3.3 Configure NFS Exports<a class="headerlink" href="#33-configure-nfs-exports" title="Permanent link">&para;</a></h3>
+<p><strong>Edit <code>/etc/exports</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/exports
+</code></pre></div></p>
+<p><strong>Add export entry:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>/nfs/beagleplay *(rw,sync,no_root_squash,no_subtree_check)
+</code></pre></div></p>
+<p><strong>Explanation:</strong>
+- <code>*</code>: Allow any client (use <code>192.168.0.0/24</code> for security)
+- <code>rw</code>: Read-write access
+- <code>sync</code>: Synchronous writes (safer but slower)
+- <code>no_root_squash</code>: Don't map root UID to nobody
+- <code>no_subtree_check</code>: Faster, less safe (OK for development)</p>
+<p><strong>Apply changes:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-ra
+</code></pre></div></p>
+<p><strong>Verify export:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-v
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="c1"># Output: /nfs/beagleplay &lt;world&gt;(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,no_root_squash,no_all_squash)</span>
+</code></pre></div></p>
+<h3 id="34-extract-rootfs-to-nfs">3.4 Extract Rootfs to NFS<a class="headerlink" href="#34-extract-rootfs-to-nfs" title="Permanent link">&para;</a></h3>
+<p><strong>Clean NFS directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/nfs/beagleplay/*
+</code></pre></div></p>
+<p><strong>Extract latest build:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>sudo<span class="w"> </span>tar<span class="w"> </span>-xf<span class="w"> </span>core-image-minimal-beagleplay.rootfs.tar.xz<span class="w"> </span>-C<span class="w"> </span>/nfs/beagleplay
+</code></pre></div></p>
+<p><strong>Verify extraction:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>/nfs/beagleplay/
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="c1"># Output: bin boot dev etc home lib media mnt proc run sbin sys tmp usr var</span>
+</code></pre></div></p>
+<p><strong>Fix permissions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>root:root<span class="w"> </span>/nfs/beagleplay
+</code></pre></div></p>
+<h3 id="35-configure-network-interface">3.5 Configure Network Interface<a class="headerlink" href="#35-configure-network-interface" title="Permanent link">&para;</a></h3>
+<p><strong>Find your Ethernet interface:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>ip<span class="w"> </span>link<span class="w"> </span>show
+</code></pre></div></p>
+<p><strong>Output (example):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; ...
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>2: wlp2s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; ...  # WiFi
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>3: enp0s25: &lt;BROADCAST,MULTICAST&gt; ...              # Wired Ethernet (DOWN)
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>4: enx00e04c534458: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; ... # USB Ethernet
+</code></pre></div></p>
+<p><strong>Your wired interface is likely <code>enp0s25</code> or <code>enx...</code></strong></p>
+<p><strong>Configure static IP using NetworkManager CLI:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>nmcli<span class="w"> </span>con<span class="w"> </span>add<span class="w"> </span><span class="nb">type</span><span class="w"> </span>ethernet<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">    </span>ifname<span class="w"> </span>enp0s25<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">    </span>con-name<span class="w"> </span>beagleplay-eth<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">    </span>ip4<span class="w"> </span><span class="m">192</span>.168.0.1/24
+</code></pre></div></p>
+<p><strong>Activate connection:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>nmcli<span class="w"> </span>con<span class="w"> </span>up<span class="w"> </span>beagleplay-eth
+</code></pre></div></p>
+<p><strong>Verify IP:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span>enp0s25
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="c1"># Should show: inet 192.168.0.1/24 ...</span>
+</code></pre></div></p>
+<p><strong>Alternative: Manual configuration (if nmcli fails):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>sudo<span class="w"> </span>ip<span class="w"> </span>addr<span class="w"> </span>add<span class="w"> </span><span class="m">192</span>.168.0.1/24<span class="w"> </span>dev<span class="w"> </span>enp0s25
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>enp0s25<span class="w"> </span>up
+</code></pre></div></p>
+<hr />
+<h2 id="4-configuring-beagleplay-for-nfs-boot">4. Configuring BeaglePlay for NFS Boot<a class="headerlink" href="#4-configuring-beagleplay-for-nfs-boot" title="Permanent link">&para;</a></h2>
+<h3 id="41-update-sd-card-boot-configuration">4.1 Update SD Card Boot Configuration<a class="headerlink" href="#41-update-sd-card-boot-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Mount SD card boot partition:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># Insert SD card, check device name</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>lsblk
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="c1"># Assuming /dev/sdb1 is boot partition</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>sudo<span class="w"> </span>mount<span class="w"> </span>/dev/sdb1<span class="w"> </span>/mnt
+</code></pre></div></p>
+<p><strong>Edit extlinux.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/mnt/extlinux/extlinux.conf
+</code></pre></div></p>
+<p><strong>Original:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>LABEL Linux
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>  KERNEL /Image
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>  FDT /k3-am625-beagleplay.dtb
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>  APPEND root=/dev/mmcblk0p2 rootwait rw console=ttyS2,115200n8
+</code></pre></div></p>
+<p><strong>Modified for NFS:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>LABEL Linux
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>  KERNEL /Image
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>  FDT /k3-am625-beagleplay.dtb
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>  APPEND root=/dev/nfs rw console=ttyS2,115200n8 nfsroot=192.168.0.1:/nfs/beagleplay,nfsvers=3,tcp ip=192.168.0.100:::::eth0
+</code></pre></div></p>
+<p><strong>Kernel command line breakdown:</strong>
+- <code>root=/dev/nfs</code>: Use NFS instead of local partition
+- <code>nfsroot=192.168.0.1:/nfs/beagleplay,nfsvers=3,tcp</code>: NFS server and options
+- <code>ip=192.168.0.100:::::eth0</code>: Static IP (format: <code>client-ip:server-ip:gw-ip:netmask:hostname:device:autoconf</code>)
+- <code>console=ttyS2,115200n8</code>: Serial console</p>
+<p><strong>Save and unmount:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>sudo<span class="w"> </span>sync
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>sudo<span class="w"> </span>umount<span class="w"> </span>/mnt
+</code></pre></div></p>
+<h3 id="42-connect-hardware">4.2 Connect Hardware<a class="headerlink" href="#42-connect-hardware" title="Permanent link">&para;</a></h3>
+<p><strong>Physical setup:</strong>
+1. Connect Ethernet cable: BeaglePlay ↔ Workstation (or switch)
+2. Insert SD card into BeaglePlay
+3. Connect serial console
+4. Power on BeaglePlay</p>
+<h3 id="43-verify-nfs-boot">4.3 Verify NFS Boot<a class="headerlink" href="#43-verify-nfs-boot" title="Permanent link">&para;</a></h3>
+<p><strong>Open serial console:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>picocom<span class="w"> </span>-b<span class="w"> </span><span class="m">115200</span><span class="w"> </span>/dev/ttyUSB0
+</code></pre></div></p>
+<p><strong>You should see during boot:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>[    2.456789] IP-Config: Complete:
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>[    2.456790]      device=eth0, hwaddr=xx:xx:xx:xx:xx:xx, ipaddr=192.168.0.100
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>[    2.789012] VFS: Mounted root (nfs filesystem) on device 0:18.
+</code></pre></div></p>
+<p><strong>Verify NFS mount:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># At BeaglePlay shell</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nfs
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="c1"># Output: 192.168.0.1:/nfs/beagleplay on / type nfs (rw,relatime,vers=3,...)</span>
+</code></pre></div></p>
+<p><strong>Test read-write access:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>touch<span class="w"> </span>/home/test-nfs-write
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>ls<span class="w"> </span>-l<span class="w"> </span>/home/
+</code></pre></div></p>
+<p><strong>On workstation, verify file appeared:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>/nfs/beagleplay/home/
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="c1"># Should show test-nfs-write</span>
+</code></pre></div></p>
+<hr />
+<h2 id="5-rapid-development-workflow">5. Rapid Development Workflow<a class="headerlink" href="#5-rapid-development-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="51-modify-rootfs-without-rebuild">5.1 Modify Rootfs Without Rebuild<a class="headerlink" href="#51-modify-rootfs-without-rebuild" title="Permanent link">&para;</a></h3>
+<p><strong>Example: Add a test script</strong></p>
+<p>On workstation:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>/nfs/beagleplay/usr/bin/hello-beagleplay<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="s">#!/bin/sh</span>
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="s">echo &quot;Hello from BeaglePlay!&quot;</span>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="s">echo &quot;IP: $(ip addr show eth0 | grep inet | awk &#39;{print $2}&#39;)&quot;</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="s">echo &quot;Uptime: $(uptime)&quot;</span>
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a><span class="s">EOF</span>
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a>chmod<span class="w"> </span>+x<span class="w"> </span>/nfs/beagleplay/usr/bin/hello-beagleplay
+</code></pre></div></p>
+<p>On BeaglePlay (reboot or just sync):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>hello-beagleplay
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>Hello from BeaglePlay!
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>IP: 192.168.0.100/24
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>Uptime: 14:32:45 up 3 min, load average: 0.12, 0.08, 0.03
+</code></pre></div></p>
+<p><strong>No rebuild, no reflash - instant!</strong></p>
+<h3 id="52-test-package-changes">5.2 Test Package Changes<a class="headerlink" href="#52-test-package-changes" title="Permanent link">&para;</a></h3>
+<p><strong>After rebuilding with new packages:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/nfs/beagleplay/*
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>sudo<span class="w"> </span>tar<span class="w"> </span>-xf<span class="w"> </span>core-image-minimal-beagleplay.rootfs.tar.xz<span class="w"> </span>-C<span class="w"> </span>/nfs/beagleplay
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>root:root<span class="w"> </span>/nfs/beagleplay
+</code></pre></div></p>
+<p><strong>Reboot BeaglePlay:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="c1"># On BeaglePlay console</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>reboot
+</code></pre></div></p>
+<p>New packages available in ~30 seconds.</p>
+<h3 id="53-debugging-with-nfs-root">5.3 Debugging with NFS Root<a class="headerlink" href="#53-debugging-with-nfs-root" title="Permanent link">&para;</a></h3>
+<p><strong>Install gdbserver in image:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="c1"># Edit local.conf</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>IMAGE_INSTALL:append<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot; gdbserver&quot;</span>
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<p><strong>Extract to NFS, reboot BeaglePlay</strong></p>
+<p><strong>Cross-compile test program on host:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="nb">source</span><span class="w"> </span>~/yocto-labs/poky/oe-init-build-env
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>bitbake<span class="w"> </span>core-image-minimal<span class="w"> </span>-c<span class="w"> </span>populate_sdk
+</code></pre></div></p>
+<p>Wait for SDK build, then install:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/sdk
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>./poky-glibc-x86_64-core-image-minimal-cortexa53-beagleplay-toolchain-5.0.4.sh
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a><span class="c1"># Install to: /opt/poky/5.0.4</span>
+</code></pre></div></p>
+<p><strong>Write test program:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>/tmp/test.c<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="s">#include &lt;stdio.h&gt;</span>
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a><span class="s">int main() {</span>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="s">    for (int i = 0; i &lt; 10; i++) {</span>
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a><span class="s">        printf(&quot;Count: %d\n&quot;, i);</span>
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a><span class="s">    }</span>
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a><span class="s">    return 0;</span>
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a><span class="s">}</span>
+<a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a><span class="s">EOF</span>
+</code></pre></div></p>
+<p><strong>Cross-compile:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="nb">source</span><span class="w"> </span>/opt/poky/5.0.4/environment-setup-cortexa53-poky-linux
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a><span class="nv">$CC</span><span class="w"> </span>-g<span class="w"> </span>/tmp/test.c<span class="w"> </span>-o<span class="w"> </span>/nfs/beagleplay/tmp/test
+</code></pre></div></p>
+<p><strong>Run on BeaglePlay with gdbserver:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>gdbserver<span class="w"> </span>:2345<span class="w"> </span>/tmp/test
+</code></pre></div></p>
+<p><strong>Debug from host:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="nv">$GDB</span><span class="w"> </span>/nfs/beagleplay/tmp/test
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a><span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>target<span class="w"> </span>remote<span class="w"> </span><span class="m">192</span>.168.0.100:2345
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a><span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>main
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a><span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">continue</span>
+</code></pre></div></p>
+<hr />
+<h2 id="6-preferred-package-providers">6. Preferred Package Providers<a class="headerlink" href="#6-preferred-package-providers" title="Permanent link">&para;</a></h2>
+<h3 id="61-understanding-virtual-packages">6.1 Understanding Virtual Packages<a class="headerlink" href="#61-understanding-virtual-packages" title="Permanent link">&para;</a></h3>
+<p><strong>Virtual packages</strong> represent functionality, not specific implementations.</p>
+<p><strong>Examples:</strong>
+- <code>virtual/kernel</code>: Provided by <code>linux-ti-staging</code>, <code>linux-yocto</code>, <code>linux-mainline</code>, etc.
+- <code>virtual/bootloader</code>: Provided by <code>u-boot</code>, <code>barebox</code>, etc.
+- <code>virtual/libc</code>: Provided by <code>glibc</code>, <code>musl</code>, <code>uclibc-ng</code></p>
+<p><strong>Check current provider:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>bitbake<span class="w"> </span>-vn<span class="w"> </span>virtual/kernel
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>NOTE: selecting linux-ti-staging to satisfy virtual/kernel due to PREFERRED_PROVIDERS
+</code></pre></div></p>
+<h3 id="62-change-preferred-provider">6.2 Change Preferred Provider<a class="headerlink" href="#62-change-preferred-provider" title="Permanent link">&para;</a></h3>
+<p><strong>Switch kernel provider in local.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>nano<span class="w"> </span>conf/local.conf
+</code></pre></div></p>
+<p><strong>Add:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>PREFERRED_PROVIDER_virtual/kernel = &quot;linux-yocto&quot;
+</code></pre></div></p>
+<p><strong>Verify change:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>bitbake<span class="w"> </span>-vn<span class="w"> </span>virtual/kernel
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a><span class="c1"># Output: NOTE: selecting linux-yocto to satisfy virtual/kernel due to PREFERRED_PROVIDERS</span>
+</code></pre></div></p>
+<p><strong>For BeaglePlay, stick with <code>linux-ti-staging</code></strong> (TI-optimized kernel).</p>
+<h3 id="63-version-preferences">6.3 Version Preferences<a class="headerlink" href="#63-version-preferences" title="Permanent link">&para;</a></h3>
+<p><strong>Pin specific version:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>PREFERRED_VERSION_linux-ti-staging = &quot;6.1%&quot;
+</code></pre></div></p>
+<p><strong>Check available versions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>linux-ti-staging
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>linux-ti-staging:
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>  meta-ti-bsp        6.1.83+gitAUTOINC+abcdef1234
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>  meta-ti-bsp        6.6.32+gitAUTOINC+987654fedc
+</code></pre></div></p>
+<hr />
+<h2 id="7-bitbake-deep-dive">7. BitBake Deep Dive<a class="headerlink" href="#7-bitbake-deep-dive" title="Permanent link">&para;</a></h2>
+<h3 id="71-task-execution-model">7.1 Task Execution Model<a class="headerlink" href="#71-task-execution-model" title="Permanent link">&para;</a></h3>
+<p><strong>Every recipe has tasks:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>do_fetch       → Download sources
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>do_unpack      → Extract archives
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>do_patch       → Apply patches
+<a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>do_configure   → Run ./configure or cmake
+<a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>do_compile     → Build the software
+<a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>do_install     → Install to staging area
+<a id="__codelineno-62-7" name="__codelineno-62-7" href="#__codelineno-62-7"></a>do_package     → Create binary packages (RPM/DEB/IPK)
+<a id="__codelineno-62-8" name="__codelineno-62-8" href="#__codelineno-62-8"></a>do_package_write_* → Write package files
+<a id="__codelineno-62-9" name="__codelineno-62-9" href="#__codelineno-62-9"></a>do_populate_sysroot → Install to sysroot for other recipes
+</code></pre></div></p>
+<p><strong>List all tasks for a recipe:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>listtasks<span class="w"> </span>virtual/kernel
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>do_build
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>do_fetch
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>do_unpack
+<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>do_patch
+<a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>do_configure
+<a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>do_menuconfig  # Special: interactive kernel config
+<a id="__codelineno-64-7" name="__codelineno-64-7" href="#__codelineno-64-7"></a>do_compile
+<a id="__codelineno-64-8" name="__codelineno-64-8" href="#__codelineno-64-8"></a>do_install
+<a id="__codelineno-64-9" name="__codelineno-64-9" href="#__codelineno-64-9"></a>...
+</code></pre></div></p>
+<h3 id="72-execute-specific-tasks">7.2 Execute Specific Tasks<a class="headerlink" href="#72-execute-specific-tasks" title="Permanent link">&para;</a></h3>
+<p><strong>Configure kernel interactively:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>menuconfig<span class="w"> </span>virtual/kernel
+</code></pre></div></p>
+<p><strong>Opens kernel menuconfig in terminal.</strong></p>
+<p><strong>Save config, then rebuild:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>compile<span class="w"> </span>-f<span class="w"> </span>virtual/kernel<span class="w">  </span><span class="c1"># Force recompile</span>
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>bitbake<span class="w"> </span>core-image-minimal<span class="w">            </span><span class="c1"># Rebuild image with new kernel</span>
+</code></pre></div></p>
+<p><strong>Other useful task commands:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a><span class="c1"># Clean package (remove outputs but keep downloads)</span>
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>clean<span class="w"> </span>&lt;package&gt;
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>
+<a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a><span class="c1"># Clean shared state</span>
+<a id="__codelineno-67-5" name="__codelineno-67-5" href="#__codelineno-67-5"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleansstate<span class="w"> </span>&lt;package&gt;
+<a id="__codelineno-67-6" name="__codelineno-67-6" href="#__codelineno-67-6"></a>
+<a id="__codelineno-67-7" name="__codelineno-67-7" href="#__codelineno-67-7"></a><span class="c1"># Clean everything including downloads</span>
+<a id="__codelineno-67-8" name="__codelineno-67-8" href="#__codelineno-67-8"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>&lt;package&gt;
+<a id="__codelineno-67-9" name="__codelineno-67-9" href="#__codelineno-67-9"></a>
+<a id="__codelineno-67-10" name="__codelineno-67-10" href="#__codelineno-67-10"></a><span class="c1"># Fetch all sources without building</span>
+<a id="__codelineno-67-11" name="__codelineno-67-11" href="#__codelineno-67-11"></a>bitbake<span class="w"> </span>--runall<span class="o">=</span>fetch<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<h3 id="73-dependency-graphing">7.3 Dependency Graphing<a class="headerlink" href="#73-dependency-graphing" title="Permanent link">&para;</a></h3>
+<p><strong>Generate task dependency graph:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>bitbake<span class="w"> </span>-g<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<p><strong>Creates files:</strong>
+- <code>pn-buildlist</code>: List of recipes to build
+- <code>task-depends.dot</code>: Task-level dependencies (massive)
+- <code>pn-depends.dot</code>: Recipe-level dependencies</p>
+<p><strong>View recipe dependencies visually:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>graphviz
+<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>dot<span class="w"> </span>-Tpng<span class="w"> </span>pn-depends.dot<span class="w"> </span>-o<span class="w"> </span>pn-depends.png
+<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a>xdg-open<span class="w"> </span>pn-depends.png
+</code></pre></div></p>
+<p><strong>Filter to specific package:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>bitbake<span class="w"> </span>-g<span class="w"> </span>dropbear
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>dot<span class="w"> </span>-Tpng<span class="w"> </span>pn-depends.dot<span class="w"> </span>-o<span class="w"> </span>dropbear-deps.png
+</code></pre></div></p>
+<h3 id="74-dry-run-analysis">7.4 Dry Run Analysis<a class="headerlink" href="#74-dry-run-analysis" title="Permanent link">&para;</a></h3>
+<p><strong>Show what would be built without building:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>bitbake<span class="w"> </span>-vn<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<p><strong>Useful for:</strong>
+- Verifying <code>PREFERRED_PROVIDER</code> changes
+- Checking if changes trigger rebuilds
+- Debugging recipe selection issues</p>
+<hr />
+<h2 id="8-performance-optimization">8. Performance Optimization<a class="headerlink" href="#8-performance-optimization" title="Permanent link">&para;</a></h2>
+<h3 id="81-parallel-build-tuning">8.1 Parallel Build Tuning<a class="headerlink" href="#81-parallel-build-tuning" title="Permanent link">&para;</a></h3>
+<p><strong>Edit local.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>nano<span class="w"> </span>conf/local.conf
+</code></pre></div></p>
+<p><strong>Add (adjust based on your CPU):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a># Number of BitBake tasks to run in parallel
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>BB_NUMBER_THREADS = &quot;8&quot;
+<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a>
+<a id="__codelineno-73-4" name="__codelineno-73-4" href="#__codelineno-73-4"></a># Number of make jobs per package (-j flag)
+<a id="__codelineno-73-5" name="__codelineno-73-5" href="#__codelineno-73-5"></a>PARALLEL_MAKE = &quot;-j 8&quot;
+<a id="__codelineno-73-6" name="__codelineno-73-6" href="#__codelineno-73-6"></a>
+<a id="__codelineno-73-7" name="__codelineno-73-7" href="#__codelineno-73-7"></a># Limit parallel tasks for specific packages (memory-intensive builds)
+<a id="__codelineno-73-8" name="__codelineno-73-8" href="#__codelineno-73-8"></a>PARALLEL_MAKE:pn-gcc = &quot;-j 4&quot;
+<a id="__codelineno-73-9" name="__codelineno-73-9" href="#__codelineno-73-9"></a>PARALLEL_MAKE:pn-llvm = &quot;-j 4&quot;
+</code></pre></div></p>
+<p><strong>Guidelines:</strong>
+- <code>BB_NUMBER_THREADS</code>: Number of CPU cores
+- <code>PARALLEL_MAKE</code>: 1.5× to 2× CPU cores (if enough RAM)
+- Monitor with <code>htop</code> - adjust if thrashing</p>
+<h3 id="82-shared-state-cache">8.2 Shared State Cache<a class="headerlink" href="#82-shared-state-cache" title="Permanent link">&para;</a></h3>
+<p><strong>Shared state (sstate-cache)</strong> stores intermediate build results.</p>
+<p><strong>Benefits:</strong>
+- Rebuild from cache instead of source
+- Share between build directories
+- Dramatically speeds up CI/CD</p>
+<p><strong>Configure shared cache:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a># In local.conf
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>SSTATE_DIR = &quot;/opt/yocto-shared/sstate-cache&quot;
+</code></pre></div></p>
+<p><strong>Create directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/yocto-shared/sstate-cache
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>/opt/yocto-shared
+</code></pre></div></p>
+<h3 id="83-download-directory">8.3 Download Directory<a class="headerlink" href="#83-download-directory" title="Permanent link">&para;</a></h3>
+<p><strong>Share downloads between projects:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a># In local.conf
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>DL_DIR = &quot;/opt/yocto-shared/downloads&quot;
+</code></pre></div></p>
+<p><strong>Create directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/yocto-shared/downloads
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>/opt/yocto-shared
+</code></pre></div></p>
+<p><strong>Saves bandwidth and time - sources downloaded once, reused forever.</strong></p>
+<h3 id="84-remove-work-directories">8.4 Remove Work Directories<a class="headerlink" href="#84-remove-work-directories" title="Permanent link">&para;</a></h3>
+<p><strong>Clean intermediate files to save disk:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a># In local.conf
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>INHERIT += &quot;rm_work&quot;
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>
+<a id="__codelineno-78-4" name="__codelineno-78-4" href="#__codelineno-78-4"></a># Exclude packages you might debug
+<a id="__codelineno-78-5" name="__codelineno-78-5" href="#__codelineno-78-5"></a>RM_WORK_EXCLUDE += &quot;linux-ti-staging u-boot-ti-staging&quot;
+</code></pre></div></p>
+<p><strong>Saves 30-50GB</strong> but slows rebuilds (can't resume from intermediate steps).</p>
+<h3 id="85-use-buildhistory">8.5 Use Buildhistory<a class="headerlink" href="#85-use-buildhistory" title="Permanent link">&para;</a></h3>
+<p><strong>Track what changed between builds:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a># In local.conf
+<a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>INHERIT += &quot;buildhistory&quot;
+<a id="__codelineno-79-3" name="__codelineno-79-3" href="#__codelineno-79-3"></a>BUILDHISTORY_COMMIT = &quot;1&quot;
+</code></pre></div></p>
+<p><strong>Creates Git repository tracking:</strong>
+- Package versions
+- Installed files
+- Image sizes
+- Dependency changes</p>
+<p><strong>View history:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/buildhistory
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>git<span class="w"> </span>log<span class="w"> </span>--oneline
+<a id="__codelineno-80-3" name="__codelineno-80-3" href="#__codelineno-80-3"></a>git<span class="w"> </span>diff<span class="w"> </span>HEAD~1<span class="w"> </span>HEAD
+</code></pre></div></p>
+<hr />
+<h2 id="9-network-boot-with-tftp">9. Network Boot with TFTP<a class="headerlink" href="#9-network-boot-with-tftp" title="Permanent link">&para;</a></h2>
+<h3 id="91-install-tftp-server">9.1 Install TFTP Server<a class="headerlink" href="#91-install-tftp-server" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>tftpd-hpa
+</code></pre></div>
+<p><strong>Configure:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/default/tftpd-hpa
+</code></pre></div></p>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>TFTP_USERNAME=&quot;tftp&quot;
+<a id="__codelineno-83-2" name="__codelineno-83-2" href="#__codelineno-83-2"></a>TFTP_DIRECTORY=&quot;/srv/tftp&quot;
+<a id="__codelineno-83-3" name="__codelineno-83-3" href="#__codelineno-83-3"></a>TFTP_ADDRESS=&quot;:69&quot;
+<a id="__codelineno-83-4" name="__codelineno-83-4" href="#__codelineno-83-4"></a>TFTP_OPTIONS=&quot;--secure&quot;
+</code></pre></div></p>
+<p><strong>Create directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/srv/tftp
+<a id="__codelineno-84-2" name="__codelineno-84-2" href="#__codelineno-84-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>tftp:tftp<span class="w"> </span>/srv/tftp
+<a id="__codelineno-84-3" name="__codelineno-84-3" href="#__codelineno-84-3"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>/srv/tftp
+</code></pre></div></p>
+<p><strong>Restart service:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>tftpd-hpa
+<a id="__codelineno-85-2" name="__codelineno-85-2" href="#__codelineno-85-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>tftpd-hpa
+</code></pre></div></p>
+<h3 id="92-copy-kernel-and-device-tree">9.2 Copy Kernel and Device Tree<a class="headerlink" href="#92-copy-kernel-and-device-tree" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-86-2" name="__codelineno-86-2" href="#__codelineno-86-2"></a>
+<a id="__codelineno-86-3" name="__codelineno-86-3" href="#__codelineno-86-3"></a><span class="c1"># Copy kernel</span>
+<a id="__codelineno-86-4" name="__codelineno-86-4" href="#__codelineno-86-4"></a>sudo<span class="w"> </span>cp<span class="w"> </span>Image<span class="w"> </span>/srv/tftp/
+<a id="__codelineno-86-5" name="__codelineno-86-5" href="#__codelineno-86-5"></a>
+<a id="__codelineno-86-6" name="__codelineno-86-6" href="#__codelineno-86-6"></a><span class="c1"># Copy Device Tree</span>
+<a id="__codelineno-86-7" name="__codelineno-86-7" href="#__codelineno-86-7"></a>sudo<span class="w"> </span>cp<span class="w"> </span>k3-am625-beagleplay.dtb<span class="w"> </span>/srv/tftp/
+<a id="__codelineno-86-8" name="__codelineno-86-8" href="#__codelineno-86-8"></a>
+<a id="__codelineno-86-9" name="__codelineno-86-9" href="#__codelineno-86-9"></a><span class="c1"># Set permissions</span>
+<a id="__codelineno-86-10" name="__codelineno-86-10" href="#__codelineno-86-10"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">644</span><span class="w"> </span>/srv/tftp/*
+</code></pre></div>
+<h3 id="93-configure-u-boot-for-tftp">9.3 Configure U-Boot for TFTP<a class="headerlink" href="#93-configure-u-boot-for-tftp" title="Permanent link">&para;</a></h3>
+<p><strong>Boot BeaglePlay, stop at U-Boot prompt (press space during countdown).</strong></p>
+<p><strong>Set network parameters:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>setenv ipaddr 192.168.0.100
+<a id="__codelineno-87-2" name="__codelineno-87-2" href="#__codelineno-87-2"></a>setenv serverip 192.168.0.1
+<a id="__codelineno-87-3" name="__codelineno-87-3" href="#__codelineno-87-3"></a>setenv gatewayip 192.168.0.1
+</code></pre></div></p>
+<p><strong>Set boot command:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>setenv bootcmd &#39;tftp ${loadaddr} Image; tftp ${fdtaddr} k3-am625-beagleplay.dtb; booti ${loadaddr} - ${fdtaddr}&#39;
+</code></pre></div></p>
+<p><strong>Set kernel arguments:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>setenv bootargs &#39;root=/dev/nfs rw console=ttyS2,115200n8 nfsroot=192.168.0.1:/nfs/beagleplay,nfsvers=3,tcp ip=192.168.0.100:::::eth0&#39;
+</code></pre></div></p>
+<p><strong>Save and boot:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>saveenv
+<a id="__codelineno-90-2" name="__codelineno-90-2" href="#__codelineno-90-2"></a>boot
+</code></pre></div></p>
+<p><strong>Now BeaglePlay boots:</strong>
+1. Bootloader from SD card
+2. Kernel via TFTP
+3. Rootfs via NFS</p>
+<p><strong>Ultimate development setup:</strong>
+- Kernel changes: Copy to <code>/srv/tftp/</code>, reboot
+- Rootfs changes: Edit in <code>/nfs/beagleplay/</code>, reboot or sync
+- No SD card reflashing ever</p>
+<hr />
+<h2 id="10-package-management">10. Package Management<a class="headerlink" href="#10-package-management" title="Permanent link">&para;</a></h2>
+<h3 id="101-image-package-formats">10.1 Image Package Formats<a class="headerlink" href="#101-image-package-formats" title="Permanent link">&para;</a></h3>
+<p><strong>Yocto supports three package formats:</strong>
+- <strong>RPM</strong>: Red Hat Package Manager (default for Fedora-based)
+- <strong>DEB</strong>: Debian packages (default for Debian/Ubuntu-based)
+- <strong>IPK</strong>: Itsy Package Management (default for embedded, used by opkg)</p>
+<p><strong>Set package format:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a># In local.conf
+<a id="__codelineno-91-2" name="__codelineno-91-2" href="#__codelineno-91-2"></a>PACKAGE_CLASSES = &quot;package_ipk&quot;
+</code></pre></div></p>
+<p><strong>For BeaglePlay, IPK is recommended</strong> (lightweight).</p>
+<h3 id="102-runtime-package-management">10.2 Runtime Package Management<a class="headerlink" href="#102-runtime-package-management" title="Permanent link">&para;</a></h3>
+<p><strong>Enable package management on target:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a># In local.conf
+<a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a>EXTRA_IMAGE_FEATURES += &quot;package-management&quot;
+</code></pre></div></p>
+<p><strong>This adds <code>opkg</code> to the image.</strong></p>
+<p><strong>Rebuild:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<p><strong>On BeaglePlay:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>opkg<span class="w"> </span>update
+<a id="__codelineno-94-2" name="__codelineno-94-2" href="#__codelineno-94-2"></a>opkg<span class="w"> </span>list
+<a id="__codelineno-94-3" name="__codelineno-94-3" href="#__codelineno-94-3"></a>opkg<span class="w"> </span>install<span class="w"> </span>htop
+</code></pre></div></p>
+<p><strong>Host package feed:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/ipk/
+<a id="__codelineno-95-2" name="__codelineno-95-2" href="#__codelineno-95-2"></a>python3<span class="w"> </span>-m<span class="w"> </span>http.server<span class="w"> </span><span class="m">8000</span>
+</code></pre></div></p>
+<p><strong>Configure opkg on target:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a><span class="c1"># On BeaglePlay</span>
+<a id="__codelineno-96-2" name="__codelineno-96-2" href="#__codelineno-96-2"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/opkg/base-feeds.conf<span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<a id="__codelineno-96-3" name="__codelineno-96-3" href="#__codelineno-96-3"></a><span class="s">src/gz all http://192.168.0.1:8000/all</span>
+<a id="__codelineno-96-4" name="__codelineno-96-4" href="#__codelineno-96-4"></a><span class="s">src/gz cortexa53 http://192.168.0.1:8000/cortexa53</span>
+<a id="__codelineno-96-5" name="__codelineno-96-5" href="#__codelineno-96-5"></a><span class="s">src/gz beagleplay http://192.168.0.1:8000/beagleplay</span>
+<a id="__codelineno-96-6" name="__codelineno-96-6" href="#__codelineno-96-6"></a><span class="s">EOF</span>
+<a id="__codelineno-96-7" name="__codelineno-96-7" href="#__codelineno-96-7"></a>
+<a id="__codelineno-96-8" name="__codelineno-96-8" href="#__codelineno-96-8"></a>opkg<span class="w"> </span>update
+<a id="__codelineno-96-9" name="__codelineno-96-9" href="#__codelineno-96-9"></a>opkg<span class="w"> </span>install<span class="w"> </span>strace
+</code></pre></div></p>
+<h3 id="103-package-inspection">10.3 Package Inspection<a class="headerlink" href="#103-package-inspection" title="Permanent link">&para;</a></h3>
+<p><strong>List package contents:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>opkg<span class="w"> </span>files<span class="w"> </span>busybox
+</code></pre></div></p>
+<p><strong>Show package info:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>opkg<span class="w"> </span>info<span class="w"> </span>dropbear
+</code></pre></div></p>
+<p><strong>Search for files:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>opkg<span class="w"> </span>search<span class="w"> </span>/usr/bin/ssh
+</code></pre></div></p>
+<hr />
+<h2 id="11-troubleshooting">11. Troubleshooting<a class="headerlink" href="#11-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="111-nfs-boot-issues">11.1 NFS Boot Issues<a class="headerlink" href="#111-nfs-boot-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> <code>VFS: Unable to mount root fs via NFS</code></p>
+<p><strong>Solutions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a><span class="c1"># On workstation: verify NFS export</span>
+<a id="__codelineno-100-2" name="__codelineno-100-2" href="#__codelineno-100-2"></a>sudo<span class="w"> </span>exportfs<span class="w"> </span>-v
+<a id="__codelineno-100-3" name="__codelineno-100-3" href="#__codelineno-100-3"></a>
+<a id="__codelineno-100-4" name="__codelineno-100-4" href="#__codelineno-100-4"></a><span class="c1"># Verify network connectivity (ping from U-Boot)</span>
+<a id="__codelineno-100-5" name="__codelineno-100-5" href="#__codelineno-100-5"></a>ping<span class="w"> </span><span class="m">192</span>.168.0.1
+<a id="__codelineno-100-6" name="__codelineno-100-6" href="#__codelineno-100-6"></a>
+<a id="__codelineno-100-7" name="__codelineno-100-7" href="#__codelineno-100-7"></a><span class="c1"># Check kernel NFS support</span>
+<a id="__codelineno-100-8" name="__codelineno-100-8" href="#__codelineno-100-8"></a>zcat<span class="w"> </span>/proc/config.gz<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>NFS
+<a id="__codelineno-100-9" name="__codelineno-100-9" href="#__codelineno-100-9"></a><span class="c1"># Should show: CONFIG_NFS_FS=y, CONFIG_ROOT_NFS=y</span>
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> NFS mount succeeds but rootfs is empty</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a><span class="c1"># Check extraction</span>
+<a id="__codelineno-101-2" name="__codelineno-101-2" href="#__codelineno-101-2"></a>ls<span class="w"> </span>-la<span class="w"> </span>/nfs/beagleplay/
+<a id="__codelineno-101-3" name="__codelineno-101-3" href="#__codelineno-101-3"></a><span class="c1"># Should contain bin/, etc/, usr/, not just empty directories</span>
+<a id="__codelineno-101-4" name="__codelineno-101-4" href="#__codelineno-101-4"></a>
+<a id="__codelineno-101-5" name="__codelineno-101-5" href="#__codelineno-101-5"></a><span class="c1"># Re-extract</span>
+<a id="__codelineno-101-6" name="__codelineno-101-6" href="#__codelineno-101-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/nfs/beagleplay/*
+<a id="__codelineno-101-7" name="__codelineno-101-7" href="#__codelineno-101-7"></a>sudo<span class="w"> </span>tar<span class="w"> </span>-xpf<span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay/core-image-minimal-beagleplay.rootfs.tar.xz<span class="w"> </span>-C<span class="w"> </span>/nfs/beagleplay
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> Permission denied errors on NFS</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a><span class="c1"># Fix ownership</span>
+<a id="__codelineno-102-2" name="__codelineno-102-2" href="#__codelineno-102-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>root:root<span class="w"> </span>/nfs/beagleplay
+<a id="__codelineno-102-3" name="__codelineno-102-3" href="#__codelineno-102-3"></a>
+<a id="__codelineno-102-4" name="__codelineno-102-4" href="#__codelineno-102-4"></a><span class="c1"># Check exports has no_root_squash</span>
+<a id="__codelineno-102-5" name="__codelineno-102-5" href="#__codelineno-102-5"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/etc/exports
+<a id="__codelineno-102-6" name="__codelineno-102-6" href="#__codelineno-102-6"></a><span class="c1"># Should have: /nfs/beagleplay *(rw,sync,no_root_squash,no_subtree_check)</span>
+</code></pre></div></p>
+<h3 id="112-tftp-boot-issues">11.2 TFTP Boot Issues<a class="headerlink" href="#112-tftp-boot-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> <code>TFTP error: file not found</code></p>
+<p><strong>Solutions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a><span class="c1"># Verify TFTP server running</span>
+<a id="__codelineno-103-2" name="__codelineno-103-2" href="#__codelineno-103-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>tftpd-hpa
+<a id="__codelineno-103-3" name="__codelineno-103-3" href="#__codelineno-103-3"></a>
+<a id="__codelineno-103-4" name="__codelineno-103-4" href="#__codelineno-103-4"></a><span class="c1"># Check file permissions</span>
+<a id="__codelineno-103-5" name="__codelineno-103-5" href="#__codelineno-103-5"></a>ls<span class="w"> </span>-l<span class="w"> </span>/srv/tftp/Image
+<a id="__codelineno-103-6" name="__codelineno-103-6" href="#__codelineno-103-6"></a><span class="c1"># Should be readable by all (644)</span>
+<a id="__codelineno-103-7" name="__codelineno-103-7" href="#__codelineno-103-7"></a>
+<a id="__codelineno-103-8" name="__codelineno-103-8" href="#__codelineno-103-8"></a><span class="c1"># Test from command line</span>
+<a id="__codelineno-103-9" name="__codelineno-103-9" href="#__codelineno-103-9"></a>tftp<span class="w"> </span><span class="m">192</span>.168.0.1
+<a id="__codelineno-103-10" name="__codelineno-103-10" href="#__codelineno-103-10"></a>tftp&gt;<span class="w"> </span>get<span class="w"> </span>Image
+<a id="__codelineno-103-11" name="__codelineno-103-11" href="#__codelineno-103-11"></a>tftp&gt;<span class="w"> </span>quit
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> TFTP timeout</p>
+<p><strong>Solutions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a><span class="c1"># Check firewall</span>
+<a id="__codelineno-104-2" name="__codelineno-104-2" href="#__codelineno-104-2"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status
+<a id="__codelineno-104-3" name="__codelineno-104-3" href="#__codelineno-104-3"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">69</span>/udp
+<a id="__codelineno-104-4" name="__codelineno-104-4" href="#__codelineno-104-4"></a>
+<a id="__codelineno-104-5" name="__codelineno-104-5" href="#__codelineno-104-5"></a><span class="c1"># Verify server IP</span>
+<a id="__codelineno-104-6" name="__codelineno-104-6" href="#__codelineno-104-6"></a>ip<span class="w"> </span>addr<span class="w"> </span>show
+<a id="__codelineno-104-7" name="__codelineno-104-7" href="#__codelineno-104-7"></a>
+<a id="__codelineno-104-8" name="__codelineno-104-8" href="#__codelineno-104-8"></a><span class="c1"># Test with tcpdump</span>
+<a id="__codelineno-104-9" name="__codelineno-104-9" href="#__codelineno-104-9"></a>sudo<span class="w"> </span>tcpdump<span class="w"> </span>-i<span class="w"> </span>enp0s25<span class="w"> </span>port<span class="w"> </span><span class="m">69</span>
+<a id="__codelineno-104-10" name="__codelineno-104-10" href="#__codelineno-104-10"></a><span class="c1"># Boot BeaglePlay and watch for TFTP requests</span>
+</code></pre></div></p>
+<h3 id="113-bitbake-issues">11.3 BitBake Issues<a class="headerlink" href="#113-bitbake-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> <code>ERROR: Nothing PROVIDES 'package-name'</code></p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a><span class="c1"># Search for package</span>
+<a id="__codelineno-105-2" name="__codelineno-105-2" href="#__codelineno-105-2"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>package-name
+<a id="__codelineno-105-3" name="__codelineno-105-3" href="#__codelineno-105-3"></a>
+<a id="__codelineno-105-4" name="__codelineno-105-4" href="#__codelineno-105-4"></a><span class="c1"># If not found, add layer containing it</span>
+<a id="__codelineno-105-5" name="__codelineno-105-5" href="#__codelineno-105-5"></a>bitbake-layers<span class="w"> </span>show-layers
+<a id="__codelineno-105-6" name="__codelineno-105-6" href="#__codelineno-105-6"></a><span class="c1"># Check which layers have the package on layers.openembedded.org</span>
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> Build fails with "No space left on device"</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a><span class="c1"># Check disk space</span>
+<a id="__codelineno-106-2" name="__codelineno-106-2" href="#__codelineno-106-2"></a>df<span class="w"> </span>-h<span class="w"> </span>~/yocto-labs/build/tmp
+<a id="__codelineno-106-3" name="__codelineno-106-3" href="#__codelineno-106-3"></a>
+<a id="__codelineno-106-4" name="__codelineno-106-4" href="#__codelineno-106-4"></a><span class="c1"># Clean up</span>
+<a id="__codelineno-106-5" name="__codelineno-106-5" href="#__codelineno-106-5"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleansstate<span class="w"> </span>core-image-minimal
+<a id="__codelineno-106-6" name="__codelineno-106-6" href="#__codelineno-106-6"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/yocto-labs/build/tmp/work/*
+<a id="__codelineno-106-7" name="__codelineno-106-7" href="#__codelineno-106-7"></a>
+<a id="__codelineno-106-8" name="__codelineno-106-8" href="#__codelineno-106-8"></a><span class="c1"># Or enable rm_work in local.conf</span>
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> <code>ERROR: Multiple .bb files are due to be built which each provide &lt;package&gt;</code></p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a><span class="c1"># Multiple recipes provide same package</span>
+<a id="__codelineno-107-2" name="__codelineno-107-2" href="#__codelineno-107-2"></a><span class="c1"># Use PREFERRED_PROVIDER</span>
+<a id="__codelineno-107-3" name="__codelineno-107-3" href="#__codelineno-107-3"></a>nano<span class="w"> </span>conf/local.conf
+<a id="__codelineno-107-4" name="__codelineno-107-4" href="#__codelineno-107-4"></a>
+<a id="__codelineno-107-5" name="__codelineno-107-5" href="#__codelineno-107-5"></a><span class="c1"># Add:</span>
+<a id="__codelineno-107-6" name="__codelineno-107-6" href="#__codelineno-107-6"></a>PREFERRED_PROVIDER_&lt;package&gt;<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;recipe-name&quot;</span>
+</code></pre></div></p>
+<hr />
+<h2 id="12-going-further">12. Going Further<a class="headerlink" href="#12-going-further" title="Permanent link">&para;</a></h2>
+<h3 id="121-advanced-image_install-techniques">12.1 Advanced IMAGE_INSTALL Techniques<a class="headerlink" href="#121-advanced-image_install-techniques" title="Permanent link">&para;</a></h3>
+<p><strong>Conditional package inclusion:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>IMAGE_INSTALL:append:beagleplay = &quot; ti-utils&quot;
+<a id="__codelineno-108-2" name="__codelineno-108-2" href="#__codelineno-108-2"></a>IMAGE_INSTALL:append:qemux86-64 = &quot; qemu-guest-agent&quot;
+</code></pre></div></p>
+<p><strong>Feature-based inclusion:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>EXTRA_IMAGE_FEATURES += &quot;debug-tweaks ssh-server-dropbear&quot;
+</code></pre></div></p>
+<p><strong>Package groups:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a>IMAGE_INSTALL:append = &quot; \
+<a id="__codelineno-110-2" name="__codelineno-110-2" href="#__codelineno-110-2"></a>    packagegroup-core-full-cmdline \
+<a id="__codelineno-110-3" name="__codelineno-110-3" href="#__codelineno-110-3"></a>    packagegroup-core-buildessential \
+<a id="__codelineno-110-4" name="__codelineno-110-4" href="#__codelineno-110-4"></a>&quot;
+</code></pre></div></p>
+<h3 id="122-create-custom-package-group">12.2 Create Custom Package Group<a class="headerlink" href="#122-create-custom-package-group" title="Permanent link">&para;</a></h3>
+<p><strong>Create recipe <code>recipes-core/packagegroups/packagegroup-beagleplay-dev.bb</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>DESCRIPTION = &quot;Development tools for BeaglePlay&quot;
+<a id="__codelineno-111-2" name="__codelineno-111-2" href="#__codelineno-111-2"></a>LICENSE = &quot;MIT&quot;
+<a id="__codelineno-111-3" name="__codelineno-111-3" href="#__codelineno-111-3"></a>
+<a id="__codelineno-111-4" name="__codelineno-111-4" href="#__codelineno-111-4"></a>inherit packagegroup
+<a id="__codelineno-111-5" name="__codelineno-111-5" href="#__codelineno-111-5"></a>
+<a id="__codelineno-111-6" name="__codelineno-111-6" href="#__codelineno-111-6"></a>RDEPENDS:${PN} = &quot; \
+<a id="__codelineno-111-7" name="__codelineno-111-7" href="#__codelineno-111-7"></a>    htop \
+<a id="__codelineno-111-8" name="__codelineno-111-8" href="#__codelineno-111-8"></a>    strace \
+<a id="__codelineno-111-9" name="__codelineno-111-9" href="#__codelineno-111-9"></a>    gdbserver \
+<a id="__codelineno-111-10" name="__codelineno-111-10" href="#__codelineno-111-10"></a>    i2c-tools \
+<a id="__codelineno-111-11" name="__codelineno-111-11" href="#__codelineno-111-11"></a>    can-utils \
+<a id="__codelineno-111-12" name="__codelineno-111-12" href="#__codelineno-111-12"></a>    mtd-utils \
+<a id="__codelineno-111-13" name="__codelineno-111-13" href="#__codelineno-111-13"></a>&quot;
+</code></pre></div></p>
+<p><strong>Use in image:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a>IMAGE_INSTALL:append = &quot; packagegroup-beagleplay-dev&quot;
+</code></pre></div></p>
+<h3 id="123-license-compliance">12.3 License Compliance<a class="headerlink" href="#123-license-compliance" title="Permanent link">&para;</a></h3>
+<p><strong>Generate license manifest:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a># In local.conf
+<a id="__codelineno-113-2" name="__codelineno-113-2" href="#__codelineno-113-2"></a>INHERIT += &quot;archiver&quot;
+<a id="__codelineno-113-3" name="__codelineno-113-3" href="#__codelineno-113-3"></a>COPYLEFT_LICENSE_INCLUDE = &quot;*&quot;
+<a id="__codelineno-113-4" name="__codelineno-113-4" href="#__codelineno-113-4"></a>ARCHIVER_MODE[src] = &quot;original&quot;
+</code></pre></div></p>
+<p><strong>Rebuild:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<p><strong>License files in:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a>tmp/deploy/licenses/core-image-minimal-beagleplay-*/
+</code></pre></div></p>
+<hr />
+<h2 id="13-key-takeaways">13. Key Takeaways<a class="headerlink" href="#13-key-takeaways" title="Permanent link">&para;</a></h2>
+<p><strong>What You Accomplished:</strong>
+1. ✅ Mastered BitBake configuration hierarchy
+2. ✅ Customized image with <code>IMAGE_INSTALL</code>
+3. ✅ Set up NFS root filesystem for rapid development
+4. ✅ Configured TFTP boot for kernel iteration
+5. ✅ Understood BitBake task execution model
+6. ✅ Optimized build performance</p>
+<p><strong>Advanced Skills Gained:</strong>
+- Package provider selection
+- Network boot workflows
+- BitBake command-line tools
+- Performance tuning
+- Package management on target</p>
+<p><strong>Development Workflow Established:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>Edit code → Build → Extract to NFS → Reboot (30 seconds)
+</code></pre></div></p>
+<p><strong>Next Steps:</strong>
+- <strong>Lab 12</strong>: Add custom applications with recipes
+- <strong>Lab 13</strong>: Create custom Yocto layers
+- <strong>Lab 14</strong>: Extend recipes with bbappend
+- <strong>Lab 15</strong>: Define custom machine configurations</p>
+<hr />
+<h2 id="14-verification-checklist">14. Verification Checklist<a class="headerlink" href="#14-verification-checklist" title="Permanent link">&para;</a></h2>
+<p><strong>Before proceeding to Lab 12, verify:</strong></p>
+<ul>
+<li>[ ] <code>IMAGE_INSTALL</code> customization works (packages added)</li>
+<li>[ ] NFS server running and exporting <code>/nfs/beagleplay</code></li>
+<li>[ ] BeaglePlay boots with NFS root successfully</li>
+<li>[ ] Network configured (192.168.0.1 host, 192.168.0.100 target)</li>
+<li>[ ] TFTP server operational (optional but recommended)</li>
+<li>[ ] Can modify rootfs and see changes on target without rebuild</li>
+<li>[ ] <code>bitbake -c menuconfig virtual/kernel</code> works</li>
+<li>[ ] Shared state cache configured for faster rebuilds</li>
+<li>[ ] Build completes in &lt;15 minutes for incremental changes</li>
+</ul>
+<p><strong>Build time:</strong> ~10 minutes incremental, ~2 hours full rebuild<br />
+<strong>Development cycle:</strong> &lt;1 minute (edit → sync → reboot)<br />
+<strong>Success criteria:</strong> Working NFS boot with custom packages</p>
+<hr />
+<h2 id="15-additional-resources">15. Additional Resources<a class="headerlink" href="#15-additional-resources" title="Permanent link">&para;</a></h2>
+<p><strong>BitBake Documentation:</strong>
+- User Manual: https://docs.yoctoproject.org/bitbake/
+- Variable Glossary: https://docs.yoctoproject.org/ref-manual/variables.html
+- Task Manual: https://docs.yoctoproject.org/overview-manual/concepts.html#tasks</p>
+<p><strong>Yocto Configuration:</strong>
+- Dev Manual - Customizing Images: https://docs.yoctoproject.org/dev-manual/customizing-images.html
+- Mega Manual (searchable): https://docs.yoctoproject.org/singleindex.html</p>
+<p><strong>Network Boot:</strong>
+- Linux NFS Root: https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt
+- U-Boot TFTP: https://docs.u-boot.org/en/latest/usage/cmd/tftp.html</p>
+<hr />
+<p><strong>End of Lab 11</strong></p>
+<p><em>The Guide rates this lab: </em><em>Mostly Harmless</em><em> ⭐⭐⭐⭐</em></p>
+<p>You now have an optimized Yocto development environment with network boot capabilities, enabling rapid iteration and efficient debugging. The next labs will teach you how to add your own applications and create reusable layers.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

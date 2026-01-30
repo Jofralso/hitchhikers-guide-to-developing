@@ -1,0 +1,3876 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/yocto/lab13-yocto-custom-layer/">
+      
+      
+        <link rel="prev" href="../lab12-yocto-custom-app/">
+      
+      
+        <link rel="next" href="../lab14-yocto-extend-recipe/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 13 - Custom Layer - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-13-create-a-custom-yocto-layer" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 13 - Custom Layer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../embedded-linux/" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-why-custom-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Why Custom Layers?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Why Custom Layers?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-layer-organization-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Layer Organization Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-layer-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Layer Naming Convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-creating-a-new-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating a New Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Creating a New Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-using-bitbake-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Using bitbake-layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-configure-layer-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Configure Layer Metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-organizing-recipe-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Organizing Recipe Directories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Organizing Recipe Directories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-standard-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Standard Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-layer-directory-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Layer Directory Conventions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-moving-recipes-to-custom-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Moving Recipes to Custom Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Moving Recipes to Custom Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-identify-current-recipe-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Identify Current Recipe Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-move-ninvaders-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Move nInvaders Recipe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-integrating-layer-into-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Integrating Layer into Build
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Integrating Layer into Build">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-add-layer-to-bblayersconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Add Layer to bblayers.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-verify-layer-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Verify Layer Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-creating-package-groups-in-custom-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Creating Package Groups in Custom Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Creating Package Groups in Custom Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-create-games-package-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Create Games Package Group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-use-package-group-in-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Use Package Group in Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Layer Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Layer Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-declare-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Declare Layer Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-version-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Version Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-advanced-layer-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Advanced Layer Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Advanced Layer Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-check-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Check Layer Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-show-layer-recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Show Layer Recipes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-layer-priority-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Layer Priority Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-version-control-for-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Version Control for Layers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Version Control for Layers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-initialize-git-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Initialize Git Repository
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-create-gitignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Create .gitignore
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-tag-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Tag Releases
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-layer-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Layer Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Layer Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-create-distribution-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Create Distribution Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-submit-to-layer-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Submit to Layer Index
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-create-multi-layer-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Create Multi-Layer Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-why-custom-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Why Custom Layers?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Why Custom Layers?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-layer-organization-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Layer Organization Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-layer-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Layer Naming Convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-creating-a-new-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating a New Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Creating a New Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-using-bitbake-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Using bitbake-layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-configure-layer-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Configure Layer Metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-organizing-recipe-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Organizing Recipe Directories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Organizing Recipe Directories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-standard-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Standard Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-layer-directory-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Layer Directory Conventions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-moving-recipes-to-custom-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Moving Recipes to Custom Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Moving Recipes to Custom Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-identify-current-recipe-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Identify Current Recipe Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-move-ninvaders-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Move nInvaders Recipe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-integrating-layer-into-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Integrating Layer into Build
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Integrating Layer into Build">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-add-layer-to-bblayersconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Add Layer to bblayers.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-verify-layer-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Verify Layer Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-creating-package-groups-in-custom-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Creating Package Groups in Custom Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Creating Package Groups in Custom Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-create-games-package-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Create Games Package Group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-use-package-group-in-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Use Package Group in Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Layer Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Layer Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-declare-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Declare Layer Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-version-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Version Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-advanced-layer-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Advanced Layer Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Advanced Layer Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-check-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Check Layer Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-show-layer-recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Show Layer Recipes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-layer-priority-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Layer Priority Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-version-control-for-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Version Control for Layers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Version Control for Layers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-initialize-git-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Initialize Git Repository
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-create-gitignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Create .gitignore
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-tag-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Tag Releases
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-layer-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Layer Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Layer Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-create-distribution-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Create Distribution Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-submit-to-layer-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Submit to Layer Index
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-create-multi-layer-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Create Multi-Layer Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-13-create-a-custom-yocto-layer">Lab 13: Create a Custom Yocto Layer<a class="headerlink" href="#lab-13-create-a-custom-yocto-layer" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about Yocto:</p>
+<p><em>"The Yocto Project is a build system of such staggering complexity that it makes the Infinite Improbability Drive look straightforward. However, once you understand it (which will take approximately 42 tries), it's actually quite brilliant."</em></p>
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>Learn to organize recipes into custom layers for maintainability, reusability, and proper project structure following Yocto best practices.</p>
+<p><strong>What You'll Learn:</strong>
+- Create custom meta-layers from scratch
+- Configure layer priority and dependencies
+- Organize recipes within layers
+- Integrate layers into build configuration
+- Move recipes between layers
+- Understand layer indexing</p>
+<p><strong>Time Required:</strong> 1-2 hours</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p><strong>Completed Labs:</strong>
+- Lab 10-12: Yocto basics and recipe writing</p>
+<p><strong>Knowledge:</strong>
+- BitBake recipe structure
+- Layer configuration concepts</p>
+<hr />
+<h2 id="1-why-custom-layers">1. Why Custom Layers?<a class="headerlink" href="#1-why-custom-layers" title="Permanent link">&para;</a></h2>
+<h3 id="11-layer-organization-benefits">1.1 Layer Organization Benefits<a class="headerlink" href="#11-layer-organization-benefits" title="Permanent link">&para;</a></h3>
+<p><strong>Without layers:</strong> All recipes mixed in meta/ or meta-poky/
+- Hard to maintain
+- Difficult to share
+- No clear ownership
+- Breaks on Yocto updates</p>
+<p><strong>With custom layers:</strong>
+- ✅ Clear separation of concerns
+- ✅ Easy to version control separately
+- ✅ Shareable across projects
+- ✅ Survives Yocto version upgrades
+- ✅ Professional project structure</p>
+<h3 id="12-layer-naming-convention">1.2 Layer Naming Convention<a class="headerlink" href="#12-layer-naming-convention" title="Permanent link">&para;</a></h3>
+<p><strong>Standard format:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>meta-&lt;layername&gt;
+</code></pre></div></p>
+<p><strong>Examples:</strong>
+- <code>meta-ti</code>: Texas Instruments BSP
+- <code>meta-openembedded</code>: Community packages
+- <code>meta-beagleplay</code>: Custom BeaglePlay layer (your project)</p>
+<hr />
+<h2 id="2-creating-a-new-layer">2. Creating a New Layer<a class="headerlink" href="#2-creating-a-new-layer" title="Permanent link">&para;</a></h2>
+<h3 id="21-using-bitbake-layers">2.1 Using bitbake-layers<a class="headerlink" href="#21-using-bitbake-layers" title="Permanent link">&para;</a></h3>
+<p><strong>Navigate to layers directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">source</span><span class="w"> </span>poky/oe-init-build-env
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+</code></pre></div></p>
+<p><strong>Create layer structure:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>bitbake-layers<span class="w"> </span>create-layer<span class="w"> </span>meta-beagleplay
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>NOTE: Starting bitbake server...
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Add your new layer with &#39;bitbake-layers add-layer meta-beagleplay&#39;
+</code></pre></div></p>
+<p><strong>Explore structure:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>meta-beagleplay
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>tree
+</code></pre></div></p>
+<p><strong>Generated structure:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>meta-beagleplay/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── conf/
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>│   └── layer.conf
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>├── COPYING.MIT
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>├── README
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>└── recipes-example/
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    └── example/
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        └── example_0.1.bb
+</code></pre></div></p>
+<h3 id="22-configure-layer-metadata">2.2 Configure Layer Metadata<a class="headerlink" href="#22-configure-layer-metadata" title="Permanent link">&para;</a></h3>
+<p><strong>Edit README:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>nano<span class="w"> </span>README
+</code></pre></div></p>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gh"># meta-beagleplay</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Custom Yocto layer for BeaglePlay development projects.
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="gu">## Dependencies</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>This layer depends on:
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">-</span><span class="w"> </span>meta
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="k">-</span><span class="w"> </span>meta-oe
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="k">-</span><span class="w"> </span>meta-ti
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="gu">## Contributing</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>Maintained by: Your Name
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>Contact: your.email@example.com
+</code></pre></div></p>
+<p><strong>Edit layer.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>nano<span class="w"> </span>conf/layer.conf
+</code></pre></div></p>
+<p><strong>Review generated configuration:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># We have a conf and classes directory, add to BBPATH</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">BBPATH</span> <span class="o">.=</span> <span class="s2">&quot;:$</span><span class="si">{LAYERDIR}</span><span class="s2">&quot;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># We have recipes-* directories, add to BBFILES</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">BBFILES</span> <span class="o">+=</span> <span class="s2">&quot;$</span><span class="si">{LAYERDIR}</span><span class="s2">/recipes-*/*/*.bb </span><span class="se">\</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="s2">            $</span><span class="si">{LAYERDIR}</span><span class="s2">/recipes-*/*/*.bbappend&quot;</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="n">BBFILE_COLLECTIONS</span> <span class="o">+=</span> <span class="s2">&quot;meta-beagleplay&quot;</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="n">BBFILE_PATTERN_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;^$</span><span class="si">{LAYERDIR}</span><span class="s2">/&quot;</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="n">BBFILE_PRIORITY_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;7&quot;</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="n">LAYERDEPENDS_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;core&quot;</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="n">LAYERSERIES_COMPAT_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;scarthgap&quot;</span>
+</code></pre></div></p>
+<p><strong>Important variables:</strong>
+- <code>BBFILE_PRIORITY</code>: 7 (higher = higher priority, overrides lower layers)
+- <code>LAYERSERIES_COMPAT</code>: Must match Yocto release ("scarthgap")
+- <code>LAYERDEPENDS</code>: Declares required layers</p>
+<hr />
+<h2 id="3-organizing-recipe-directories">3. Organizing Recipe Directories<a class="headerlink" href="#3-organizing-recipe-directories" title="Permanent link">&para;</a></h2>
+<h3 id="31-standard-directory-structure">3.1 Standard Directory Structure<a class="headerlink" href="#31-standard-directory-structure" title="Permanent link">&para;</a></h3>
+<p><strong>Create recipe categories:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-core/packagegroups
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-games/ninvaders
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-kernel/linux
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-bsp/u-boot
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-graphics
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-connectivity
+</code></pre></div></p>
+<p><strong>Why categorize?</strong>
+- Easier navigation
+- Clear purpose
+- Matches upstream conventions
+- Simplifies layer indexing</p>
+<h3 id="32-layer-directory-conventions">3.2 Layer Directory Conventions<a class="headerlink" href="#32-layer-directory-conventions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Purpose</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recipes-core/</code></td>
+<td>System essentials</td>
+<td>init, base packages</td>
+</tr>
+<tr>
+<td><code>recipes-kernel/</code></td>
+<td>Kernel and modules</td>
+<td>linux, kernel modules</td>
+</tr>
+<tr>
+<td><code>recipes-bsp/</code></td>
+<td>Board support</td>
+<td>bootloaders, firmware</td>
+</tr>
+<tr>
+<td><code>recipes-graphics/</code></td>
+<td>GUI applications</td>
+<td>Wayland, X11 apps</td>
+</tr>
+<tr>
+<td><code>recipes-connectivity/</code></td>
+<td>Networking</td>
+<td>WiFi, Bluetooth tools</td>
+</tr>
+<tr>
+<td><code>recipes-games/</code></td>
+<td>Game applications</td>
+<td>Your games</td>
+</tr>
+<tr>
+<td><code>recipes-extended/</code></td>
+<td>Optional packages</td>
+<td>Development tools</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-moving-recipes-to-custom-layer">4. Moving Recipes to Custom Layer<a class="headerlink" href="#4-moving-recipes-to-custom-layer" title="Permanent link">&para;</a></h2>
+<h3 id="41-identify-current-recipe-location">4.1 Identify Current Recipe Location<a class="headerlink" href="#41-identify-current-recipe-location" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>ninvaders
+</code></pre></div>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ninvaders:
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  meta-poky        0.1.1
+</code></pre></div></p>
+<p>Recipe is currently in <code>meta-poky</code> (not recommended).</p>
+<h3 id="42-move-ninvaders-recipe">4.2 Move nInvaders Recipe<a class="headerlink" href="#42-move-ninvaders-recipe" title="Permanent link">&para;</a></h3>
+<p><strong>Copy recipe to custom layer:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>cp<span class="w"> </span>-r<span class="w"> </span>poky/meta-poky/recipes-extended/ninvaders<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">     </span>meta-beagleplay/recipes-games/
+</code></pre></div></p>
+<p><strong>Remove from meta-poky:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>rm<span class="w"> </span>-rf<span class="w"> </span>poky/meta-poky/recipes-extended/ninvaders
+</code></pre></div></p>
+<p><strong>Verify new location:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>ninvaders
+</code></pre></div></p>
+<p><strong>Expected error:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Nothing PROVIDES &#39;ninvaders&#39;
+</code></pre></div></p>
+<p>Layer not yet integrated!</p>
+<hr />
+<h2 id="5-integrating-layer-into-build">5. Integrating Layer into Build<a class="headerlink" href="#5-integrating-layer-into-build" title="Permanent link">&para;</a></h2>
+<h3 id="51-add-layer-to-bblayersconf">5.1 Add Layer to bblayers.conf<a class="headerlink" href="#51-add-layer-to-bblayersconf" title="Permanent link">&para;</a></h3>
+<p><strong>Option 1: Manual edit</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>nano<span class="w"> </span>conf/bblayers.conf
+</code></pre></div></p>
+<p><strong>Add line:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>BBLAYERS ?= &quot; \
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  ... (existing layers) ...
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>  /home/user/yocto-labs/meta-beagleplay \
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>&quot;
+</code></pre></div></p>
+<p><strong>Option 2: Use bitbake-layers (recommended)</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>bitbake-layers<span class="w"> </span>add-layer<span class="w"> </span>~/yocto-labs/meta-beagleplay
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>NOTE: Starting bitbake server...
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>NOTE: Added layer &#39;/home/user/yocto-labs/meta-beagleplay&#39; to build/conf/bblayers.conf
+</code></pre></div></p>
+<h3 id="52-verify-layer-integration">5.2 Verify Layer Integration<a class="headerlink" href="#52-verify-layer-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>bitbake-layers<span class="w"> </span>show-layers
+</code></pre></div>
+<p><strong>Output should include:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>layer                 path                                      priority
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>==================================================================================
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>...
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>meta-beagleplay       /home/user/yocto-labs/meta-beagleplay     7
+</code></pre></div></p>
+<p><strong>Check recipe now found:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>ninvaders
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>ninvaders:
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>  meta-beagleplay  0.1.1
+</code></pre></div></p>
+<p>✅ Success!</p>
+<hr />
+<h2 id="6-creating-package-groups-in-custom-layer">6. Creating Package Groups in Custom Layer<a class="headerlink" href="#6-creating-package-groups-in-custom-layer" title="Permanent link">&para;</a></h2>
+<h3 id="61-create-games-package-group">6.1 Create Games Package Group<a class="headerlink" href="#61-create-games-package-group" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>nano<span class="w"> </span>recipes-core/packagegroups/packagegroup-beagleplay-games.bb
+</code></pre></div>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="n">SUMMARY</span> <span class="o">=</span> <span class="s2">&quot;BeaglePlay games package group&quot;</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;Collection of terminal-based games for BeaglePlay&quot;</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="n">LICENSE</span> <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="n">inherit</span> <span class="n">packagegroup</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a><span class="n">RDEPENDS</span><span class="p">:</span><span class="err">$</span><span class="p">{</span><span class="n">PN</span><span class="p">}</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="se">\</span>
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a><span class="s2">    ninvaders </span><span class="se">\</span>
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="s2">&quot;</span>
+</code></pre></div></p>
+<h3 id="62-use-package-group-in-image">6.2 Use Package Group in Image<a class="headerlink" href="#62-use-package-group-in-image" title="Permanent link">&para;</a></h3>
+<p><strong>Edit local.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>nano<span class="w"> </span>conf/local.conf
+</code></pre></div></p>
+<p><strong>Replace individual package with group:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a># Old:
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a># IMAGE_INSTALL:append = &quot; ninvaders&quot;
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a># New:
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>IMAGE_INSTALL:append = &quot; packagegroup-beagleplay-games&quot;
+</code></pre></div></p>
+<p><strong>Rebuild:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<hr />
+<h2 id="7-layer-dependencies">7. Layer Dependencies<a class="headerlink" href="#7-layer-dependencies" title="Permanent link">&para;</a></h2>
+<h3 id="71-declare-layer-dependencies">7.1 Declare Layer Dependencies<a class="headerlink" href="#71-declare-layer-dependencies" title="Permanent link">&para;</a></h3>
+<p><strong>Edit layer.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>nano<span class="w"> </span>conf/layer.conf
+</code></pre></div></p>
+<p><strong>Add dependencies:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">LAYERDEPENDS_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="se">\</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="s2">    core </span><span class="se">\</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="s2">    openembedded-layer </span><span class="se">\</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="s2">    meta-ti-bsp </span><span class="se">\</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="s2">&quot;</span>
+</code></pre></div></p>
+<p><strong>Why declare dependencies?</strong>
+- BitBake validates required layers present
+- Documents layer requirements
+- Prevents cryptic build errors</p>
+<h3 id="72-version-compatibility">7.2 Version Compatibility<a class="headerlink" href="#72-version-compatibility" title="Permanent link">&para;</a></h3>
+<p><strong>Ensure Yocto version compatibility:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">LAYERSERIES_COMPAT_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;scarthgap&quot;</span>
+</code></pre></div></p>
+<p><strong>For multi-version support:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">LAYERSERIES_COMPAT_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;kirkstone scarthgap&quot;</span>
+</code></pre></div></p>
+<hr />
+<h2 id="8-advanced-layer-management">8. Advanced Layer Management<a class="headerlink" href="#8-advanced-layer-management" title="Permanent link">&para;</a></h2>
+<h3 id="81-check-layer-dependencies">8.1 Check Layer Dependencies<a class="headerlink" href="#81-check-layer-dependencies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>bitbake-layers<span class="w"> </span>show-layers
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>bitbake-layers<span class="w"> </span>check-layers
+</code></pre></div>
+<p><strong>Output (if OK):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>NOTE: All layers are compatible with the current Yocto version
+</code></pre></div></p>
+<h3 id="82-show-layer-recipes">8.2 Show Layer Recipes<a class="headerlink" href="#82-show-layer-recipes" title="Permanent link">&para;</a></h3>
+<p><strong>List all recipes in layer:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>-i<span class="w"> </span>meta-beagleplay
+</code></pre></div></p>
+<p><strong>Find overlayed recipes:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>bitbake-layers<span class="w"> </span>show-overlayed
+</code></pre></div></p>
+<p>Shows recipes provided by multiple layers.</p>
+<h3 id="83-layer-priority-resolution">8.3 Layer Priority Resolution<a class="headerlink" href="#83-layer-priority-resolution" title="Permanent link">&para;</a></h3>
+<p><strong>When multiple layers provide same recipe:</strong>
+- Higher <code>BBFILE_PRIORITY</code> wins
+- Same priority = first in <code>BBLAYERS</code> wins</p>
+<p><strong>Check effective recipe:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>-b<span class="w"> </span>ninvaders
+</code></pre></div></p>
+<hr />
+<h2 id="9-version-control-for-layers">9. Version Control for Layers<a class="headerlink" href="#9-version-control-for-layers" title="Permanent link">&para;</a></h2>
+<h3 id="91-initialize-git-repository">9.1 Initialize Git Repository<a class="headerlink" href="#91-initialize-git-repository" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>git<span class="w"> </span>init
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>git<span class="w"> </span>add<span class="w"> </span>.
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Initial commit: meta-beagleplay layer&quot;</span>
+</code></pre></div>
+<h3 id="92-create-gitignore">9.2 Create .gitignore<a class="headerlink" href="#92-create-gitignore" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>nano<span class="w"> </span>.gitignore
+</code></pre></div>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a># Temporary files
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>*.swp
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>*.swo
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>*~
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a># Build artifacts (should never be in layer)
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>tmp/
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>build/
+</code></pre></div></p>
+<h3 id="93-tag-releases">9.3 Tag Releases<a class="headerlink" href="#93-tag-releases" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v1.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release 1.0 - BeaglePlay games support&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="10-layer-distribution">10. Layer Distribution<a class="headerlink" href="#10-layer-distribution" title="Permanent link">&para;</a></h2>
+<h3 id="101-create-distribution-script">10.1 Create Distribution Script<a class="headerlink" href="#101-create-distribution-script" title="Permanent link">&para;</a></h3>
+<p><strong>For easy layer sharing:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>nano<span class="w"> </span>setup-layer.sh
+</code></pre></div></p>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="ch">#!/bin/bash</span>
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="nv">LAYER_DIR</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>dirname<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">BASH_SOURCE</span><span class="p">[0]</span><span class="si">}</span><span class="s2">&quot;</span><span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">pwd</span><span class="k">)</span><span class="s2">&quot;</span>
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Adding meta-beagleplay layer from: </span><span class="nv">$LAYER_DIR</span><span class="s2">&quot;</span>
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>bitbake-layers<span class="w"> </span>add-layer<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$LAYER_DIR</span><span class="s2">&quot;</span>
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Layer added successfully!&quot;</span>
+</code></pre></div></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>setup-layer.sh
+</code></pre></div>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="nb">source</span><span class="w"> </span>poky/oe-init-build-env
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>../meta-beagleplay/setup-layer.sh
+</code></pre></div></p>
+<hr />
+<h2 id="11-going-further">11. Going Further<a class="headerlink" href="#11-going-further" title="Permanent link">&para;</a></h2>
+<h3 id="111-submit-to-layer-index">11.1 Submit to Layer Index<a class="headerlink" href="#111-submit-to-layer-index" title="Permanent link">&para;</a></h3>
+<p>Yocto maintains a searchable index: https://layers.openembedded.org/</p>
+<p><strong>To submit:</strong>
+1. Host layer on public Git repository (GitHub, GitLab)
+2. Submit via web form
+3. Maintain layer compatibility</p>
+<h3 id="112-create-multi-layer-project">11.2 Create Multi-Layer Project<a class="headerlink" href="#112-create-multi-layer-project" title="Permanent link">&para;</a></h3>
+<p><strong>Example structure:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>yocto-beagleplay/
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>├── poky/
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>├── meta-openembedded/
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>├── meta-ti/
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>├── meta-beagleplay/         # Board-specific
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>├── meta-beagleplay-apps/    # Application layer
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>└── meta-beagleplay-prod/    # Production configuration
+</code></pre></div></p>
+<hr />
+<h2 id="12-troubleshooting">12. Troubleshooting<a class="headerlink" href="#12-troubleshooting" title="Permanent link">&para;</a></h2>
+<p><strong>Problem:</strong> <code>ERROR: Layer 'meta-beagleplay' has incompatible version</code></p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="c1"># Update layer.conf</span>
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a><span class="n">LAYERSERIES_COMPAT_meta</span><span class="o">-</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot;scarthgap&quot;</span>
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> Recipe not found after adding layer</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="c1"># Verify layer path correct</span>
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>bitbake-layers<span class="w"> </span>show-layers
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>
+<a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a><span class="c1"># Check recipe directory structure</span>
+<a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>ls<span class="w"> </span>-R<span class="w"> </span>meta-beagleplay/recipes-*/
+<a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a>
+<a id="__codelineno-49-7" name="__codelineno-49-7" href="#__codelineno-49-7"></a><span class="c1"># Re-parse recipes</span>
+<a id="__codelineno-49-8" name="__codelineno-49-8" href="#__codelineno-49-8"></a>bitbake<span class="w"> </span>-e<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>BBFILES
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> Layer priority conflicts</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="c1"># Check priorities</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>bitbake-layers<span class="w"> </span>show-layers
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="c1"># Adjust in layer.conf</span>
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>BBFILE_PRIORITY_meta-beagleplay<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;10&quot;</span><span class="w">  </span><span class="c1"># Higher priority</span>
+</code></pre></div></p>
+<hr />
+<h2 id="13-key-takeaways">13. Key Takeaways<a class="headerlink" href="#13-key-takeaways" title="Permanent link">&para;</a></h2>
+<p><strong>Accomplished:</strong>
+1. ✅ Created professional layer structure
+2. ✅ Organized recipes by category
+3. ✅ Moved recipes to custom layer
+4. ✅ Declared layer dependencies
+5. ✅ Integrated layer into build
+6. ✅ Created reusable package groups</p>
+<p><strong>Best Practices Learned:</strong>
+- Never modify meta/ or meta-poky/
+- Use custom layers for all customizations
+- Version control layers separately
+- Document layer dependencies
+- Follow naming conventions</p>
+<p><strong>Next Steps:</strong>
+- <strong>Lab 14</strong>: Extend recipes with bbappend
+- <strong>Lab 15</strong>: Custom machine configurations
+- <strong>Lab 16</strong>: Create custom distribution images</p>
+<hr />
+<h2 id="14-verification-checklist">14. Verification Checklist<a class="headerlink" href="#14-verification-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] <code>meta-beagleplay</code> layer created</li>
+<li>[ ] Layer added to <code>bblayers.conf</code></li>
+<li>[ ] <code>bitbake-layers show-layers</code> includes meta-beagleplay</li>
+<li>[ ] ninvaders recipe moved to custom layer</li>
+<li>[ ] Package group created for games</li>
+<li>[ ] Layer priority set to 7</li>
+<li>[ ] Layer dependencies declared</li>
+<li>[ ] Build succeeds with custom layer</li>
+<li>[ ] Recipes organized in appropriate directories</li>
+</ul>
+<p><strong>Success criteria:</strong> Clean layer structure following Yocto conventions</p>
+<hr />
+<p><strong>End of Lab 13</strong></p>
+<p><em>The Guide rates this lab: </em><em>Mostly Harmless</em><em> ⭐⭐⭐⭐</em></p>
+<p>Your recipes are now properly organized in a custom layer, ready for version control, sharing, and long-term maintenance. This professional structure will scale as your project grows.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

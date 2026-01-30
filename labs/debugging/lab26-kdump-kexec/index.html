@@ -1,0 +1,4203 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/debugging/lab26-kdump-kexec/">
+      
+      
+        <link rel="prev" href="../lab25-kernel-debugging/">
+      
+      
+        <link rel="next" href="../../../THE-JOURNEY/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 26 - kdump & kexec - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-26-crash-dump-analysis-with-kdump-and-kexec" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 26 - kdump & kexec
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../embedded-linux/" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-kdump-and-kexec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding kdump and kexec
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding kdump and kexec">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-what-is-kexec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 What is kexec?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-what-is-kdump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 What is kdump?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-memory-reservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Memory Reservation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Kernel Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Kernel Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-required-configs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Required Configs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-enable-in-yocto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Enable in Yocto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-install-kdump-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Install kdump Tools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Install kdump Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-install-kexec-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Install kexec-tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-install-crash-utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Install crash Utility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-configure-crash-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Configure Crash Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Configure Crash Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-reserve-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Reserve Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-verify-reservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Verify Reservation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-load-crash-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Load Crash Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Load Crash Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-load-kernel-and-initrd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Load Kernel and Initrd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-automatic-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Automatic Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-trigger-test-crash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Trigger Test Crash
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Trigger Test Crash">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-trigger-kernel-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Trigger Kernel Panic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-observe-crash-kernel-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Observe Crash Kernel Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-save-crash-dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Save Crash Dump
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Save Crash Dump">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-configure-dump-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Configure Dump Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-dump-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Dump Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-analyze-crash-dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Analyze Crash Dump
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Analyze Crash Dump">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-transfer-dump-to-workstation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Transfer Dump to Workstation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-launch-crash-utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Launch crash Utility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-examine-crash-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Examine Crash State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-examine-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Examine Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-disassemble-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 Disassemble Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-advanced-crash-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Advanced crash Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Advanced crash Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-analyze-locks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Analyze Locks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-network-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Network State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-file-system-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 File System State
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-automate-crash-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Automate Crash Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Automate Crash Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-crash-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 crash Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-python-script-for-multiple-dumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Python Script for Multiple Dumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-production-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Production Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Production Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-automated-dump-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Automated Dump Collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-remote-dump-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Remote Dump Upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-crash-kernel-fails-to-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Crash Kernel Fails to Load
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-no-vmcore-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 No vmcore Generated
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Performance Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Performance Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-memory-overhead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Memory Overhead
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-dump-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Dump Time
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#congratulations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Congratulations! 🎉
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-kdump-and-kexec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding kdump and kexec
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding kdump and kexec">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-what-is-kexec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 What is kexec?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-what-is-kdump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 What is kdump?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-memory-reservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Memory Reservation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Kernel Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Kernel Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-required-configs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Required Configs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-enable-in-yocto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Enable in Yocto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-install-kdump-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Install kdump Tools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Install kdump Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-install-kexec-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Install kexec-tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-install-crash-utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Install crash Utility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-configure-crash-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Configure Crash Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Configure Crash Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-reserve-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Reserve Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-verify-reservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Verify Reservation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-load-crash-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Load Crash Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Load Crash Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-load-kernel-and-initrd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Load Kernel and Initrd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-automatic-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Automatic Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-trigger-test-crash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Trigger Test Crash
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Trigger Test Crash">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-trigger-kernel-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Trigger Kernel Panic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-observe-crash-kernel-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Observe Crash Kernel Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-save-crash-dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Save Crash Dump
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Save Crash Dump">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-configure-dump-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Configure Dump Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-dump-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Dump Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-analyze-crash-dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Analyze Crash Dump
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Analyze Crash Dump">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-transfer-dump-to-workstation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Transfer Dump to Workstation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-launch-crash-utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Launch crash Utility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-examine-crash-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Examine Crash State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-examine-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Examine Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-disassemble-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 Disassemble Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-advanced-crash-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Advanced crash Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Advanced crash Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-analyze-locks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Analyze Locks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-network-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Network State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-file-system-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 File System State
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-automate-crash-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Automate Crash Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Automate Crash Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-crash-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 crash Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-python-script-for-multiple-dumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Python Script for Multiple Dumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-production-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Production Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Production Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-automated-dump-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Automated Dump Collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-remote-dump-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Remote Dump Upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-crash-kernel-fails-to-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Crash Kernel Fails to Load
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-no-vmcore-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 No vmcore Generated
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Performance Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Performance Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-memory-overhead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Memory Overhead
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-dump-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Dump Time
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#congratulations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Congratulations! 🎉
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-26-crash-dump-analysis-with-kdump-and-kexec">Lab 26: Crash Dump Analysis with kdump and kexec<a class="headerlink" href="#lab-26-crash-dump-analysis-with-kdump-and-kexec" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about debugging:</p>
+<p><em>"Debugging is the art of figuring out why your code doesn't work, as opposed to why you thought it would work. This is similar to the difference between what Deep Thought calculated (42) and what everyone expected (a useful answer). Both are technically correct, but only one is helpful."</em></p>
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>Master crash dump collection with kdump/kexec for post-mortem analysis of kernel panics and system crashes, enabling root cause analysis even when systems are unresponsive.</p>
+<p><strong>What You'll Learn:</strong>
+- Configure kexec for fast kernel reboots
+- Set up kdump for crash dump collection
+- Analyze crash dumps with the crash utility
+- Extract useful information from vmcore files
+- Automate crash dump collection
+- Debug production system failures</p>
+<p><strong>Time Required:</strong> 3-4 hours</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p><strong>Hardware:</strong>
+- BeaglePlay board
+- 2GB+ RAM (kdump reserves memory)
+- Development workstation
+- Network/USB storage for dumps</p>
+<p><strong>Software:</strong>
+- Kernel with kdump/kexec support
+- crash utility
+- kexec-tools package</p>
+<hr />
+<h2 id="1-understanding-kdump-and-kexec">1. Understanding kdump and kexec<a class="headerlink" href="#1-understanding-kdump-and-kexec" title="Permanent link">&para;</a></h2>
+<h3 id="11-what-is-kexec">1.1 What is kexec?<a class="headerlink" href="#11-what-is-kexec" title="Permanent link">&para;</a></h3>
+<p><strong>kexec</strong> allows booting a new kernel from currently running kernel without BIOS/bootloader.</p>
+<p><strong>Use cases:</strong>
+- Fast reboots (skip firmware)
+- Crash dump collection
+- System recovery</p>
+<p><strong>How it works:</strong>
+1. Load new kernel into memory
+2. When triggered, jump to new kernel
+3. New kernel boots (no firmware reset)</p>
+<h3 id="12-what-is-kdump">1.2 What is kdump?<a class="headerlink" href="#12-what-is-kdump" title="Permanent link">&para;</a></h3>
+<p><strong>kdump</strong> uses kexec to boot a crash kernel when primary kernel panics.</p>
+<p><strong>Workflow:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│ Production      │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│ Kernel Running  │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│ (Reserve memory │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  for crash)     │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>└────────┬────────┘
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>         │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>         │ PANIC!
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>         ▼
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>┌─────────────────┐
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│ kexec Triggered │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│ Boot Crash      │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│ Kernel          │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>└────────┬────────┘
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>         │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>         ▼
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>┌─────────────────┐
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│ Crash Kernel    │
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│ - Minimal env   │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│ - Save vmcore   │
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│ - Reboot        │
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>└─────────────────┘
+</code></pre></div></p>
+<h3 id="13-memory-reservation">1.3 Memory Reservation<a class="headerlink" href="#13-memory-reservation" title="Permanent link">&para;</a></h3>
+<p><strong>BeaglePlay has 2GB RAM:</strong>
+- Production kernel: 1.75GB
+- Crash kernel: 256MB (reserved at boot)</p>
+<p><strong>Reserved region cannot be used by production kernel.</strong></p>
+<hr />
+<h2 id="2-kernel-configuration">2. Kernel Configuration<a class="headerlink" href="#2-kernel-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="21-required-configs">2.1 Required Configs<a class="headerlink" href="#21-required-configs" title="Permanent link">&para;</a></h3>
+<p><strong>For kexec:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>CONFIG_KEXEC=y
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>CONFIG_KEXEC_FILE=y
+</code></pre></div></p>
+<p><strong>For kdump:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>CONFIG_CRASH_DUMP=y
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>CONFIG_PROC_VMCORE=y
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>CONFIG_SYSFS=y
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>CONFIG_DEBUG_INFO=y
+</code></pre></div></p>
+<p><strong>Additional useful:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>CONFIG_RELOCATABLE=y      # Kernel can run at different addresses
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>CONFIG_RANDOMIZE_BASE=n   # Disable KASLR for easier debugging
+</code></pre></div></p>
+<h3 id="22-enable-in-yocto">2.2 Enable in Yocto<a class="headerlink" href="#22-enable-in-yocto" title="Permanent link">&para;</a></h3>
+<p><strong>In <code>local.conf</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>KERNEL_FEATURES:append = &quot; features/kexec/kexec-enable.scc&quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a># Or manually
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>KERNEL_CONFIG_FRAGMENTS:append = &quot; ${THISDIR}/files/kdump.cfg&quot;
+</code></pre></div></p>
+<p><strong>Create <code>kdump.cfg</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>CONFIG_KEXEC=y
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>CONFIG_KEXEC_FILE=y
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>CONFIG_CRASH_DUMP=y
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>CONFIG_PROC_VMCORE=y
+</code></pre></div></p>
+<h3 id="23-verify-configuration">2.3 Verify Configuration<a class="headerlink" href="#23-verify-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>cat<span class="w"> </span>/boot/config-<span class="k">$(</span>uname<span class="w"> </span>-r<span class="k">)</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;KEXEC|CRASH|VMCORE&quot;</span>
+</code></pre></div>
+<p><strong>Should show:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>CONFIG_KEXEC=y
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>CONFIG_KEXEC_FILE=y
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>CONFIG_CRASH_DUMP=y
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>CONFIG_PROC_VMCORE=y
+</code></pre></div></p>
+<hr />
+<h2 id="3-install-kdump-tools">3. Install kdump Tools<a class="headerlink" href="#3-install-kdump-tools" title="Permanent link">&para;</a></h2>
+<h3 id="31-install-kexec-tools">3.1 Install kexec-tools<a class="headerlink" href="#31-install-kexec-tools" title="Permanent link">&para;</a></h3>
+<p><strong>On BeaglePlay:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Buildroot</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>make<span class="w"> </span>menuconfig
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># Target packages → System tools → kexec</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># Yocto</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>IMAGE_INSTALL:append<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot; kexec-tools&quot;</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="c1"># Debian/Ubuntu</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>apt-get<span class="w"> </span>install<span class="w"> </span>kexec-tools<span class="w"> </span>makedumpfile<span class="w"> </span>crash
+</code></pre></div></p>
+<p><strong>Verify:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>kexec<span class="w"> </span>--version
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># kexec-tools 2.0.23</span>
+</code></pre></div></p>
+<h3 id="32-install-crash-utility">3.2 Install crash Utility<a class="headerlink" href="#32-install-crash-utility" title="Permanent link">&para;</a></h3>
+<p><strong>On workstation (for analysis):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>crash<span class="w"> </span>linux-image-<span class="k">$(</span>uname<span class="w"> </span>-r<span class="k">)</span>-dbgsym
+</code></pre></div></p>
+<hr />
+<h2 id="4-configure-crash-kernel">4. Configure Crash Kernel<a class="headerlink" href="#4-configure-crash-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="41-reserve-memory">4.1 Reserve Memory<a class="headerlink" href="#41-reserve-memory" title="Permanent link">&para;</a></h3>
+<p><strong>Boot parameter method:</strong></p>
+<p><strong>In U-Boot, edit bootargs:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>setenv bootargs &quot;console=ttyS0,115200 root=/dev/mmcblk0p2 crashkernel=256M&quot;
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>saveenv
+</code></pre></div></p>
+<p><strong>Or in device tree:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nf">/</span><span class="cm"> </span><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nf">reserved-memory</span><span class="cm"> </span><span class="p">{</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">        </span><span class="nf">crash_dump</span><span class="o">@</span><span class="mi">80000000</span><span class="cm"> </span><span class="p">{</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">            </span><span class="kr">compatible</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;shared-dma-pool&quot;</span><span class="p">;</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">            </span><span class="kr">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="mh">0x0</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="mh">0x0</span><span class="w"> </span><span class="mh">0x10000000</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// 256MB at 2GB</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">            </span><span class="n">no-map</span><span class="p">;</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">        </span><span class="p">};</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="p">};</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="p">};</span>
+</code></pre></div></p>
+<h3 id="42-verify-reservation">4.2 Verify Reservation<a class="headerlink" href="#42-verify-reservation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>crashkernel
+</code></pre></div>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>[    0.000000] Reserving 256MB of memory at 2048MB for crashkernel (System RAM: 2048MB)
+</code></pre></div></p>
+<p><strong>Check reserved memory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>cat<span class="w"> </span>/proc/iomem<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>Crash
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>80000000-8fffffff : Crash kernel
+</code></pre></div></p>
+<hr />
+<h2 id="5-load-crash-kernel">5. Load Crash Kernel<a class="headerlink" href="#5-load-crash-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="51-load-kernel-and-initrd">5.1 Load Kernel and Initrd<a class="headerlink" href="#51-load-kernel-and-initrd" title="Permanent link">&para;</a></h3>
+<p><strong>Prepare crash kernel:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kexec<span class="w"> </span>-p<span class="w"> </span>/boot/vmlinuz-<span class="k">$(</span>uname<span class="w"> </span>-r<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">      </span>--initrd<span class="o">=</span>/boot/initrd.img-<span class="k">$(</span>uname<span class="w"> </span>-r<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">      </span>--append<span class="o">=</span><span class="s2">&quot;root=/dev/mmcblk0p2 console=ttyS0,115200 irqpoll maxcpus=1 reset_devices&quot;</span>
+</code></pre></div></p>
+<p><strong>Options:</strong>
+- <code>-p</code>: Load panic kernel
+- <code>--append</code>: Kernel command line for crash kernel
+- <code>irqpoll</code>: Poll for interrupts (useful after crash)
+- <code>maxcpus=1</code>: Use single CPU
+- <code>reset_devices</code>: Reset devices before crash kernel boots</p>
+<p><strong>Verify loaded:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>cat<span class="w"> </span>/sys/kernel/kexec_crash_loaded
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="c1"># 1 (loaded), 0 (not loaded)</span>
+</code></pre></div></p>
+<h3 id="52-automatic-loading">5.2 Automatic Loading<a class="headerlink" href="#52-automatic-loading" title="Permanent link">&para;</a></h3>
+<p><strong>Create systemd service <code>/etc/systemd/system/kdump.service</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">[Unit]</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="na">Description</span><span class="o">=</span><span class="s">Crash recovery kernel loader</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="na">After</span><span class="o">=</span><span class="s">local-fs.target</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="k">[Service]</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="na">Type</span><span class="o">=</span><span class="s">oneshot</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="na">ExecStart</span><span class="o">=</span><span class="s">/usr/sbin/kexec -p /boot/vmlinuz-$(uname -r) </span>\
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">          </span><span class="s">--initrd=/boot/initrd.img-$(uname -r) </span>\
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">          </span><span class="s">--append=&quot;root=/dev/mmcblk0p2 console=ttyS0,115200 irqpoll maxcpus=1 reset_devices&quot;</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="na">RemainAfterExit</span><span class="o">=</span><span class="s">yes</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="k">[Install]</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="na">WantedBy</span><span class="o">=</span><span class="s">multi-user.target</span>
+</code></pre></div></p>
+<p><strong>Enable:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>kdump
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>systemctl<span class="w"> </span>start<span class="w"> </span>kdump
+</code></pre></div></p>
+<hr />
+<h2 id="6-trigger-test-crash">6. Trigger Test Crash<a class="headerlink" href="#6-trigger-test-crash" title="Permanent link">&para;</a></h2>
+<h3 id="61-trigger-kernel-panic">6.1 Trigger Kernel Panic<a class="headerlink" href="#61-trigger-kernel-panic" title="Permanent link">&para;</a></h3>
+<p><strong>Method 1: SysRq trigger</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/proc/sys/kernel/sysrq
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nb">echo</span><span class="w"> </span>c<span class="w"> </span>&gt;<span class="w"> </span>/proc/sysrq-trigger
+</code></pre></div></p>
+<p><strong>Method 2: Kernel module</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/module.h&gt;</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/kernel.h&gt;</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">__init</span><span class="w"> </span><span class="nf">panic_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="n">panic</span><span class="p">(</span><span class="s">&quot;Test panic for kdump!&quot;</span><span class="p">);</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="p">}</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="n">module_init</span><span class="p">(</span><span class="n">panic_init</span><span class="p">);</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL&quot;</span><span class="p">);</span>
+</code></pre></div></p>
+<p><strong>Load:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>insmod<span class="w"> </span>panic_module.ko
+</code></pre></div></p>
+<h3 id="62-observe-crash-kernel-boot">6.2 Observe Crash Kernel Boot<a class="headerlink" href="#62-observe-crash-kernel-boot" title="Permanent link">&para;</a></h3>
+<p><strong>Serial console output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>Kernel panic - not syncing: Test panic for kdump!
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>CPU: 0 PID: 567 Comm: insmod Not tainted 5.10.0 #1
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>Hardware name: BeaglePlay (DT)
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>Call trace:
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a> dump_backtrace+0x0/0x1a0
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a> show_stack+0x18/0x70
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a> dump_stack+0xb0/0xfc
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a> panic+0x140/0x320
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a> panic_init+0x14/0x1000 [panic_module]
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>...
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>---[ end Kernel panic - not syncing: Test panic for kdump! ]---
+</code></pre></div></p>
+<p><strong>Then:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>kexec: Starting new kernel
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>Linux version 5.10.0 (crash kernel)
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>...
+</code></pre></div></p>
+<p><strong>Crash kernel boots and saves dump.</strong></p>
+<hr />
+<h2 id="7-save-crash-dump">7. Save Crash Dump<a class="headerlink" href="#7-save-crash-dump" title="Permanent link">&para;</a></h2>
+<h3 id="71-configure-dump-location">7.1 Configure Dump Location<a class="headerlink" href="#71-configure-dump-location" title="Permanent link">&para;</a></h3>
+<p><strong>In crash kernel's initramfs, create script:</strong></p>
+<p><strong><code>/etc/kdump.conf</code> or init script:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="ch">#!/bin/sh</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="c1"># Save vmcore to USB drive</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>mount<span class="w"> </span>/dev/sda1<span class="w"> </span>/mnt
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>makedumpfile<span class="w"> </span>-c<span class="w"> </span>-d<span class="w"> </span><span class="m">31</span><span class="w"> </span>/proc/vmcore<span class="w"> </span>/mnt/vmcore-<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>umount<span class="w"> </span>/mnt
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>reboot<span class="w"> </span>-f
+</code></pre></div></p>
+<p><strong>makedumpfile options:</strong>
+- <code>-c</code>: Compress dump
+- <code>-d 31</code>: Filter pages (exclude free pages, cache, etc.)
+- Reduces dump size significantly (e.g., 2GB → 200MB)</p>
+<h3 id="72-dump-filtering">7.2 Dump Filtering<a class="headerlink" href="#72-dump-filtering" title="Permanent link">&para;</a></h3>
+<p><strong>Filter levels (<code>-d</code> flag):</strong>
+- <code>1</code>: Exclude zero pages
+- <code>2</code>: Exclude cache pages
+- <code>4</code>: Exclude user pages
+- <code>8</code>: Exclude free pages
+- <code>31</code>: Exclude all above (minimal dump)</p>
+<p><strong>Full dump (no filtering):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>cp<span class="w"> </span>/proc/vmcore<span class="w"> </span>/mnt/vmcore
+</code></pre></div></p>
+<hr />
+<h2 id="8-analyze-crash-dump">8. Analyze Crash Dump<a class="headerlink" href="#8-analyze-crash-dump" title="Permanent link">&para;</a></h2>
+<h3 id="81-transfer-dump-to-workstation">8.1 Transfer Dump to Workstation<a class="headerlink" href="#81-transfer-dump-to-workstation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>scp<span class="w"> </span>beagleplay:/mnt/vmcore-20250115-123456<span class="w"> </span>.
+</code></pre></div>
+<h3 id="82-launch-crash-utility">8.2 Launch crash Utility<a class="headerlink" href="#82-launch-crash-utility" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>crash<span class="w"> </span>vmlinux<span class="w"> </span>vmcore-20250115-123456
+</code></pre></div>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>crash 7.3.0
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>Copyright (C) 2002-2021  Red Hat, Inc.
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>      KERNEL: vmlinux
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>    DUMPFILE: vmcore-20250115-123456
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>        CPUS: 4
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>        DATE: Wed Jan 15 12:34:56 2025
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>      UPTIME: 00:12:34
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>LOAD AVERAGE: 0.15, 0.08, 0.03
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a>       TASKS: 95
+<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a>    NODENAME: beagleplay
+<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a>     RELEASE: 5.10.0
+<a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a>     VERSION: #1 SMP PREEMPT Wed Jan 15 10:00:00 UTC 2025
+<a id="__codelineno-30-14" name="__codelineno-30-14" href="#__codelineno-30-14"></a>     MACHINE: aarch64  (2000 Mhz)
+<a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a>      MEMORY: 2 GB
+<a id="__codelineno-30-16" name="__codelineno-30-16" href="#__codelineno-30-16"></a>       PANIC: &quot;Test panic for kdump!&quot;
+<a id="__codelineno-30-17" name="__codelineno-30-17" href="#__codelineno-30-17"></a>
+<a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a>crash&gt;
+</code></pre></div></p>
+<h3 id="83-examine-crash-state">8.3 Examine Crash State<a class="headerlink" href="#83-examine-crash-state" title="Permanent link">&para;</a></h3>
+<p><strong>Show panic message:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>crash&gt; log | tail -50
+</code></pre></div></p>
+<p><strong>Backtrace of crashing task:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>crash&gt; bt
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>PID: 567    TASK: ffff0000c1234000  CPU: 0   COMMAND: &quot;insmod&quot;
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a> #0 [ffff800012a3bd00] crash_kexec at ffff800010123456
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a> #1 [ffff800012a3bd20] __crash_kexec at ffff800010234567
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a> #2 [ffff800012a3bd40] panic at ffff800010345678
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a> #3 [ffff800012a3bd80] panic_init at ffff800011456789 [panic_module]
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a> #4 [ffff800012a3bda0] do_one_initcall at ffff800010567890
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a> #5 [ffff800012a3bdc0] do_init_module at ffff800010678901
+</code></pre></div></p>
+<p><strong>Show process list:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>crash&gt; ps
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>   PID    PPID  CPU       TASK        ST  %MEM     VSZ    RSS  COMM
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>&gt;    0      0   0  ffff800012345000  RU   0.0       0      0  [swapper/0]
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>     1      0   1  ffff0000c0001000  IN   0.1    5324   3208  systemd
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>   567      1   0  ffff0000c1234000  PA   0.2   45632  12048  insmod
+</code></pre></div></p>
+<p><strong><code>&gt;</code> marks crashing task.</strong></p>
+<h3 id="84-examine-variables">8.4 Examine Variables<a class="headerlink" href="#84-examine-variables" title="Permanent link">&para;</a></h3>
+<p><strong>Show global variables:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>crash&gt; p jiffies
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>jiffies = $1 = 750000
+</code></pre></div></p>
+<p><strong>Show struct members:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>crash&gt; struct task_struct.comm ffff0000c1234000
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>  comm = &quot;insmod&quot;
+</code></pre></div></p>
+<p><strong>Examine memory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>crash&gt; rd 0xffff800012a3bd00 20
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>ffff800012a3bd00:  ffff800010123456 ffff800012a3bd20   V.......  ......
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>ffff800012a3bd10:  0000000000000000 ffff0000c1234000   ........@.#.....
+</code></pre></div></p>
+<h3 id="85-disassemble-code">8.5 Disassemble Code<a class="headerlink" href="#85-disassemble-code" title="Permanent link">&para;</a></h3>
+<p><strong>At crash location:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>crash&gt; dis panic_init
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>0xffff800011456789 &lt;panic_init&gt;:        stp     x29, x30, [sp,#-16]!
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>0xffff80001145678d &lt;panic_init+4&gt;:      mov     x29, sp
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>0xffff800011456791 &lt;panic_init+8&gt;:      adrp    x0, 0xffff800011457000
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>0xffff800011456795 &lt;panic_init+12&gt;:     add     x0, x0, #0x123
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>0xffff800011456799 &lt;panic_init+16&gt;:     bl      0xffff800010345678 &lt;panic&gt;
+</code></pre></div></p>
+<hr />
+<h2 id="9-advanced-crash-commands">9. Advanced crash Commands<a class="headerlink" href="#9-advanced-crash-commands" title="Permanent link">&para;</a></h2>
+<h3 id="91-analyze-locks">9.1 Analyze Locks<a class="headerlink" href="#91-analyze-locks" title="Permanent link">&para;</a></h3>
+<p><strong>Show held locks:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>crash&gt; lock_stat
+</code></pre></div></p>
+<p><strong>Blocked tasks:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>crash&gt; ps -m
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a># Shows tasks in uninterruptible sleep (blocked on locks/I/O)
+</code></pre></div></p>
+<h3 id="92-network-state">9.2 Network State<a class="headerlink" href="#92-network-state" title="Permanent link">&para;</a></h3>
+<p><strong>Show network connections:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>crash&gt; net
+</code></pre></div></p>
+<p><strong>Socket buffers:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>crash&gt; net -s
+</code></pre></div></p>
+<h3 id="93-file-system-state">9.3 File System State<a class="headerlink" href="#93-file-system-state" title="Permanent link">&para;</a></h3>
+<p><strong>Open files:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>crash&gt; files 567
+</code></pre></div></p>
+<p><strong>Mounted filesystems:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>crash&gt; mount
+</code></pre></div></p>
+<hr />
+<h2 id="10-automate-crash-analysis">10. Automate Crash Analysis<a class="headerlink" href="#10-automate-crash-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="101-crash-script">10.1 crash Script<a class="headerlink" href="#101-crash-script" title="Permanent link">&para;</a></h3>
+<p><strong>Create <code>analyze.crash</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>log | tail -100
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>bt
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>ps
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>files
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>sys
+<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>quit
+</code></pre></div></p>
+<p><strong>Run:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>crash<span class="w"> </span>-i<span class="w"> </span>analyze.crash<span class="w"> </span>vmlinux<span class="w"> </span>vmcore<span class="w"> </span>&gt;<span class="w"> </span>crash-report.txt
+</code></pre></div></p>
+<h3 id="102-python-script-for-multiple-dumps">10.2 Python Script for Multiple Dumps<a class="headerlink" href="#102-python-script-for-multiple-dumps" title="Permanent link">&para;</a></h3>
+<p><strong>Create <code>batch_analyze.sh</code>:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="ch">#!/bin/bash</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="k">for</span><span class="w"> </span>vmcore<span class="w"> </span><span class="k">in</span><span class="w"> </span>vmcore-*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Analyzing </span><span class="nv">$vmcore</span><span class="s2"> ===&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>analysis.log
+<a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a><span class="w">    </span>crash<span class="w"> </span>-i<span class="w"> </span>analyze.crash<span class="w"> </span>vmlinux<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$vmcore</span><span class="s2">&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>analysis.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a><span class="k">done</span>
+</code></pre></div></p>
+<hr />
+<h2 id="11-production-deployment">11. Production Deployment<a class="headerlink" href="#11-production-deployment" title="Permanent link">&para;</a></h2>
+<h3 id="111-automated-dump-collection">11.1 Automated Dump Collection<a class="headerlink" href="#111-automated-dump-collection" title="Permanent link">&para;</a></h3>
+<p><strong>Create <code>/etc/init.d/kdump-save</code> (initramfs):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="ch">#!/bin/sh</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="nv">DUMP_PATH</span><span class="o">=</span><span class="s2">&quot;/var/crash&quot;</span>
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="nv">DUMP_FILE</span><span class="o">=</span><span class="s2">&quot;vmcore-</span><span class="k">$(</span>cat<span class="w"> </span>/proc/sys/kernel/hostname<span class="k">)</span><span class="s2">-</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span><span class="s2">&quot;</span>
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a><span class="c1"># Mount persistent storage</span>
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>mount<span class="w"> </span>/dev/sda1<span class="w"> </span>/mnt<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Failed to mount dump storage&quot;</span>
+<a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a><span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a><span class="o">}</span>
+<a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a>
+<a id="__codelineno-47-12" name="__codelineno-47-12" href="#__codelineno-47-12"></a><span class="c1"># Save dump</span>
+<a id="__codelineno-47-13" name="__codelineno-47-13" href="#__codelineno-47-13"></a>makedumpfile<span class="w"> </span>-c<span class="w"> </span>-d<span class="w"> </span><span class="m">31</span><span class="w"> </span>/proc/vmcore<span class="w"> </span><span class="s2">&quot;/mnt/</span><span class="nv">$DUMP_FILE</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-47-14" name="__codelineno-47-14" href="#__codelineno-47-14"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;makedumpfile failed&quot;</span>
+<a id="__codelineno-47-15" name="__codelineno-47-15" href="#__codelineno-47-15"></a><span class="w">    </span>umount<span class="w"> </span>/mnt
+<a id="__codelineno-47-16" name="__codelineno-47-16" href="#__codelineno-47-16"></a><span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-47-17" name="__codelineno-47-17" href="#__codelineno-47-17"></a><span class="o">}</span>
+<a id="__codelineno-47-18" name="__codelineno-47-18" href="#__codelineno-47-18"></a>
+<a id="__codelineno-47-19" name="__codelineno-47-19" href="#__codelineno-47-19"></a><span class="c1"># Save kernel log</span>
+<a id="__codelineno-47-20" name="__codelineno-47-20" href="#__codelineno-47-20"></a>dmesg<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;/mnt/</span><span class="nv">$DUMP_FILE</span><span class="s2">.log&quot;</span>
+<a id="__codelineno-47-21" name="__codelineno-47-21" href="#__codelineno-47-21"></a>
+<a id="__codelineno-47-22" name="__codelineno-47-22" href="#__codelineno-47-22"></a>umount<span class="w"> </span>/mnt
+<a id="__codelineno-47-23" name="__codelineno-47-23" href="#__codelineno-47-23"></a>reboot<span class="w"> </span>-f
+</code></pre></div></p>
+<h3 id="112-remote-dump-upload">11.2 Remote Dump Upload<a class="headerlink" href="#112-remote-dump-upload" title="Permanent link">&para;</a></h3>
+<p><strong>Upload to server:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="c1"># In crash kernel</span>
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>nc<span class="w"> </span>dump-server.local<span class="w"> </span><span class="m">9999</span><span class="w"> </span>&lt;<span class="w"> </span>/proc/vmcore
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="c1"># On server</span>
+<a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>nc<span class="w"> </span>-l<span class="w"> </span><span class="m">9999</span><span class="w"> </span>&gt;<span class="w"> </span>vmcore-<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span>
+</code></pre></div></p>
+<hr />
+<h2 id="12-troubleshooting">12. Troubleshooting<a class="headerlink" href="#12-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="121-crash-kernel-fails-to-load">12.1 Crash Kernel Fails to Load<a class="headerlink" href="#121-crash-kernel-fails-to-load" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong> "Cannot allocate memory"</p>
+<p><strong>Solution:</strong>
+- Increase <code>crashkernel=</code> reservation
+- Check physical memory availability</p>
+<p><strong>Error:</strong> "Invalid argument"</p>
+<p><strong>Solution:</strong>
+- Verify kernel has <code>CONFIG_KEXEC=y</code>
+- Check kernel/initrd paths</p>
+<h3 id="122-no-vmcore-generated">12.2 No vmcore Generated<a class="headerlink" href="#122-no-vmcore-generated" title="Permanent link">&para;</a></h3>
+<p><strong>Check:</strong>
+1. <code>/proc/vmcore</code> exists in crash kernel?
+2. Crash kernel has write access to dump location?
+3. Sufficient disk space?</p>
+<p><strong>Debug crash kernel:</strong>
+- Add <code>debug</code> to crash kernel command line
+- View serial console output</p>
+<hr />
+<h2 id="13-performance-considerations">13. Performance Considerations<a class="headerlink" href="#13-performance-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="131-memory-overhead">13.1 Memory Overhead<a class="headerlink" href="#131-memory-overhead" title="Permanent link">&para;</a></h3>
+<p><strong>BeaglePlay with 2GB RAM:</strong>
+- <code>crashkernel=256M</code>: 12.5% overhead
+- Consider smaller dump (128M) if memory-constrained
+- Use <code>makedumpfile -d 31</code> to minimize required space</p>
+<h3 id="132-dump-time">13.2 Dump Time<a class="headerlink" href="#132-dump-time" title="Permanent link">&para;</a></h3>
+<p><strong>Factors:</strong>
+- Dump size (compressed: faster)
+- Storage speed (USB 2.0 vs SD card)
+- Filter level (higher = faster)</p>
+<p><strong>Typical times:</strong>
+- Full 2GB dump: 5-10 minutes
+- Filtered to 200MB: 1-2 minutes</p>
+<hr />
+<h2 id="14-key-takeaways">14. Key Takeaways<a class="headerlink" href="#14-key-takeaways" title="Permanent link">&para;</a></h2>
+<p><strong>Accomplished:</strong>
+1. ✅ Configured kdump and kexec
+2. ✅ Reserved memory for crash kernel
+3. ✅ Triggered test crashes
+4. ✅ Collected and analyzed crash dumps
+5. ✅ Used crash utility for post-mortem analysis
+6. ✅ Automated dump collection</p>
+<p><strong>Essential Commands:</strong>
+- <code>kexec -p vmlinuz</code>: Load crash kernel
+- <code>echo c &gt; /proc/sysrq-trigger</code>: Trigger test crash
+- <code>makedumpfile -c -d 31</code>: Create compressed dump
+- <code>crash vmlinux vmcore</code>: Analyze dump</p>
+<p><strong>Workflow:</strong>
+1. Configure and load crash kernel at boot
+2. When panic occurs, kexec boots crash kernel
+3. Crash kernel saves vmcore and reboots
+4. Analyze vmcore with crash utility</p>
+<hr />
+<h2 id="15-verification-checklist">15. Verification Checklist<a class="headerlink" href="#15-verification-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Can reserve memory for crash kernel</li>
+<li>[ ] Can load crash kernel with kexec</li>
+<li>[ ] Can trigger test panic</li>
+<li>[ ] Crash kernel boots and saves dump</li>
+<li>[ ] Can analyze dump with crash utility</li>
+<li>[ ] Understand crash commands (bt, ps, log)</li>
+</ul>
+<hr />
+<p><strong>End of Lab 26</strong></p>
+<p><em>The Guide rates this lab: </em><em>Mostly Harmless</em><em> ⭐⭐⭐⭐</em></p>
+<p>kdump and kexec provide the ultimate safety net for production systems. Even when a kernel panic makes the system unresponsive, kdump ensures you can collect a complete crash dump for root cause analysis, turning mysterious failures into debuggable problems.</p>
+<hr />
+<h2 id="congratulations">🎉 Congratulations! 🎉<a class="headerlink" href="#congratulations" title="Permanent link">&para;</a></h2>
+<p><strong>You have completed the entire Linux Debugging track!</strong></p>
+<p><strong>26 Labs Completed:</strong>
+- <strong>Labs 1-9</strong>: Embedded Linux Fundamentals
+- <strong>Labs 10-18</strong>: Yocto Project Development
+- <strong>Labs 19-26</strong>: Advanced Debugging and Performance Analysis</p>
+<p><strong>Skills Acquired:</strong>
+- ✅ System monitoring and resource analysis
+- ✅ Application debugging with GDB
+- ✅ System call and library tracing
+- ✅ Memory debugging with Valgrind
+- ✅ Performance profiling (perf, ftrace, flame graphs)
+- ✅ eBPF and BCC for custom tracing
+- ✅ Kernel debugging (KGDB, OOPS analysis, lockdep)
+- ✅ Crash dump analysis (kdump, crash utility)</p>
+<p><strong>You are now equipped to:</strong>
+- Debug the most challenging embedded Linux issues
+- Optimize system and application performance
+- Analyze production crashes and kernel panics
+- Build robust, high-performance embedded systems</p>
+<p><strong>Thank you for completing this comprehensive training!</strong> 🚀</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

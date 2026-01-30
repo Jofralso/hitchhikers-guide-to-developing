@@ -1,0 +1,4886 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/embedded-linux/lab07-block-filesystems/">
+      
+      
+        <link rel="prev" href="../lab06-hardware/">
+      
+      
+        <link rel="next" href="../lab08-buildroot/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 7 - Block Filesystems - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-7-block-filesystems-and-persistent-storage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 7 - Block Filesystems
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lab-duration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab Duration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storage-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Storage Architecture Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#working-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-current-nfs-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Current NFS Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-1-filesystem-support-in-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 1: Filesystem Support in Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 1: Filesystem Support in Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-kernel-for-filesystem-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Kernel for Filesystem Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-filesystem-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Filesystem Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-2-sd-card-partitioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 2: SD Card Partitioning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 2: SD Card Partitioning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identify-sd-card-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identify SD Card Device
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup-important-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup Important Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-new-partitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create New Partitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-new-partitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify New Partitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-3-data-partition-ext4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 3: Data Partition (ext4)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 3: Data Partition (ext4)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-ext4-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create ext4 Filesystem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mount-and-test-data-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mount and Test Data Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrate-upload-directory-to-data-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrate Upload Directory to Data Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-4-root-filesystem-squashfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 4: Root Filesystem (SquashFS)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 4: Root Filesystem (SquashFS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prepare-root-filesystem-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare Root Filesystem Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-startup-scripts-for-block-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modify Startup Scripts for Block Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-upload-script-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update Upload Script Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-squashfs-tools-workstation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install SquashFS Tools (Workstation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-squashfs-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create SquashFS Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-squashfs-to-sd-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Write SquashFS to SD Card
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Write SquashFS to SD Card">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-from-workstation-sd-card-reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: From Workstation (SD Card Reader)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-from-beagleplay-via-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: From BeaglePlay (via NFS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-5-tmpfs-for-volatile-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 5: Tmpfs for Volatile Storage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 5: Tmpfs for Volatile Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-tmpfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Tmpfs?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tmpfs-mount-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tmpfs Mount Points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-tmpfs-in-startup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Tmpfs in Startup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-6-boot-from-sd-card-root-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 6: Boot from SD Card Root Filesystem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 6: Boot from SD Card Root Filesystem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-u-boot-bootcmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure U-Boot Bootcmd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-u-boot-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update U-Boot Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-boot-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Boot Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Mounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-read-only-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Read-Only Root
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-write-to-data-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Write to Data Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-tmpfs-volatility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Tmpfs Volatility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-7-testing-web-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 7: Testing Web Interface
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 7: Testing Web Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify-http-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify HTTP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-upload-functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Upload Functionality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-upload-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Upload Log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-log-volatility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Log Volatility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-8-switching-boot-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 8: Switching Boot Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 8: Switching Boot Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#switch-back-to-tftp-boot-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switch Back to TFTP Boot (for Development)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switch-back-to-sd-card-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switch Back to SD Card Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#u-boot-environment-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        U-Boot Environment Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problem-kernel-panic-not-syncing-vfs-unable-to-mount-root-fs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: Kernel panic - not syncing: VFS: Unable to mount root fs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-wwwuploadfiles-mount-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: /www/upload/files mount fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-tmpfs-mount-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: Tmpfs mount fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-system-is-read-only-cant-write-anywhere" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: System is read-only, can't write anywhere
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-cannot-update-system-squashfs-is-read-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: Cannot update system (SquashFS is read-only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Challenges
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Challenges">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-implement-overlay-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Implement Overlay Filesystem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-add-swap-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Add Swap Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-implement-etc-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Implement /etc Overlay
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-partition-alignment-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Partition Alignment Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-5-read-only-root-with-persistent-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 5: Read-Only Root with Persistent Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-youve-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You've Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Reading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lab-duration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab Duration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storage-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Storage Architecture Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#working-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-current-nfs-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Current NFS Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-1-filesystem-support-in-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 1: Filesystem Support in Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 1: Filesystem Support in Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-kernel-for-filesystem-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Kernel for Filesystem Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-filesystem-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Filesystem Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-2-sd-card-partitioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 2: SD Card Partitioning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 2: SD Card Partitioning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identify-sd-card-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identify SD Card Device
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup-important-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup Important Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-new-partitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create New Partitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-new-partitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify New Partitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-3-data-partition-ext4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 3: Data Partition (ext4)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 3: Data Partition (ext4)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-ext4-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create ext4 Filesystem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mount-and-test-data-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mount and Test Data Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrate-upload-directory-to-data-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrate Upload Directory to Data Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-4-root-filesystem-squashfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 4: Root Filesystem (SquashFS)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 4: Root Filesystem (SquashFS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prepare-root-filesystem-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare Root Filesystem Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-startup-scripts-for-block-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modify Startup Scripts for Block Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-upload-script-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update Upload Script Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-squashfs-tools-workstation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install SquashFS Tools (Workstation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-squashfs-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create SquashFS Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-squashfs-to-sd-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Write SquashFS to SD Card
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Write SquashFS to SD Card">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-from-workstation-sd-card-reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: From Workstation (SD Card Reader)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-from-beagleplay-via-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: From BeaglePlay (via NFS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-5-tmpfs-for-volatile-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 5: Tmpfs for Volatile Storage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 5: Tmpfs for Volatile Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-tmpfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Tmpfs?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tmpfs-mount-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tmpfs Mount Points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-tmpfs-in-startup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Tmpfs in Startup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-6-boot-from-sd-card-root-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 6: Boot from SD Card Root Filesystem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 6: Boot from SD Card Root Filesystem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-u-boot-bootcmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure U-Boot Bootcmd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-u-boot-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update U-Boot Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-boot-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Boot Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Mounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-read-only-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Read-Only Root
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-write-to-data-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Write to Data Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-tmpfs-volatility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Tmpfs Volatility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-7-testing-web-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 7: Testing Web Interface
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 7: Testing Web Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify-http-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify HTTP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-upload-functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Upload Functionality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-upload-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Upload Log
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-log-volatility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Log Volatility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#section-8-switching-boot-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 8: Switching Boot Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Section 8: Switching Boot Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#switch-back-to-tftp-boot-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switch Back to TFTP Boot (for Development)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switch-back-to-sd-card-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switch Back to SD Card Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#u-boot-environment-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        U-Boot Environment Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problem-kernel-panic-not-syncing-vfs-unable-to-mount-root-fs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: Kernel panic - not syncing: VFS: Unable to mount root fs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-wwwuploadfiles-mount-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: /www/upload/files mount fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-tmpfs-mount-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: Tmpfs mount fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-system-is-read-only-cant-write-anywhere" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: System is read-only, can't write anywhere
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-cannot-update-system-squashfs-is-read-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem: Cannot update system (SquashFS is read-only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Challenges
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Challenges">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-implement-overlay-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Implement Overlay Filesystem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-add-swap-partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Add Swap Partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-implement-etc-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Implement /etc Overlay
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-partition-alignment-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Partition Alignment Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-5-read-only-root-with-persistent-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 5: Read-Only Root with Persistent Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-youve-learned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You've Learned
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Reading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-7-block-filesystems-and-persistent-storage">Lab 7: Block Filesystems and Persistent Storage<a class="headerlink" href="#lab-7-block-filesystems-and-persistent-storage" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about root filesystems:</p>
+<p><em>"A root filesystem is where all your files live. Think of it as the contents of your towel bag - essential utilities, helpful tools, and the occasional item whose purpose you've completely forgotten but you're certain you'll need eventually."</em></p>
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>Transition from network-based root filesystem to persistent block storage:</p>
+<ul>
+<li>Create and manage filesystem partitions on SD card</li>
+<li>Build ext4 filesystems for data storage</li>
+<li>Create read-only SquashFS root filesystem</li>
+<li>Use tmpfs for volatile temporary storage</li>
+<li>Configure persistent mounts with fstab</li>
+<li>Boot completely from SD card (kernel + DTB + rootfs)</li>
+<li>Implement proper separation: system vs. user data</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Completed Lab 6 (Hardware Devices)</li>
+<li>Working NFS root filesystem from Lab 5</li>
+<li>SD card (minimum 8GB) in BeaglePlay</li>
+<li>Understanding of filesystem concepts</li>
+<li>Familiarity with partition tables</li>
+</ul>
+<h2 id="lab-duration">Lab Duration<a class="headerlink" href="#lab-duration" title="Permanent link">&para;</a></h2>
+<p>Approximately 3-4 hours</p>
+<h2 id="storage-architecture-overview">Storage Architecture Overview<a class="headerlink" href="#storage-architecture-overview" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                        SD Card (mmcblk0)                        │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├────────────────┬──────────────┬────────────────┬────────────────┤
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│ Partition 1    │ Partition 2  │ Partition 3    │ Partition 4    │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│ Boot (FAT32)   │ Env (ext4)   │ RootFS (squash)│ Data (ext4)    │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│ ~100MB         │ ~50MB        │ ~100MB         │ Rest of space  │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│                │              │                │                │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│ tiboot3.bin    │ uEnv.txt     │ BusyBox        │ /www/upload/   │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│ tispl.bin      │ Image.gz     │ Libraries      │ files/         │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│ u-boot.img     │ *.dtb        │ /bin, /sbin    │ User data      │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│                │              │ /etc (config)  │                │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>└────────────────┴──────────────┴────────────────┴────────────────┘
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>System Boot Flow:
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>1. ROM → tiboot3.bin (partition 1, FAT32)
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>2. R5 SPL → tispl.bin (partition 1, FAT32)
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>3. A53 U-Boot → u-boot.img (partition 1, FAT32)
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>4. U-Boot loads: Image.gz + DTB (partition 2, ext4)
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>5. Linux mounts: root=squashfs (partition 3, read-only)
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>6. System mounts: /www/upload/files (partition 4, read-write)
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>7. tmpfs mounted at: /var/log, /tmp (volatile RAM)
+</code></pre></div>
+<h2 id="environment-setup">Environment Setup<a class="headerlink" href="#environment-setup" title="Permanent link">&para;</a></h2>
+<h3 id="working-directory">Working Directory<a class="headerlink" href="#working-directory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Create block filesystem lab directory</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>blockfs
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nb">cd</span><span class="w"> </span>blockfs
+</code></pre></div>
+<h3 id="verify-current-nfs-setup">Verify Current NFS Setup<a class="headerlink" href="#verify-current-nfs-setup" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># On BeaglePlay, verify current NFS mount</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nfs
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Expected:</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># 192.168.0.1:/home/&lt;user&gt;/.../tinysystem/nfsroot on / type nfs ...</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Note current system size</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>du<span class="w"> </span>-sh<span class="w"> </span>/
+</code></pre></div>
+<h2 id="section-1-filesystem-support-in-kernel">Section 1: Filesystem Support in Kernel<a class="headerlink" href="#section-1-filesystem-support-in-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="configure-kernel-for-filesystem-types">Configure Kernel for Filesystem Types<a class="headerlink" href="#configure-kernel-for-filesystem-types" title="Permanent link">&para;</a></h3>
+<p>We need support for ext4, SquashFS, and tmpfs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/kernel/linux
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>make<span class="w"> </span><span class="nv">ARCH</span><span class="o">=</span>arm64<span class="w"> </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span>aarch64-beagleplay-linux-musl-<span class="w"> </span>menuconfig
+</code></pre></div>
+<p><strong>Enable the following:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>File systems ---&gt;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    &lt;*&gt; Second extended fs support            (CONFIG_EXT2_FS)
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    &lt;*&gt; The Extended 4 (ext4) filesystem      (CONFIG_EXT4_FS)
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        [*] Ext4 POSIX Access Control Lists
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        [*] Ext4 Security Labels
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    [*] Miscellaneous filesystems ---&gt;
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        &lt;*&gt; SquashFS 4.0 - Squashed file system support  (CONFIG_SQUASHFS)
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            [*] Squashfs XATTR support
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>            [*] Include support for ZLIB compressed file systems
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>            [*] Include support for LZ4 compressed file systems
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>            [*] Include support for LZO compressed file systems
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>            [*] Include support for XZ compressed file systems
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>            [*] Include support for ZSTD compressed file systems
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    Pseudo filesystems ---&gt;
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>        [*] Tmpfs virtual memory file system support (CONFIG_TMPFS)
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        [*] Tmpfs POSIX Access Control Lists
+</code></pre></div>
+<p><strong>Compile and Deploy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Build kernel</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>make<span class="w"> </span><span class="nv">ARCH</span><span class="o">=</span>arm64<span class="w"> </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span>aarch64-beagleplay-linux-musl-<span class="w"> </span>Image.gz<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Copy to TFTP</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>cp<span class="w"> </span>arch/arm64/boot/Image.gz<span class="w"> </span>/srv/tftp/
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Reboot BeaglePlay</span>
+</code></pre></div>
+<h3 id="verify-filesystem-support">Verify Filesystem Support<a class="headerlink" href="#verify-filesystem-support" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># On BeaglePlay (after reboot)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>cat<span class="w"> </span>/proc/filesystems
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Expected output (partial):</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1"># nodev   sysfs</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># nodev   tmpfs</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># nodev   devtmpfs</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1">#         ext4</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="c1">#         squashfs</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># nodev   nfs</span>
+</code></pre></div>
+<p><strong>Verification Checklist:</strong></p>
+<ul>
+<li>[ ] ext4 filesystem support enabled</li>
+<li>[ ] SquashFS support with compression enabled</li>
+<li>[ ] tmpfs support enabled</li>
+<li>[ ] Kernel compiled and deployed</li>
+<li>[ ] Filesystem types visible in <code>/proc/filesystems</code></li>
+</ul>
+<h2 id="section-2-sd-card-partitioning">Section 2: SD Card Partitioning<a class="headerlink" href="#section-2-sd-card-partitioning" title="Permanent link">&para;</a></h2>
+<h3 id="identify-sd-card-device">Identify SD Card Device<a class="headerlink" href="#identify-sd-card-device" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># On BeaglePlay</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>cat<span class="w"> </span>/proc/partitions
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Expected output:</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># major minor  #blocks  name</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">#  179        0    7634944 mmcblk0</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1">#  179        1     131072 mmcblk0p1    # Boot partition (existing)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1">#  179        2      32768 mmcblk0p2    # Env partition (existing)</span>
+</code></pre></div>
+<p><strong>Important (like knowing where your towel is):</strong> 
+- <code>mmcblk0</code> is the SD card device
+- Existing partitions 1 and 2 contain bootloader and environment
+- <strong>DO NOT DELETE OR MODIFY PARTITIONS 1 AND 2!</strong></p>
+<h3 id="backup-important-data">Backup Important Data<a class="headerlink" href="#backup-important-data" title="Permanent link">&para;</a></h3>
+<p>Before repartitioning, backup the web upload files (if any):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># On workstation (from NFS root)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/tinysystem/nfsroot
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>tar<span class="w"> </span>czf<span class="w"> </span>/tmp/www-backup.tar.gz<span class="w"> </span>www/upload/files/
+</code></pre></div>
+<h3 id="create-new-partitions">Create New Partitions<a class="headerlink" href="#create-new-partitions" title="Permanent link">&para;</a></h3>
+<p>We'll add two new partitions:
+- Partition 3: 100MB for SquashFS root filesystem
+- Partition 4: Remaining space for data (ext4)</p>
+<p><strong>On BeaglePlay:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># CAUTION: This modifies the partition table!</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>fdisk<span class="w"> </span>/dev/mmcblk0
+</code></pre></div>
+<p><strong>fdisk interactive commands:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Command (m for help): p    # Print current partition table
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a># You should see partitions 1 and 2
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a># Note the end sector of partition 2
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>Command (m for help): n    # New partition
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>Partition type: p          # Primary
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>Partition number: 3        # Partition 3
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>First sector: &lt;press Enter to accept default&gt;
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>Last sector: +100M         # 100 megabytes for root filesystem
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>Command (m for help): n    # New partition for data
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>Partition type: p          # Primary
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>Partition number: 4        # Partition 4  
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>First sector: &lt;press Enter&gt;
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>Last sector: &lt;press Enter&gt; # Use remaining space
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>Command (m for help): p    # Print to verify
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a># You should now see 4 partitions:
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a># mmcblk0p1 (boot, FAT32)
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a># mmcblk0p2 (env, ext4)
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a># mmcblk0p3 (rootfs, will be SquashFS)
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a># mmcblk0p4 (data, will be ext4)
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>Command (m for help): w    # Write changes and exit
+</code></pre></div>
+<h3 id="verify-new-partitions">Verify New Partitions<a class="headerlink" href="#verify-new-partitions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Re-read partition table</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>partprobe<span class="w"> </span>/dev/mmcblk0
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Or reboot if partprobe not available</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>reboot
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># After reboot, verify</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>cat<span class="w"> </span>/proc/partitions
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="c1"># Expected:</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="c1">#  179        0    7634944 mmcblk0</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="c1">#  179        1     131072 mmcblk0p1</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="c1">#  179        2      32768 mmcblk0p2</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="c1">#  179        3     102400 mmcblk0p3    # New: ~100MB</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="c1">#  179        4    7398400 mmcblk0p4    # New: rest of card</span>
+</code></pre></div>
+<p><strong>Verification Checklist:</strong></p>
+<ul>
+<li>[ ] Partition table backed up (optional but recommended)</li>
+<li>[ ] New partition 3 created (100MB)</li>
+<li>[ ] New partition 4 created (remaining space)</li>
+<li>[ ] Partition table written successfully</li>
+<li>[ ] New partitions visible in <code>/proc/partitions</code></li>
+</ul>
+<h2 id="section-3-data-partition-ext4">Section 3: Data Partition (ext4)<a class="headerlink" href="#section-3-data-partition-ext4" title="Permanent link">&para;</a></h2>
+<h3 id="create-ext4-filesystem">Create ext4 Filesystem<a class="headerlink" href="#create-ext4-filesystem" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># On BeaglePlay</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="c1"># Create ext4 filesystem on partition 4</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>mkfs.ext4<span class="w"> </span>-L<span class="w"> </span>data<span class="w"> </span>/dev/mmcblk0p4
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="c1"># Flags explanation:</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1"># -L data: Set volume label to &quot;data&quot;</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># -E nodiscard: Skip bad block discarding (faster, optional)</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="c1"># Expected output:</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="c1"># Creating filesystem with ... 4k blocks and ... inodes</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="c1"># ...</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="c1"># Writing superblocks and filesystem accounting information: done</span>
+</code></pre></div>
+<h3 id="mount-and-test-data-partition">Mount and Test Data Partition<a class="headerlink" href="#mount-and-test-data-partition" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Create mount point</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/mnt/data
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Mount partition</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>mount<span class="w"> </span>/dev/mmcblk0p4<span class="w"> </span>/mnt/data
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># Verify mount</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>mmcblk0p4
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="c1"># /dev/mmcblk0p4 on /mnt/data type ext4 (rw,relatime)</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="c1"># Test write</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Test file on data partition&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/mnt/data/test.txt
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>cat<span class="w"> </span>/mnt/data/test.txt
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="c1"># Check filesystem info</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>df<span class="w"> </span>-h<span class="w"> </span>/mnt/data
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="c1"># Should show available space</span>
+</code></pre></div>
+<h3 id="migrate-upload-directory-to-data-partition">Migrate Upload Directory to Data Partition<a class="headerlink" href="#migrate-upload-directory-to-data-partition" title="Permanent link">&para;</a></h3>
+<p>Currently, web uploads are stored in <code>/www/upload/files</code> in the NFS root. Let's move this to persistent storage.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Create directory structure on data partition</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/mnt/data/www/upload/files
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Restore backup if you created one earlier</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="c1"># (or manually copy any existing files from NFS)</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># Unmount for now (we&#39;ll set up automatic mounting later)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>umount<span class="w"> </span>/mnt/data
+</code></pre></div>
+<p><strong>Verification Checklist:</strong></p>
+<ul>
+<li>[ ] ext4 filesystem created on <code>/dev/mmcblk0p4</code></li>
+<li>[ ] Filesystem labeled as "data"</li>
+<li>[ ] Successfully mounted and tested write access</li>
+<li>[ ] Directory structure created for web uploads</li>
+</ul>
+<h2 id="section-4-root-filesystem-squashfs">Section 4: Root Filesystem (SquashFS)<a class="headerlink" href="#section-4-root-filesystem-squashfs" title="Permanent link">&para;</a></h2>
+<h3 id="prepare-root-filesystem-directory">Prepare Root Filesystem Directory<a class="headerlink" href="#prepare-root-filesystem-directory" title="Permanent link">&para;</a></h3>
+<p>We'll use the NFS root from Lab 5 as the base.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># On workstation</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/blockfs
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># Copy NFS root to blockfs directory</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>cp<span class="w"> </span>-a<span class="w"> </span>../tinysystem/nfsroot<span class="w"> </span>./rootfs
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># Important: Create init symlink</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="c1"># SquashFS kernel boot requires /init</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nb">cd</span><span class="w"> </span>rootfs
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>ln<span class="w"> </span>-s<span class="w"> </span>sbin/init<span class="w"> </span>init
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="c1"># Verify</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>ls<span class="w"> </span>-l<span class="w"> </span>init
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="c1"># lrwxrwxrwx 1 user user 9 ... init -&gt; sbin/init</span>
+</code></pre></div>
+<h3 id="modify-startup-scripts-for-block-storage">Modify Startup Scripts for Block Storage<a class="headerlink" href="#modify-startup-scripts-for-block-storage" title="Permanent link">&para;</a></h3>
+<p>The startup script needs to mount the data partition automatically.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Edit rcS</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/blockfs/rootfs/etc/init.d
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>vi<span class="w"> </span>rcS
+</code></pre></div>
+<p><strong>Modify rcS to add data partition mount:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="ch">#!/bin/sh</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1"># Mount essential filesystems</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>mount<span class="w"> </span>-t<span class="w"> </span>proc<span class="w"> </span>proc<span class="w"> </span>/proc
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>mount<span class="w"> </span>-t<span class="w"> </span>sysfs<span class="w"> </span>sysfs<span class="w"> </span>/sys
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="c1"># Mount data partition for web uploads</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/www/upload/files
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>mount<span class="w"> </span>-t<span class="w"> </span>ext4<span class="w"> </span>/dev/mmcblk0p4<span class="w"> </span>/www/upload/files
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="c1"># Mount tmpfs for temporary files</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>mount<span class="w"> </span>-t<span class="w"> </span>tmpfs<span class="w"> </span>tmpfs<span class="w"> </span>/tmp
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>mount<span class="w"> </span>-t<span class="w"> </span>tmpfs<span class="w"> </span>tmpfs<span class="w"> </span>/var
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="c1"># Create necessary directories in tmpfs</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/log
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/run
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="c1"># Load kernel modules</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>modprobe<span class="w"> </span>snd-usb-audio
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>modprobe<span class="w"> </span>nunchuk
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="c1"># Network configuration</span>
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>ip<span class="w"> </span>addr<span class="w"> </span>add<span class="w"> </span><span class="m">192</span>.168.0.100/24<span class="w"> </span>dev<span class="w"> </span>eth0
+<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>eth0<span class="w"> </span>up
+<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>
+<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="c1"># Start web server</span>
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>/usr/sbin/httpd<span class="w"> </span>-h<span class="w"> </span>/www/
+<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>
+<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Starting system...&quot;</span>
+</code></pre></div>
+<h3 id="update-upload-script-configuration">Update Upload Script Configuration<a class="headerlink" href="#update-upload-script-configuration" title="Permanent link">&para;</a></h3>
+<p>The upload script needs to log to tmpfs, not the data partition.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/blockfs/rootfs/www/cgi-bin
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>vi<span class="w"> </span>upload.cfg
+</code></pre></div>
+<p><strong>Update log file path:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="ch">#!/bin/sh</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="c1"># Upload configuration</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nv">UPLOAD_DIR</span><span class="o">=</span>/www/upload/files
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="nv">LOG_FILE</span><span class="o">=</span>/var/log/upload.log<span class="w">    </span><span class="c1"># Changed from /www/upload/files/upload.log</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nv">MAX_SIZE</span><span class="o">=</span><span class="m">10485760</span><span class="w">  </span><span class="c1"># 10MB</span>
+</code></pre></div>
+<h3 id="install-squashfs-tools-workstation">Install SquashFS Tools (Workstation)<a class="headerlink" href="#install-squashfs-tools-workstation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># On workstation</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>squashfs-tools
+</code></pre></div>
+<h3 id="create-squashfs-image">Create SquashFS Image<a class="headerlink" href="#create-squashfs-image" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/blockfs
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="c1"># Create compressed SquashFS image</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>mksquashfs<span class="w"> </span>rootfs<span class="w"> </span>rootfs.sqfs<span class="w"> </span>-comp<span class="w"> </span>xz<span class="w"> </span>-Xbcj<span class="w"> </span>arm
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="c1"># Flags explanation:</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="c1"># -comp xz: Use XZ compression (best compression ratio)</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="c1"># -Xbcj arm: ARM-specific binary optimization filter</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="c1"># Expected output:</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="c1"># Creating 4.0 filesystem on rootfs.sqfs, block size 131072.</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="c1"># ...</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="c1"># Exportable Squashfs 4.0 filesystem, xz compressed, data block size 131072</span>
+</code></pre></div>
+<p><strong>Check Image Size:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span>rootfs.sqfs
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="c1"># Should be significantly smaller than original rootfs directory</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>du<span class="w"> </span>-sh<span class="w"> </span>rootfs
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>du<span class="w"> </span>-sh<span class="w"> </span>rootfs.sqfs
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="c1"># Example:</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="c1"># 50M   rootfs/</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="c1"># 12M   rootfs.sqfs</span>
+</code></pre></div>
+<h3 id="write-squashfs-to-sd-card">Write SquashFS to SD Card<a class="headerlink" href="#write-squashfs-to-sd-card" title="Permanent link">&para;</a></h3>
+<p>We'll use <code>dd</code> to write the image directly to partition 3.</p>
+<p><strong>Important (like knowing where your towel is):</strong> This operation must be done from the workstation or from BeaglePlay before mounting partition 3.</p>
+<h4 id="option-a-from-workstation-sd-card-reader">Option A: From Workstation (SD Card Reader)<a class="headerlink" href="#option-a-from-workstation-sd-card-reader" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Remove SD card from BeaglePlay and insert into workstation SD reader</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="c1"># Identify device (e.g., /dev/sdb)</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>lsblk
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="c1"># Write SquashFS image to partition 3</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>sudo<span class="w"> </span>dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>rootfs.sqfs<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/sdb3<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>1M<span class="w"> </span><span class="nv">status</span><span class="o">=</span>progress
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="c1"># Sync to ensure all data is written</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>sync
+</code></pre></div>
+<h4 id="option-b-from-beagleplay-via-nfs">Option B: From BeaglePlay (via NFS)<a class="headerlink" href="#option-b-from-beagleplay-via-nfs" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># On workstation: copy image to NFS root</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>cp<span class="w"> </span>rootfs.sqfs<span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/tinysystem/nfsroot/tmp/
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="c1"># On BeaglePlay:</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/tmp/rootfs.sqfs<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/mmcblk0p3<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>1M
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="c1"># Sync</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>sync
+</code></pre></div>
+<p><strong>Verification Checklist:</strong></p>
+<ul>
+<li>[ ] NFS root copied to blockfs/rootfs directory</li>
+<li>[ ] <code>/init</code> symlink created pointing to <code>/sbin/init</code></li>
+<li>[ ] Startup script modified to mount data partition</li>
+<li>[ ] Upload script configured to log to <code>/var/log</code></li>
+<li>[ ] SquashFS image created successfully</li>
+<li>[ ] Image written to <code>/dev/mmcblk0p3</code></li>
+</ul>
+<h2 id="section-5-tmpfs-for-volatile-storage">Section 5: Tmpfs for Volatile Storage<a class="headerlink" href="#section-5-tmpfs-for-volatile-storage" title="Permanent link">&para;</a></h2>
+<h3 id="why-tmpfs">Why Tmpfs?<a class="headerlink" href="#why-tmpfs" title="Permanent link">&para;</a></h3>
+<p>Tmpfs is a temporary filesystem stored in RAM:</p>
+<ul>
+<li><strong>Fast:</strong> No disk I/O, operates at RAM speed</li>
+<li><strong>Volatile:</strong> Data lost on reboot (ideal for logs, temporary files)</li>
+<li><strong>Automatically sized:</strong> Grows/shrinks based on usage</li>
+<li><strong>Read-only root friendly:</strong> Allows writes even with SquashFS root</li>
+</ul>
+<h3 id="tmpfs-mount-points">Tmpfs Mount Points<a class="headerlink" href="#tmpfs-mount-points" title="Permanent link">&para;</a></h3>
+<p>Our startup script already mounts tmpfs at:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>mount<span class="w"> </span>-t<span class="w"> </span>tmpfs<span class="w"> </span>tmpfs<span class="w"> </span>/tmp<span class="w">      </span><span class="c1"># Temporary files</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>mount<span class="w"> </span>-t<span class="w"> </span>tmpfs<span class="w"> </span>tmpfs<span class="w"> </span>/var<span class="w">      </span><span class="c1"># Variable data (logs, run files)</span>
+</code></pre></div>
+<h3 id="verify-tmpfs-in-startup-script">Verify Tmpfs in Startup Script<a class="headerlink" href="#verify-tmpfs-in-startup-script" title="Permanent link">&para;</a></h3>
+<p>The <code>rcS</code> script we modified earlier should have:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Mount tmpfs for temporary files</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>mount<span class="w"> </span>-t<span class="w"> </span>tmpfs<span class="w"> </span>tmpfs<span class="w"> </span>/tmp
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>mount<span class="w"> </span>-t<span class="w"> </span>tmpfs<span class="w"> </span>tmpfs<span class="w"> </span>/var
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="c1"># Create necessary directories in tmpfs</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/log
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/run
+</code></pre></div>
+<p>This ensures:
+- <code>/var/log/upload.log</code> is stored in RAM (volatile)
+- System run files go to <code>/var/run</code> (volatile)
+- Temporary files go to <code>/tmp</code> (volatile)</p>
+<h2 id="section-6-boot-from-sd-card-root-filesystem">Section 6: Boot from SD Card Root Filesystem<a class="headerlink" href="#section-6-boot-from-sd-card-root-filesystem" title="Permanent link">&para;</a></h2>
+<h3 id="configure-u-boot-bootcmd">Configure U-Boot Bootcmd<a class="headerlink" href="#configure-u-boot-bootcmd" title="Permanent link">&para;</a></h3>
+<p>Now we'll configure U-Boot to boot the kernel and DTB from SD card partition 2 (ext4), and mount root from partition 3 (SquashFS).</p>
+<p><strong>Copy Kernel and DTB to SD Card (Workstation):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># Remove SD card from BeaglePlay, insert into workstation</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="c1"># Assume partition 2 is mounted at /media/&lt;user&gt;/env</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="c1"># Copy kernel</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>cp<span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/kernel/linux/arch/arm64/boot/Image.gz<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">   </span>/media/&lt;user&gt;/env/
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="c1"># Copy Device Tree</span>
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>cp<span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/kernel/linux/arch/arm64/boot/dts/ti/k3-am625-beagleplay-custom.dtb<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a><span class="w">   </span>/media/&lt;user&gt;/env/
+<a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>
+<a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a><span class="c1"># Sync and unmount</span>
+<a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a>sync
+<a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a>sudo<span class="w"> </span>umount<span class="w"> </span>/media/&lt;user&gt;/env
+</code></pre></div>
+<p><strong>Insert SD card back into BeaglePlay and boot.</strong></p>
+<h3 id="update-u-boot-environment">Update U-Boot Environment<a class="headerlink" href="#update-u-boot-environment" title="Permanent link">&para;</a></h3>
+<p><strong>On BeaglePlay U-Boot console (interrupt boot with any key):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Save current TFTP boot command (for easy switching back)</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootcmdtftp<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">bootcmd</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="c1"># Define SD card boot command</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootcmdsd<span class="w"> </span><span class="s1">&#39;load mmc 1:2 0x80000000 Image.gz; load mmc 1:2 0x82000000 k3-am625-beagleplay-custom.dtb; booti 0x80000000 - 0x82000000&#39;</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="c1"># Set kernel command line for SD card root</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootargs<span class="w"> </span><span class="s1">&#39;console=ttyS2,115200 root=/dev/mmcblk0p3 rootwait ro&#39;</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="c1"># Explanation:</span>
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="c1"># - console=ttyS2,115200: Serial console</span>
+<a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a><span class="c1"># - root=/dev/mmcblk0p3: Root filesystem on partition 3</span>
+<a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a><span class="c1"># - rootwait: Wait for SD card initialization before mounting root</span>
+<a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a><span class="c1"># - ro: Mount root filesystem as read-only (SquashFS requirement)</span>
+<a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a>
+<a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a><span class="c1"># Set bootcmd to SD card boot</span>
+<a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootcmd<span class="w"> </span><span class="s1">&#39;run bootcmdsd&#39;</span>
+<a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a>
+<a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a><span class="c1"># Save environment</span>
+<a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a><span class="o">=</span>&gt;<span class="w"> </span>saveenv
+<a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a>
+<a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a><span class="c1"># Boot</span>
+<a id="__codelineno-28-23" name="__codelineno-28-23" href="#__codelineno-28-23"></a><span class="o">=</span>&gt;<span class="w"> </span>boot
+</code></pre></div>
+<h3 id="expected-boot-sequence">Expected Boot Sequence<a class="headerlink" href="#expected-boot-sequence" title="Permanent link">&para;</a></h3>
+<p>Watch the boot messages:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>U-Boot SPL 2024.01 (...)
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>...
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>Loading kernel from MMC...
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>Loading Device Tree from MMC...
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>Starting kernel ...
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a>...
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a>[    2.543210] VFS: Mounted root (squashfs filesystem) readonly on device 179:3.
+<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a>[    2.678543] devtmpfs: mounted
+<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a>...
+<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>[    3.123456] mount: mounting /dev/mmcblk0p4 on /www/upload/files succeeded
+<a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a>...
+<a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a>Starting system...
+<a id="__codelineno-29-15" name="__codelineno-29-15" href="#__codelineno-29-15"></a>
+<a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a>Welcome to BeaglePlay!
+<a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a>beagleplay login:
+</code></pre></div>
+<p><strong>Key indicators:</strong>
+- <code>Mounted root (squashfs filesystem) readonly on device 179:3</code> ← SquashFS root
+- <code>mounting /dev/mmcblk0p4 on /www/upload/files succeeded</code> ← Data partition</p>
+<h3 id="verify-mounts">Verify Mounts<a class="headerlink" href="#verify-mounts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Login as root (no password)</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="c1"># Check all mounts</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>mount
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="c1"># Expected output:</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="c1"># /dev/mmcblk0p3 on / type squashfs (ro,relatime)</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="c1"># devtmpfs on /dev type devtmpfs (rw,relatime,...)</span>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="c1"># proc on /proc type proc (rw,relatime)</span>
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a><span class="c1"># sysfs on /sys type sysfs (rw,relatime)</span>
+<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a><span class="c1"># /dev/mmcblk0p4 on /www/upload/files type ext4 (rw,relatime)</span>
+<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a><span class="c1"># tmpfs on /tmp type tmpfs (rw,relatime)</span>
+<a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a><span class="c1"># tmpfs on /var type tmpfs (rw,relatime)</span>
+<a id="__codelineno-30-14" name="__codelineno-30-14" href="#__codelineno-30-14"></a>
+<a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a><span class="c1"># Check filesystem usage</span>
+<a id="__codelineno-30-16" name="__codelineno-30-16" href="#__codelineno-30-16"></a>df<span class="w"> </span>-h
+<a id="__codelineno-30-17" name="__codelineno-30-17" href="#__codelineno-30-17"></a>
+<a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a><span class="c1"># /dev/mmcblk0p3 on / should show squashfs, read-only</span>
+<a id="__codelineno-30-19" name="__codelineno-30-19" href="#__codelineno-30-19"></a><span class="c1"># /dev/mmcblk0p4 on /www/upload/files should show ext4, read-write</span>
+<a id="__codelineno-30-20" name="__codelineno-30-20" href="#__codelineno-30-20"></a><span class="c1"># tmpfs on /var and /tmp should show RAM usage</span>
+</code></pre></div>
+<h3 id="test-read-only-root">Test Read-Only Root<a class="headerlink" href="#test-read-only-root" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="c1"># Try to create a file in root (should fail)</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>touch<span class="w"> </span>/test.txt
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="c1"># touch: /test.txt: Read-only file system</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="c1"># Verify root is read-only</span>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;on / &quot;</span>
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="c1"># /dev/mmcblk0p3 on / type squashfs (ro,relatime)</span>
+</code></pre></div>
+<h3 id="test-write-to-data-partition">Test Write to Data Partition<a class="headerlink" href="#test-write-to-data-partition" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># Create test file</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Persistent data test&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/www/upload/files/test.txt
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="c1"># Read it back</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>cat<span class="w"> </span>/www/upload/files/test.txt
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="c1"># Reboot</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>reboot
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a><span class="c1"># After reboot, verify file persists</span>
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a>cat<span class="w"> </span>/www/upload/files/test.txt
+<a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a><span class="c1"># Persistent data test    &lt;-- File survived reboot!</span>
+</code></pre></div>
+<h3 id="test-tmpfs-volatility">Test Tmpfs Volatility<a class="headerlink" href="#test-tmpfs-volatility" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="c1"># Create file in tmpfs</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Volatile log entry&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/var/log/test.log
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>cat<span class="w"> </span>/var/log/test.log
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="c1"># Reboot</span>
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>reboot
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a><span class="c1"># After reboot, check if file exists</span>
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a>cat<span class="w"> </span>/var/log/test.log
+<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a><span class="c1"># cat: can&#39;t open &#39;/var/log/test.log&#39;: No such file or directory  &lt;-- Gone!</span>
+</code></pre></div>
+<p><strong>Verification Checklist:</strong></p>
+<ul>
+<li>[ ] Kernel and DTB copied to SD card partition 2</li>
+<li>[ ] U-Boot configured to load from SD card</li>
+<li>[ ] Kernel command line set with <code>root=/dev/mmcblk0p3 rootwait ro</code></li>
+<li>[ ] System boots successfully from SquashFS root</li>
+<li>[ ] Root filesystem mounted read-only</li>
+<li>[ ] Data partition mounted at <code>/www/upload/files</code> (read-write)</li>
+<li>[ ] Tmpfs mounted at <code>/tmp</code> and <code>/var</code></li>
+<li>[ ] Persistent data survives reboot</li>
+<li>[ ] Tmpfs data is volatile (lost on reboot)</li>
+</ul>
+<h2 id="section-7-testing-web-interface">Section 7: Testing Web Interface<a class="headerlink" href="#section-7-testing-web-interface" title="Permanent link">&para;</a></h2>
+<h3 id="verify-http-server">Verify HTTP Server<a class="headerlink" href="#verify-http-server" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># On BeaglePlay, check httpd is running</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>httpd
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># Expected:</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="c1">#  1234 root     /usr/sbin/httpd -h /www/</span>
+</code></pre></div>
+<h3 id="test-upload-functionality">Test Upload Functionality<a class="headerlink" href="#test-upload-functionality" title="Permanent link">&para;</a></h3>
+<p><strong>From your workstation browser:</strong></p>
+<ol>
+<li>
+<p>Navigate to <code>http://192.168.0.100/index.html</code></p>
+</li>
+<li>
+<p>Upload a test image using the web interface</p>
+</li>
+<li>
+<p>Verify image appears in listing</p>
+</li>
+</ol>
+<p><strong>On BeaglePlay:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="c1"># Check uploaded file</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>ls<span class="w"> </span>-l<span class="w"> </span>/www/upload/files/
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="c1"># Should show your uploaded image</span>
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a><span class="c1"># -rw-r--r-- 1 root root 123456 Jan  1 00:12 test-image.jpg</span>
+</code></pre></div>
+<h3 id="check-upload-log">Check Upload Log<a class="headerlink" href="#check-upload-log" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># View upload log (tmpfs - volatile)</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>cat<span class="w"> </span>/var/log/upload.log
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># Should show upload activity</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="c1"># Jan  1 00:12:34 File uploaded: test-image.jpg (123456 bytes)</span>
+</code></pre></div>
+<h3 id="verify-log-volatility">Verify Log Volatility<a class="headerlink" href="#verify-log-volatility" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="c1"># Note log contents</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>cat<span class="w"> </span>/var/log/upload.log
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="c1"># Reboot</span>
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>reboot
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a><span class="c1"># After reboot, check log</span>
+<a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a>cat<span class="w"> </span>/var/log/upload.log
+<a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a><span class="c1"># Should be empty or non-existent</span>
+<a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a>
+<a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a><span class="c1"># But uploaded files persist!</span>
+<a id="__codelineno-37-12" name="__codelineno-37-12" href="#__codelineno-37-12"></a>ls<span class="w"> </span>/www/upload/files/
+<a id="__codelineno-37-13" name="__codelineno-37-13" href="#__codelineno-37-13"></a><span class="c1"># Files still there!</span>
+</code></pre></div>
+<p><strong>Verification Checklist:</strong></p>
+<ul>
+<li>[ ] Web server running and accessible</li>
+<li>[ ] File upload functionality works</li>
+<li>[ ] Uploaded files stored on ext4 data partition</li>
+<li>[ ] Upload log written to tmpfs <code>/var/log</code></li>
+<li>[ ] Uploaded files persist across reboot</li>
+<li>[ ] Upload log is volatile (lost on reboot)</li>
+</ul>
+<h2 id="section-8-switching-boot-modes">Section 8: Switching Boot Modes<a class="headerlink" href="#section-8-switching-boot-modes" title="Permanent link">&para;</a></h2>
+<h3 id="switch-back-to-tftp-boot-for-development">Switch Back to TFTP Boot (for Development)<a class="headerlink" href="#switch-back-to-tftp-boot-for-development" title="Permanent link">&para;</a></h3>
+<p>During development, NFS/TFTP boot is faster for iteration. Let's keep the ability to switch modes.</p>
+<p><strong>On U-Boot console:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="c1"># Boot from TFTP/NFS</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootcmd<span class="w"> </span><span class="s1">&#39;run bootcmdtftp&#39;</span>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="o">=</span>&gt;<span class="w"> </span><span class="nv">saveenv</span>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="o">=</span>&gt;<span class="w"> </span>boot
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a><span class="c1"># Or without saving (one-time):</span>
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a><span class="o">=</span>&gt;<span class="w"> </span>run<span class="w"> </span>bootcmdtftp
+</code></pre></div>
+<h3 id="switch-back-to-sd-card-boot">Switch Back to SD Card Boot<a class="headerlink" href="#switch-back-to-sd-card-boot" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># Boot from SD card</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootcmd<span class="w"> </span><span class="s1">&#39;run bootcmdsd&#39;</span>
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="o">=</span>&gt;<span class="w"> </span><span class="nv">saveenv</span>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="o">=</span>&gt;<span class="w"> </span>boot
+</code></pre></div>
+<h3 id="u-boot-environment-summary">U-Boot Environment Summary<a class="headerlink" href="#u-boot-environment-summary" title="Permanent link">&para;</a></h3>
+<p>After this lab, your U-Boot environment should have:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nv">bootcmdtftp</span><span class="o">=</span>&lt;TFTP<span class="w"> </span>boot<span class="w"> </span>commands&gt;<span class="w">   </span><span class="c1"># Development mode</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="nv">bootcmdsd</span><span class="o">=</span>run<span class="w"> </span>bootcmdsd<span class="w">            </span><span class="c1"># Production mode</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="nv">bootcmd</span><span class="o">=</span>run<span class="w"> </span>bootcmdsd<span class="w">              </span><span class="c1"># Default: SD card boot</span>
+</code></pre></div>
+<h2 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Permanent link">&para;</a></h2>
+<h3 id="problem-kernel-panic-not-syncing-vfs-unable-to-mount-root-fs">Problem: Kernel panic - not syncing: VFS: Unable to mount root fs<a class="headerlink" href="#problem-kernel-panic-not-syncing-vfs-unable-to-mount-root-fs" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>[    2.123456] VFS: Cannot open root device &quot;mmcblk0p3&quot; or unknown-block(179,3)
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>[    2.123456] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(179,3)
+</code></pre></div>
+<p><strong>Possible causes:</strong></p>
+<ol>
+<li><strong>SquashFS support not compiled in kernel:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Verify CONFIG_SQUASHFS=y</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/kernel/linux
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>grep<span class="w"> </span>CONFIG_SQUASHFS<span class="w"> </span>.config
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="c1"># Should show:</span>
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a><span class="c1"># CONFIG_SQUASHFS=y</span>
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a><span class="c1"># If not, reconfigure and recompile</span>
+<a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a>make<span class="w"> </span><span class="nv">ARCH</span><span class="o">=</span>arm64<span class="w"> </span>menuconfig
+<a id="__codelineno-42-10" name="__codelineno-42-10" href="#__codelineno-42-10"></a><span class="c1"># Enable SquashFS</span>
+<a id="__codelineno-42-11" name="__codelineno-42-11" href="#__codelineno-42-11"></a>make<span class="w"> </span><span class="nv">ARCH</span><span class="o">=</span>arm64<span class="w"> </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span>aarch64-beagleplay-linux-musl-<span class="w"> </span>Image.gz<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</code></pre></div>
+<ol>
+<li><strong>Partition 3 is empty or corrupted:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># Boot from NFS first, then check partition 3</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/mmcblk0p3<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">512</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>hexdump<span class="w"> </span>-C
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="c1"># SquashFS magic: 0x73717368 (hsqs in little-endian)</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="c1"># Should see &quot;hsqs&quot; in first few bytes</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="c1"># If not, re-write SquashFS image:</span>
+<a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a>dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/tmp/rootfs.sqfs<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/mmcblk0p3<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>1M
+<a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a>sync
+</code></pre></div>
+<ol>
+<li><strong>Wrong partition number in bootargs:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1"># Verify bootargs</span>
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="c1"># In U-Boot:</span>
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="o">=</span>&gt;<span class="w"> </span>printenv<span class="w"> </span>bootargs
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="c1"># Should show: root=/dev/mmcblk0p3</span>
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>
+<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="c1"># If wrong, correct it:</span>
+<a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a><span class="o">=</span>&gt;<span class="w"> </span>setenv<span class="w"> </span>bootargs<span class="w"> </span><span class="s1">&#39;console=ttyS2,115200 root=/dev/mmcblk0p3 rootwait ro&#39;</span>
+<a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a><span class="o">=</span>&gt;<span class="w"> </span>saveenv
+</code></pre></div>
+<h3 id="problem-wwwuploadfiles-mount-fails">Problem: /www/upload/files mount fails<a class="headerlink" href="#problem-wwwuploadfiles-mount-fails" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>mount: mounting /dev/mmcblk0p4 on /www/upload/files failed: No such device
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li><strong>Ext4 support missing:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="c1"># Verify ext4 is enabled in kernel</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>cat<span class="w"> </span>/proc/filesystems<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ext4
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="c1"># If not listed, recompile kernel with CONFIG_EXT4_FS=y</span>
+</code></pre></div>
+<ol>
+<li><strong>Partition 4 not formatted:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="c1"># Check if partition exists</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>cat<span class="w"> </span>/proc/partitions<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>mmcblk0p4
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="c1"># Format if needed</span>
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>mkfs.ext4<span class="w"> </span>/dev/mmcblk0p4
+</code></pre></div>
+<ol>
+<li><strong>Mount point doesn't exist:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="c1"># rcS should create mount point:</span>
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/www/upload/files
+</code></pre></div>
+<h3 id="problem-tmpfs-mount-fails">Problem: Tmpfs mount fails<a class="headerlink" href="#problem-tmpfs-mount-fails" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>mount: mounting tmpfs on /tmp failed: Invalid argument
+</code></pre></div>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="c1"># Verify tmpfs support</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>cat<span class="w"> </span>/proc/filesystems<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>tmpfs
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="c1"># Should show:</span>
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a><span class="c1"># nodev tmpfs</span>
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a><span class="c1"># If missing, enable CONFIG_TMPFS in kernel</span>
+</code></pre></div>
+<h3 id="problem-system-is-read-only-cant-write-anywhere">Problem: System is read-only, can't write anywhere<a class="headerlink" href="#problem-system-is-read-only-cant-write-anywhere" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="c1"># Even data partition is read-only</span>
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>touch<span class="w"> </span>/www/upload/files/test.txt
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a><span class="c1"># touch: /www/upload/files/test.txt: Read-only file system</span>
+</code></pre></div>
+<p><strong>Cause:</strong> Data partition mounted read-only.</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1"># Remount data partition as read-write</span>
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>mount<span class="w"> </span>-o<span class="w"> </span>remount,rw<span class="w"> </span>/dev/mmcblk0p4<span class="w"> </span>/www/upload/files
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="c1"># Verify</span>
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>mmcblk0p4
+<a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a><span class="c1"># Should show (rw,...)</span>
+<a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a>
+<a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a><span class="c1"># Fix rcS to mount as rw explicitly:</span>
+<a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a>mount<span class="w"> </span>-t<span class="w"> </span>ext4<span class="w"> </span>-o<span class="w"> </span>rw<span class="w"> </span>/dev/mmcblk0p4<span class="w"> </span>/www/upload/files
+</code></pre></div>
+<h3 id="problem-cannot-update-system-squashfs-is-read-only">Problem: Cannot update system (SquashFS is read-only)<a class="headerlink" href="#problem-cannot-update-system-squashfs-is-read-only" title="Permanent link">&para;</a></h3>
+<p>This is intentional! SquashFS root is immutable.</p>
+<p><strong>To update the system:</strong></p>
+<ol>
+<li><strong>Modify rootfs on workstation:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/blockfs/rootfs
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a><span class="c1"># Make changes to files/scripts</span>
+</code></pre></div>
+<ol>
+<li><strong>Rebuild SquashFS image:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-linux-beagleplay-labs/blockfs
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>mksquashfs<span class="w"> </span>rootfs<span class="w"> </span>rootfs.sqfs<span class="w"> </span>-comp<span class="w"> </span>xz<span class="w"> </span>-Xbcj<span class="w"> </span>arm
+</code></pre></div>
+<ol>
+<li><strong>Write new image to partition 3:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="c1"># From workstation (SD card reader):</span>
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>sudo<span class="w"> </span>dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>rootfs.sqfs<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/sdb3<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>1M<span class="w"> </span><span class="nv">status</span><span class="o">=</span>progress
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>sync
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a><span class="c1"># Or from BeaglePlay (boot from NFS first):</span>
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/tmp/rootfs.sqfs<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/mmcblk0p3<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>1M
+<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>sync
+</code></pre></div>
+<ol>
+<li><strong>Reboot and test</strong></li>
+</ol>
+<p>This workflow ensures system integrity - accidental changes can't corrupt the root filesystem.</p>
+<h2 id="advanced-challenges">Advanced Challenges<a class="headerlink" href="#advanced-challenges" title="Permanent link">&para;</a></h2>
+<h3 id="challenge-1-implement-overlay-filesystem">Challenge 1: Implement Overlay Filesystem<a class="headerlink" href="#challenge-1-implement-overlay-filesystem" title="Permanent link">&para;</a></h3>
+<p>Combine read-only SquashFS root with read-write tmpfs overlay, allowing temporary system modifications without modifying the base SquashFS.</p>
+<p><strong>Hint:</strong> Use <code>overlayfs</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="c1"># In rcS:</span>
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>mount<span class="w"> </span>-t<span class="w"> </span>overlay<span class="w"> </span>overlay<span class="w"> </span>-o<span class="w"> </span><span class="nv">lowerdir</span><span class="o">=</span>/,upperdir<span class="o">=</span>/tmp/upper,workdir<span class="o">=</span>/tmp/work<span class="w"> </span>/mnt/overlay
+</code></pre></div>
+<h3 id="challenge-2-add-swap-partition">Challenge 2: Add Swap Partition<a class="headerlink" href="#challenge-2-add-swap-partition" title="Permanent link">&para;</a></h3>
+<p>Create a swap partition on the SD card for emergency memory relief.</p>
+<p><strong>Steps:</strong>
+1. Create partition 5 with fdisk (512MB)
+2. Format as swap: <code>mkswap /dev/mmcblk0p5</code>
+3. Enable in rcS: <code>swapon /dev/mmcblk0p5</code></p>
+<h3 id="challenge-3-implement-etc-overlay">Challenge 3: Implement /etc Overlay<a class="headerlink" href="#challenge-3-implement-etc-overlay" title="Permanent link">&para;</a></h3>
+<p>Make <code>/etc</code> writable while keeping <code>/</code> read-only, allowing runtime configuration changes.</p>
+<p><strong>Approach:</strong>
+- Copy <code>/etc</code> to <code>/www/upload/files/etc</code> (persistent)
+- Use bind mount or overlay to make <code>/etc</code> writable</p>
+<h3 id="challenge-4-partition-alignment-optimization">Challenge 4: Partition Alignment Optimization<a class="headerlink" href="#challenge-4-partition-alignment-optimization" title="Permanent link">&para;</a></h3>
+<p>Optimize partition boundaries for SD card erase block size.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1"># Find preferred erase size</span>
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>cat<span class="w"> </span>/sys/bus/mmc/devices/mmc0:0001/preferred_erase_size
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="c1"># Align partitions to multiples of this size</span>
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="c1"># Use fdisk with sector calculations</span>
+</code></pre></div>
+<h3 id="challenge-5-read-only-root-with-persistent-logs">Challenge 5: Read-Only Root with Persistent Logs<a class="headerlink" href="#challenge-5-read-only-root-with-persistent-logs" title="Permanent link">&para;</a></h3>
+<p>Implement persistent logging despite read-only root:</p>
+<p><strong>Approach:</strong>
+- Store logs on data partition: <code>/www/upload/files/logs/</code>
+- Bind mount or symlink <code>/var/log</code> to persistent location
+- Rotate logs to prevent partition filling</p>
+<h2 id="what-youve-learned">What You've Learned<a class="headerlink" href="#what-youve-learned" title="Permanent link">&para;</a></h2>
+<p>By completing this lab, you've mastered:</p>
+<p>✅ <strong>Filesystem Kernel Support:</strong>
+- Configured ext4 filesystem support
+- Enabled SquashFS with multiple compression algorithms
+- Enabled tmpfs for volatile RAM storage</p>
+<p>✅ <strong>Partition Management:</strong>
+- Used fdisk to create new partitions
+- Preserved bootloader partitions
+- Aligned partitions properly on SD card</p>
+<p>✅ <strong>ext4 Filesystem:</strong>
+- Created ext4 filesystems with labels
+- Mounted and tested read-write access
+- Used ext4 for persistent user data</p>
+<p>✅ <strong>SquashFS:</strong>
+- Created compressed SquashFS images
+- Understood compression options (xz, lzo, lz4)
+- Wrote SquashFS directly to partition
+- Booted from read-only SquashFS root</p>
+<p>✅ <strong>Tmpfs:</strong>
+- Mounted tmpfs for volatile storage
+- Used tmpfs for <code>/tmp</code> and <code>/var</code>
+- Understood tmpfs lifecycle (RAM-based, lost on reboot)</p>
+<p>✅ <strong>System Integration:</strong>
+- Migrated from NFS to block storage boot
+- Modified startup scripts for automatic mounting
+- Configured U-Boot for SD card boot
+- Implemented proper separation: system vs. user data</p>
+<p>✅ <strong>Boot Configuration:</strong>
+- Stored kernel and DTB on ext4 partition
+- Configured kernel command line (<code>root=</code>, <code>rootwait</code>, <code>ro</code>)
+- Managed multiple boot modes (TFTP vs. SD card)</p>
+<p>✅ <strong>Storage Architecture Best Practices:</strong>
+- Read-only root filesystem (SquashFS) for system integrity
+- Read-write data partition (ext4) for user files
+- Volatile storage (tmpfs) for temporary data and logs
+- Clear separation of concerns</p>
+<h2 id="going-further">Going Further<a class="headerlink" href="#going-further" title="Permanent link">&para;</a></h2>
+<h3 id="recommended-reading">Recommended Reading<a class="headerlink" href="#recommended-reading" title="Permanent link">&para;</a></h3>
+<p><strong>Kernel Documentation:</strong>
+- <code>Documentation/filesystems/ext4.txt</code> - ext4 filesystem
+- <code>Documentation/filesystems/squashfs.txt</code> - SquashFS details
+- <code>Documentation/filesystems/tmpfs.txt</code> - Tmpfs usage</p>
+<p><strong>Storage:</strong>
+- <code>Documentation/mmc/</code> - MMC/SD card subsystem</p>
+<p><strong>Articles:</strong>
+- "SquashFS vs ext4: When to use which" - Embedded Linux design patterns
+- "Optimizing SD card usage in embedded Linux" - Partition alignment, wear leveling</p>
+<h3 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h3>
+<p>In <strong>Lab 8: Buildroot</strong>, you'll:
+- Automate the entire build process with Buildroot
+- Generate root filesystem images automatically
+- Build external kernel modules with Buildroot
+- Configure and customize package selection
+- Create reproducible embedded Linux systems</p>
+<hr />
+<p><strong>Estimated Completion Time:</strong> 3-4 hours</p>
+<p><strong>Difficulty:</strong> ⭐⭐⭐☆☆ (Intermediate)</p>
+<p><strong>Prerequisites Met:</strong> ✅ Lab 6 (Hardware Devices)</p>
+<p><strong>Leads to:</strong> Lab 8 (Buildroot System Integration)</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

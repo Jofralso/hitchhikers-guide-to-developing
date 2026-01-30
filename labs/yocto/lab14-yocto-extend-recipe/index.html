@@ -1,0 +1,3857 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/yocto/lab14-yocto-extend-recipe/">
+      
+      
+        <link rel="prev" href="../lab13-yocto-custom-layer/">
+      
+      
+        <link rel="next" href="../lab15-yocto-custom-machine/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 14 - Extend Recipe - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-14-extend-recipes-with-bbappend" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 14 - Extend Recipe
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../embedded-linux/" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-bbappend-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding bbappend Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding bbappend Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-why-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Why bbappend?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-bbappend-mechanics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 bbappend Mechanics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-creating-your-first-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating Your First bbappend
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Creating Your First bbappend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-extend-kernel-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Extend Kernel Recipe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-verify-bbappend-is-recognized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Verify bbappend is Recognized
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-adding-kernel-patches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Adding Kernel Patches
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Adding Kernel Patches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-nunchuk-driver-background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Nunchuk Driver Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-obtain-patch-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Obtain Patch Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-add-patches-to-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Add Patches to bbappend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-adding-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Adding Kernel Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Adding Kernel Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-create-defconfig-fragment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Create defconfig Fragment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-add-defconfig-to-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Add defconfig to bbappend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-building-modified-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Building Modified Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Building Modified Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-clean-and-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Clean and Rebuild
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-verify-patches-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Verify Patches Applied
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-deploy-and-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Deploy and Test
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Deploy and Test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-rebuild-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Rebuild Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-deploy-to-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Deploy to NFS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-connect-nunchuk-hardware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Connect Nunchuk Hardware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-boot-and-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Boot and Verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-advanced-bbappend-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Advanced bbappend Techniques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Advanced bbappend Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-conditional-append" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Conditional Append
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-override-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Override Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-extend-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Extend Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-remove-files-from-src_uri" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Remove Files from SRC_URI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-patch-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Patch Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-patch-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Patch Creation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-config-fragment-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Config Fragment Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-patch-ninvaders-for-joystick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Patch ninvaders for Joystick
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-multiple-bbappend-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Multiple bbappend Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-bbappend-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding bbappend Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding bbappend Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-why-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Why bbappend?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-bbappend-mechanics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 bbappend Mechanics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-creating-your-first-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating Your First bbappend
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Creating Your First bbappend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-extend-kernel-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Extend Kernel Recipe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-verify-bbappend-is-recognized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Verify bbappend is Recognized
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-adding-kernel-patches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Adding Kernel Patches
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Adding Kernel Patches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-nunchuk-driver-background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Nunchuk Driver Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-obtain-patch-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Obtain Patch Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-add-patches-to-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Add Patches to bbappend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-adding-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Adding Kernel Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Adding Kernel Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-create-defconfig-fragment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Create defconfig Fragment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-add-defconfig-to-bbappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Add defconfig to bbappend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-building-modified-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Building Modified Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Building Modified Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-clean-and-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Clean and Rebuild
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-verify-patches-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Verify Patches Applied
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-deploy-and-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Deploy and Test
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Deploy and Test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-rebuild-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Rebuild Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-deploy-to-nfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Deploy to NFS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-connect-nunchuk-hardware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Connect Nunchuk Hardware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-boot-and-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Boot and Verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-advanced-bbappend-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Advanced bbappend Techniques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Advanced bbappend Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-conditional-append" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Conditional Append
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-override-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Override Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-extend-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Extend Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-remove-files-from-src_uri" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Remove Files from SRC_URI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-patch-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Patch Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-patch-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Patch Creation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-config-fragment-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Config Fragment Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-patch-ninvaders-for-joystick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Patch ninvaders for Joystick
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-multiple-bbappend-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Multiple bbappend Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-14-extend-recipes-with-bbappend">Lab 14: Extend Recipes with bbappend<a class="headerlink" href="#lab-14-extend-recipes-with-bbappend" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about debugging:</p>
+<p><em>"Debugging is the art of figuring out why your code doesn't work, as opposed to why you thought it would work. This is similar to the difference between what Deep Thought calculated (42) and what everyone expected (a useful answer). Both are technically correct, but only one is helpful."</em></p>
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>Master the art of extending existing recipes without modifying the original files, using BitBake append (<code>.bbappend</code>) files for customization.</p>
+<p><strong>What You'll Learn:</strong>
+- Create <code>.bbappend</code> files
+- Apply patches to existing recipes
+- Add custom configuration files
+- Extend kernel configuration
+- Add Nunchuk joystick support to Linux kernel
+- Best practices for recipe extension</p>
+<p><strong>Time Required:</strong> 2-3 hours (or approximately 42 minutes in improbable circumstances)</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p><strong>Completed Labs:</strong>
+- Lab 13: Create Custom Yocto Layer</p>
+<p><strong>Hardware:</strong>
+- Wii Nunchuk controller
+- mikroBUS connector on BeaglePlay</p>
+<hr />
+<h2 id="1-understanding-bbappend-files">1. Understanding bbappend Files<a class="headerlink" href="#1-understanding-bbappend-files" title="Permanent link">&para;</a></h2>
+<h3 id="11-why-bbappend">1.1 Why bbappend?<a class="headerlink" href="#11-why-bbappend" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> You need to modify an existing recipe from another layer.</p>
+<p><strong>Bad solution:</strong> Edit the original recipe
+- Breaks on layer updates
+- Merge conflicts
+- Not maintainable</p>
+<p><strong>Good solution:</strong> Create <code>.bbappend</code> file
+- ✅ Original recipe untouched
+- ✅ Changes in your layer
+- ✅ Survives upstream updates
+- ✅ Clear separation of concerns</p>
+<h3 id="12-bbappend-mechanics">1.2 bbappend Mechanics<a class="headerlink" href="#12-bbappend-mechanics" title="Permanent link">&para;</a></h3>
+<p><strong>Recipe location:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>meta-ti/recipes-kernel/linux/linux-ti-staging_6.6.bb
+</code></pre></div></p>
+<p><strong>Your bbappend:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>meta-beagleplay/recipes-kernel/linux/linux-ti-staging_6.6.bbappend
+</code></pre></div></p>
+<p><strong>Naming rules:</strong>
+- Must match recipe base name
+- Can use <code>%</code> wildcard for version: <code>linux-ti-staging_%.bbappend</code></p>
+<hr />
+<h2 id="2-creating-your-first-bbappend">2. Creating Your First bbappend<a class="headerlink" href="#2-creating-your-first-bbappend" title="Permanent link">&para;</a></h2>
+<h3 id="21-extend-kernel-recipe">2.1 Extend Kernel Recipe<a class="headerlink" href="#21-extend-kernel-recipe" title="Permanent link">&para;</a></h3>
+<p><strong>Create directory structure:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>recipes-kernel/linux
+</code></pre></div></p>
+<p><strong>Create bbappend file:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>nano<span class="w"> </span>recipes-kernel/linux/linux-ti-staging_%.bbappend
+</code></pre></div></p>
+<p><strong>Minimal bbappend:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Extend kernel recipe for BeaglePlay customizations</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">FILESEXTRAPATHS</span><span class="p">:</span><span class="n">prepend</span> <span class="o">:=</span> <span class="s2">&quot;$</span><span class="si">{THISDIR}</span><span class="s2">/files:&quot;</span>
+</code></pre></div></p>
+<p><strong>What this does:</strong>
+- <code>FILESEXTRAPATHS</code>: Adds directory to file search path
+- <code>:prepend :=</code>: Immediate prepend (evaluated once)
+- <code>${THISDIR}/files:</code>: Points to <code>files/</code> subdirectory</p>
+<h3 id="22-verify-bbappend-is-recognized">2.2 Verify bbappend is Recognized<a class="headerlink" href="#22-verify-bbappend-is-recognized" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>bitbake-layers<span class="w"> </span>show-appends
+</code></pre></div>
+<p><strong>Expected output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>linux-ti-staging_6.6.bb:
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  /home/user/yocto-labs/meta-beagleplay/recipes-kernel/linux/linux-ti-staging_%.bbappend
+</code></pre></div></p>
+<p>✅ bbappend matched!</p>
+<hr />
+<h2 id="3-adding-kernel-patches">3. Adding Kernel Patches<a class="headerlink" href="#3-adding-kernel-patches" title="Permanent link">&para;</a></h2>
+<h3 id="31-nunchuk-driver-background">3.1 Nunchuk Driver Background<a class="headerlink" href="#31-nunchuk-driver-background" title="Permanent link">&para;</a></h3>
+<p>We'll add a custom kernel driver for Wii Nunchuk joystick support.</p>
+<p><strong>What it does:</strong>
+- Communicates with Nunchuk via I2C
+- Exposes joystick input device (<code>/dev/input/js0</code>)
+- Handles button and accelerometer data</p>
+<h3 id="32-obtain-patch-files">3.2 Obtain Patch Files<a class="headerlink" href="#32-obtain-patch-files" title="Permanent link">&para;</a></h3>
+<p><strong>Create files directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-beagleplay/recipes-kernel/linux
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>mkdir<span class="w"> </span>files
+</code></pre></div></p>
+<p><strong>Download/create patches</strong> (example content):</p>
+<p><strong>File 1: <code>files/0001-add-nunchuk-driver.patch</code></strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>nano<span class="w"> </span>files/0001-add-nunchuk-driver.patch
+</code></pre></div></p>
+<p><strong>Content (example structure):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>From abc123def456... Mon Sep 17 00:00:00 2001
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>From: Your Name &lt;your.email@example.com&gt;
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Date: Mon, 20 Nov 2024 10:00:00 +0000
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>Subject: [PATCH 1/2] Add Wii Nunchuk I2C joystick driver
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>Add kernel driver for Nintendo Wii Nunchuk controller
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>connected via I2C bus.
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>Signed-off-by: Your Name &lt;your.email@example.com&gt;
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>---
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a> drivers/input/joystick/Kconfig     |  10 ++
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a> drivers/input/joystick/Makefile    |   1 +
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a> drivers/input/joystick/nunchuk.c   | 250 +++++++++++++++++++++++++++++
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a> 3 files changed, 261 insertions(+)
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a> create mode 100644 drivers/input/joystick/nunchuk.c
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>diff --git a/drivers/input/joystick/Kconfig b/drivers/input/joystick/Kconfig
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>index 123456..789abc 100644
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>--- a/drivers/input/joystick/Kconfig
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>+++ b/drivers/input/joystick/Kconfig
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>@@ -300,4 +300,14 @@ config JOYSTICK_XPAD_LEDS
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>      This option enables support for the LED which surrounds the Big X on
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>      XBox 360 controller.
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>+config JOYSTICK_NUNCHUK
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>+   tristate &quot;Nintendo Wii Nunchuk&quot;
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>+   depends on I2C
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a>+   help
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a>+     Say Y here if you want to use a Nintendo Wii Nunchuk controller
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a>+     connected via I2C.
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a>+
+<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a>+     To compile this driver as a module, choose M here: the
+<a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a>+     module will be called nunchuk.
+<a id="__codelineno-9-34" name="__codelineno-9-34" href="#__codelineno-9-34"></a>+
+<a id="__codelineno-9-35" name="__codelineno-9-35" href="#__codelineno-9-35"></a> endif
+<a id="__codelineno-9-36" name="__codelineno-9-36" href="#__codelineno-9-36"></a>diff --git a/drivers/input/joystick/Makefile b/drivers/input/joystick/Makefile
+<a id="__codelineno-9-37" name="__codelineno-9-37" href="#__codelineno-9-37"></a>index 654321..fedcba 100644
+<a id="__codelineno-9-38" name="__codelineno-9-38" href="#__codelineno-9-38"></a>--- a/drivers/input/joystick/Makefile
+<a id="__codelineno-9-39" name="__codelineno-9-39" href="#__codelineno-9-39"></a>+++ b/drivers/input/joystick/Makefile
+<a id="__codelineno-9-40" name="__codelineno-9-40" href="#__codelineno-9-40"></a>@@ -30,3 +30,4 @@ obj-$(CONFIG_JOYSTICK_WARRIOR)        += warrior.o
+<a id="__codelineno-9-41" name="__codelineno-9-41" href="#__codelineno-9-41"></a> obj-$(CONFIG_JOYSTICK_XPAD)        += xpad.o
+<a id="__codelineno-9-42" name="__codelineno-9-42" href="#__codelineno-9-42"></a> obj-$(CONFIG_JOYSTICK_ZHENHUA)     += zhenhua.o
+<a id="__codelineno-9-43" name="__codelineno-9-43" href="#__codelineno-9-43"></a> obj-$(CONFIG_JOYSTICK_WALKERA0701) += walkera0701.o
+<a id="__codelineno-9-44" name="__codelineno-9-44" href="#__codelineno-9-44"></a>+obj-$(CONFIG_JOYSTICK_NUNCHUK)     += nunchuk.o
+<a id="__codelineno-9-45" name="__codelineno-9-45" href="#__codelineno-9-45"></a>diff --git a/drivers/input/joystick/nunchuk.c b/drivers/input/joystick/nunchuk.c
+<a id="__codelineno-9-46" name="__codelineno-9-46" href="#__codelineno-9-46"></a>new file mode 100644
+<a id="__codelineno-9-47" name="__codelineno-9-47" href="#__codelineno-9-47"></a>index 000000..123456
+<a id="__codelineno-9-48" name="__codelineno-9-48" href="#__codelineno-9-48"></a>--- /dev/null
+<a id="__codelineno-9-49" name="__codelineno-9-49" href="#__codelineno-9-49"></a>+++ b/drivers/input/joystick/nunchuk.c
+<a id="__codelineno-9-50" name="__codelineno-9-50" href="#__codelineno-9-50"></a>@@ -0,0 +1,250 @@
+<a id="__codelineno-9-51" name="__codelineno-9-51" href="#__codelineno-9-51"></a>+// SPDX-License-Identifier: GPL-2.0
+<a id="__codelineno-9-52" name="__codelineno-9-52" href="#__codelineno-9-52"></a>+/*
+<a id="__codelineno-9-53" name="__codelineno-9-53" href="#__codelineno-9-53"></a>+ * Nintendo Wii Nunchuk I2C joystick driver
+<a id="__codelineno-9-54" name="__codelineno-9-54" href="#__codelineno-9-54"></a>+ */
+<a id="__codelineno-9-55" name="__codelineno-9-55" href="#__codelineno-9-55"></a>+
+<a id="__codelineno-9-56" name="__codelineno-9-56" href="#__codelineno-9-56"></a>+#include &lt;linux/module.h&gt;
+<a id="__codelineno-9-57" name="__codelineno-9-57" href="#__codelineno-9-57"></a>+#include &lt;linux/i2c.h&gt;
+<a id="__codelineno-9-58" name="__codelineno-9-58" href="#__codelineno-9-58"></a>+#include &lt;linux/input.h&gt;
+<a id="__codelineno-9-59" name="__codelineno-9-59" href="#__codelineno-9-59"></a>+#include &lt;linux/delay.h&gt;
+<a id="__codelineno-9-60" name="__codelineno-9-60" href="#__codelineno-9-60"></a>+
+<a id="__codelineno-9-61" name="__codelineno-9-61" href="#__codelineno-9-61"></a>+// (Driver implementation code here)
+<a id="__codelineno-9-62" name="__codelineno-9-62" href="#__codelineno-9-62"></a>+// ...
+<a id="__codelineno-9-63" name="__codelineno-9-63" href="#__codelineno-9-63"></a>+
+<a id="__codelineno-9-64" name="__codelineno-9-64" href="#__codelineno-9-64"></a>+MODULE_LICENSE(&quot;GPL&quot;);
+<a id="__codelineno-9-65" name="__codelineno-9-65" href="#__codelineno-9-65"></a>+MODULE_AUTHOR(&quot;Your Name&quot;);
+<a id="__codelineno-9-66" name="__codelineno-9-66" href="#__codelineno-9-66"></a>+MODULE_DESCRIPTION(&quot;Nintendo Wii Nunchuk driver&quot;);
+<a id="__codelineno-9-67" name="__codelineno-9-67" href="#__codelineno-9-67"></a>--
+<a id="__codelineno-9-68" name="__codelineno-9-68" href="#__codelineno-9-68"></a>2.40.1
+</code></pre></div></p>
+<p><strong>File 2: <code>files/0002-enable-nunchuk-device-tree.patch</code></strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>nano<span class="w"> </span>files/0002-enable-nunchuk-device-tree.patch
+</code></pre></div></p>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>From def456abc789... Mon Sep 17 00:00:00 2001
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>From: Your Name &lt;your.email@example.com&gt;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Date: Mon, 20 Nov 2024 10:05:00 +0000
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>Subject: [PATCH 2/2] ARM64: dts: beagleplay: Add Nunchuk to I2C3
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>Enable Nunchuk controller on I2C3 bus (mikroBUS connector).
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>Signed-off-by: Your Name &lt;your.email@example.com&gt;
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>---
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a> arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts | 8 ++++++++
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a> 1 file changed, 8 insertions(+)
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>diff --git a/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts b/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>index 123456..789abc 100644
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>--- a/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>+++ b/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>@@ -400,6 +400,14 @@
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>    status = &quot;okay&quot;;
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>    pinctrl-names = &quot;default&quot;;
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    pinctrl-0 = &lt;&amp;mikrobus_i2c_pins_default&gt;;
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>+
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>+   nunchuk: joystick@52 {
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>+       compatible = &quot;nintendo,nunchuk&quot;;
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>+       reg = &lt;0x52&gt;;
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>+       interrupt-parent = &lt;&amp;main_gpio0&gt;;
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>+       interrupts = &lt;12 IRQ_TYPE_EDGE_FALLING&gt;;
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>+       status = &quot;okay&quot;;
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>+   };
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a> };
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a> &amp;main_i2c1 {
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>--
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>2.40.1
+</code></pre></div></p>
+<h3 id="33-add-patches-to-bbappend">3.3 Add Patches to bbappend<a class="headerlink" href="#33-add-patches-to-bbappend" title="Permanent link">&para;</a></h3>
+<p><strong>Edit bbappend:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>nano<span class="w"> </span>recipes-kernel/linux/linux-ti-staging_%.bbappend
+</code></pre></div></p>
+<p><strong>Add patches:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">FILESEXTRAPATHS</span><span class="p">:</span><span class="n">prepend</span> <span class="o">:=</span> <span class="s2">&quot;$</span><span class="si">{THISDIR}</span><span class="s2">/files:&quot;</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">append</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="se">\</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="s2">    file://0001-add-nunchuk-driver.patch </span><span class="se">\</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="s2">    file://0002-enable-nunchuk-device-tree.patch </span><span class="se">\</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="s2">&quot;</span>
+</code></pre></div></p>
+<p><strong>Explanation:</strong>
+- <code>SRC_URI:append</code>: Adds files to source list
+- BitBake automatically applies <code>.patch</code> files
+- Patches applied in <code>do_patch</code> task
+- Order matters - patches applied sequentially</p>
+<hr />
+<h2 id="4-adding-kernel-configuration">4. Adding Kernel Configuration<a class="headerlink" href="#4-adding-kernel-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="41-create-defconfig-fragment">4.1 Create defconfig Fragment<a class="headerlink" href="#41-create-defconfig-fragment" title="Permanent link">&para;</a></h3>
+<p><strong>Enable Nunchuk driver:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>nano<span class="w"> </span>files/nunchuk.cfg
+</code></pre></div></p>
+<p><strong>Content:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>CONFIG_JOYSTICK_NUNCHUK=y
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>CONFIG_INPUT_JOYSTICK=y
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>CONFIG_INPUT_EVDEV=y
+</code></pre></div></p>
+<h3 id="42-add-defconfig-to-bbappend">4.2 Add defconfig to bbappend<a class="headerlink" href="#42-add-defconfig-to-bbappend" title="Permanent link">&para;</a></h3>
+<p><strong>Update bbappend:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">FILESEXTRAPATHS</span><span class="p">:</span><span class="n">prepend</span> <span class="o">:=</span> <span class="s2">&quot;$</span><span class="si">{THISDIR}</span><span class="s2">/files:&quot;</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">append</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="se">\</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="s2">    file://0001-add-nunchuk-driver.patch </span><span class="se">\</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="s2">    file://0002-enable-nunchuk-device-tree.patch </span><span class="se">\</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="s2">    file://nunchuk.cfg </span><span class="se">\</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="s2">&quot;</span>
+</code></pre></div></p>
+<p><strong>Kernel recipe automatically merges <code>.cfg</code> files</strong> via <code>kernel-yocto</code> class.</p>
+<hr />
+<h2 id="5-building-modified-kernel">5. Building Modified Kernel<a class="headerlink" href="#5-building-modified-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="51-clean-and-rebuild">5.1 Clean and Rebuild<a class="headerlink" href="#51-clean-and-rebuild" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>virtual/kernel
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>bitbake<span class="w"> </span>virtual/kernel
+</code></pre></div>
+<p><strong>Build takes ~20-30 minutes</strong> (full kernel rebuild).</p>
+<h3 id="52-verify-patches-applied">5.2 Verify Patches Applied<a class="headerlink" href="#52-verify-patches-applied" title="Permanent link">&para;</a></h3>
+<p><strong>Check kernel work directory:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/work/beagleplay-poky-linux/linux-ti-staging/*/git
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-5
+</code></pre></div></p>
+<p><strong>Should show:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>abc123d (HEAD) enable-nunchuk-device-tree
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>def456e add-nunchuk-driver
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>...
+</code></pre></div></p>
+<p><strong>Check driver exists:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>ls<span class="w"> </span>drivers/input/joystick/nunchuk.c
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="c1"># Should exist</span>
+</code></pre></div></p>
+<h3 id="53-verify-configuration">5.3 Verify Configuration<a class="headerlink" href="#53-verify-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Check kernel config:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/work/beagleplay-poky-linux/linux-ti-staging/*/
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>cat<span class="w"> </span>.config<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>NUNCHUK
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>CONFIG_JOYSTICK_NUNCHUK=y
+</code></pre></div></p>
+<hr />
+<h2 id="6-deploy-and-test">6. Deploy and Test<a class="headerlink" href="#6-deploy-and-test" title="Permanent link">&para;</a></h2>
+<h3 id="61-rebuild-image">6.1 Rebuild Image<a class="headerlink" href="#61-rebuild-image" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div>
+<h3 id="62-deploy-to-nfs">6.2 Deploy to NFS<a class="headerlink" href="#62-deploy-to-nfs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/nfs/beagleplay/*
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>sudo<span class="w"> </span>tar<span class="w"> </span>-xf<span class="w"> </span>core-image-minimal-beagleplay.rootfs.tar.xz<span class="w"> </span>-C<span class="w"> </span>/nfs/beagleplay
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>root:root<span class="w"> </span>/nfs/beagleplay
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="c1"># Copy new kernel to SD card boot partition (or TFTP)</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>sudo<span class="w"> </span>mount<span class="w"> </span>/dev/sdb1<span class="w"> </span>/mnt
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>sudo<span class="w"> </span>cp<span class="w"> </span>Image<span class="w"> </span>/mnt/
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>sudo<span class="w"> </span>cp<span class="w"> </span>k3-am625-beagleplay.dtb<span class="w"> </span>/mnt/
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>sudo<span class="w"> </span>umount<span class="w"> </span>/mnt
+</code></pre></div>
+<h3 id="63-connect-nunchuk-hardware">6.3 Connect Nunchuk Hardware<a class="headerlink" href="#63-connect-nunchuk-hardware" title="Permanent link">&para;</a></h3>
+<p><strong>mikroBUS I2C3 pins on BeaglePlay:</strong>
+- Pin 11: SDA (I2C3 data)
+- Pin 12: SCL (I2C3 clock)
+- Pin 7: 3.3V (power)
+- Pin 10: GND (ground)</p>
+<p><strong>Nunchuk pinout (UEXT connector):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>   1  2  3  4  5  6  7  8  9 10
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>  ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>  │3V│  │  │  │  │  │GN│SC│SD│  │
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>  │3V│  │  │  │  │  │D │L │A │  │
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>  └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+</code></pre></div></p>
+<p><strong>Connections:</strong>
+- Nunchuk 3V3 → mikroBUS Pin 7
+- Nunchuk GND → mikroBUS Pin 10
+- Nunchuk SCL → mikroBUS Pin 12
+- Nunchuk SDA → mikroBUS Pin 11</p>
+<h3 id="64-boot-and-verify">6.4 Boot and Verify<a class="headerlink" href="#64-boot-and-verify" title="Permanent link">&para;</a></h3>
+<p><strong>Boot BeaglePlay, check kernel log:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>nunchuk
+</code></pre></div></p>
+<p><strong>Expected:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>[    2.345678] nunchuk 3-0052: Nintendo Wii Nunchuk detected
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>[    2.456789] input: Nintendo Wii Nunchuk as /devices/platform/.../input/input0
+</code></pre></div></p>
+<p><strong>Check device node:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>/dev/input/js0
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="c1"># Output: crw-rw---- 1 root input 13, 0 Nov 20 10:00 /dev/input/js0</span>
+</code></pre></div></p>
+<p><strong>Test input events:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>cat<span class="w"> </span>/dev/input/js0
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="c1"># Move joystick, press buttons - should see binary data</span>
+</code></pre></div></p>
+<p><strong>Use evtest (if installed):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>evtest<span class="w"> </span>/dev/input/js0
+</code></pre></div></p>
+<hr />
+<h2 id="7-advanced-bbappend-techniques">7. Advanced bbappend Techniques<a class="headerlink" href="#7-advanced-bbappend-techniques" title="Permanent link">&para;</a></h2>
+<h3 id="71-conditional-append">7.1 Conditional Append<a class="headerlink" href="#71-conditional-append" title="Permanent link">&para;</a></h3>
+<p><strong>Machine-specific patches:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">append</span><span class="p">:</span><span class="n">beagleplay</span> <span class="o">=</span> <span class="s2">&quot; file://beagleplay-only.patch&quot;</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">append</span><span class="p">:</span><span class="n">qemux86</span><span class="o">-</span><span class="mi">64</span> <span class="o">=</span> <span class="s2">&quot; file://qemu-only.patch&quot;</span>
+</code></pre></div></p>
+<h3 id="72-override-variables">7.2 Override Variables<a class="headerlink" href="#72-override-variables" title="Permanent link">&para;</a></h3>
+<p><strong>Change kernel version:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">PV</span> <span class="o">=</span> <span class="s2">&quot;6.6.32&quot;</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="n">SRCREV</span> <span class="o">=</span> <span class="s2">&quot;abc123def456...&quot;</span>
+</code></pre></div></p>
+<p><strong>Add extra compiler flags:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">EXTRA_OEMAKE</span><span class="p">:</span><span class="n">append</span> <span class="o">=</span> <span class="s2">&quot; CONFIG_DEBUG_INFO=y&quot;</span>
+</code></pre></div></p>
+<h3 id="73-extend-tasks">7.3 Extend Tasks<a class="headerlink" href="#73-extend-tasks" title="Permanent link">&para;</a></h3>
+<p><strong>Add post-install steps:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">do_install</span><span class="p">:</span><span class="n">append</span><span class="p">()</span> <span class="p">{</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>    <span class="n">install</span> <span class="o">-</span><span class="n">m</span> <span class="mi">0644</span> <span class="err">$</span><span class="p">{</span><span class="n">S</span><span class="p">}</span><span class="o">/</span><span class="n">extra</span><span class="o">-</span><span class="n">file</span> <span class="err">$</span><span class="p">{</span><span class="n">D</span><span class="p">}</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="74-remove-files-from-src_uri">7.4 Remove Files from SRC_URI<a class="headerlink" href="#74-remove-files-from-src_uri" title="Permanent link">&para;</a></h3>
+<p><strong>Remove unwanted patches:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">remove</span> <span class="o">=</span> <span class="s2">&quot;file://unwanted-patch.patch&quot;</span>
+</code></pre></div></p>
+<hr />
+<h2 id="8-best-practices">8. Best Practices<a class="headerlink" href="#8-best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="81-patch-naming">8.1 Patch Naming<a class="headerlink" href="#81-patch-naming" title="Permanent link">&para;</a></h3>
+<p><strong>Convention:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>0001-short-description.patch
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>0002-another-change.patch
+</code></pre></div></p>
+<p><strong>Numbering ensures order.</strong></p>
+<h3 id="82-patch-creation">8.2 Patch Creation<a class="headerlink" href="#82-patch-creation" title="Permanent link">&para;</a></h3>
+<p><strong>Generate from Git:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="nb">cd</span><span class="w"> </span>linux-source/
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>git<span class="w"> </span>format-patch<span class="w"> </span>-1<span class="w"> </span>HEAD
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="c1"># Outputs: 0001-commit-message.patch</span>
+</code></pre></div></p>
+<h3 id="83-config-fragment-organization">8.3 Config Fragment Organization<a class="headerlink" href="#83-config-fragment-organization" title="Permanent link">&para;</a></h3>
+<p><strong>Separate by feature:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>files/
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>├── nunchuk.cfg       # Nunchuk driver config
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>├── debug.cfg         # Debug options
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>├── usb.cfg           # USB gadget features
+</code></pre></div></p>
+<p><strong>Combine in bbappend:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">append</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="se">\</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="s2">    file://nunchuk.cfg </span><span class="se">\</span>
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="s2">    file://debug.cfg </span><span class="se">\</span>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="s2">    file://usb.cfg </span><span class="se">\</span>
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a><span class="s2">&quot;</span>
+</code></pre></div></p>
+<hr />
+<h2 id="9-troubleshooting">9. Troubleshooting<a class="headerlink" href="#9-troubleshooting" title="Permanent link">&para;</a></h2>
+<p><strong>Problem:</strong> Patch fails to apply</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1"># Check patch context</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>cat<span class="w"> </span>files/0001-patch.patch
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="c1"># Manually apply to check</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a><span class="nb">cd</span><span class="w"> </span>tmp/work/.../linux-ti-staging/.../git
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>patch<span class="w"> </span>-p1<span class="w"> </span>&lt;<span class="w"> </span>/path/to/patch
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a>
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a><span class="c1"># If fails, regenerate patch against current kernel version</span>
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> Configuration not taking effect</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># Check merged config</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>configure<span class="w"> </span>virtual/kernel
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>cat<span class="w"> </span>tmp/work/.../linux-ti-staging/.../.config<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>NUNCHUK
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="c1"># Force reconfigure</span>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>virtual/kernel
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>bitbake<span class="w"> </span>virtual/kernel
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> bbappend not matched</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Check exact recipe name</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>linux-ti-staging
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1"># Use wildcard version</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>mv<span class="w"> </span>linux-ti-staging_6.6.bbappend<span class="w"> </span>linux-ti-staging_%.bbappend
+</code></pre></div></p>
+<hr />
+<h2 id="10-going-further">10. Going Further<a class="headerlink" href="#10-going-further" title="Permanent link">&para;</a></h2>
+<h3 id="101-patch-ninvaders-for-joystick">10.1 Patch ninvaders for Joystick<a class="headerlink" href="#101-patch-ninvaders-for-joystick" title="Permanent link">&para;</a></h3>
+<p><strong>Add joystick support to ninvaders:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># In meta-beagleplay/recipes-games/ninvaders/ninvaders_%.bbappend</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="n">FILESEXTRAPATHS</span><span class="p">:</span><span class="n">prepend</span> <span class="o">:=</span> <span class="s2">&quot;$</span><span class="si">{THISDIR}</span><span class="s2">/files:&quot;</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="n">SRC_URI</span><span class="p">:</span><span class="n">append</span> <span class="o">=</span> <span class="s2">&quot; file://0001-add-joystick-support.patch&quot;</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="n">DEPENDS</span><span class="p">:</span><span class="n">append</span> <span class="o">=</span> <span class="s2">&quot; linux-input&quot;</span>
+</code></pre></div></p>
+<h3 id="102-multiple-bbappend-files">10.2 Multiple bbappend Files<a class="headerlink" href="#102-multiple-bbappend-files" title="Permanent link">&para;</a></h3>
+<p><strong>You can have multiple appends for same recipe:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>meta-layer1/recipes-kernel/linux/linux-ti-staging_%.bbappend
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>meta-layer2/recipes-kernel/linux/linux-ti-staging_%.bbappend
+</code></pre></div></p>
+<p>Both applied, layer priority determines order.</p>
+<hr />
+<h2 id="11-key-takeaways">11. Key Takeaways<a class="headerlink" href="#11-key-takeaways" title="Permanent link">&para;</a></h2>
+<p><strong>Accomplished:</strong>
+1. ✅ Created bbappend files
+2. ✅ Applied kernel patches
+3. ✅ Added kernel configuration fragments
+4. ✅ Extended Device Tree
+5. ✅ Added Nunchuk driver support
+6. ✅ Tested on hardware</p>
+<p><strong>Skills Gained:</strong>
+- Non-invasive recipe modification
+- Patch management
+- Kernel customization workflow
+- Hardware driver integration</p>
+<p><strong>Next Steps:</strong>
+- <strong>Lab 15</strong>: Custom machine configurations
+- <strong>Lab 16</strong>: Create custom distribution images
+- <strong>Lab 17</strong>: SDK development workflow</p>
+<hr />
+<h2 id="12-verification-checklist">12. Verification Checklist<a class="headerlink" href="#12-verification-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] bbappend file created and recognized</li>
+<li>[ ] Patches apply successfully</li>
+<li>[ ] Kernel config includes Nunchuk driver</li>
+<li>[ ] Kernel rebuilds without errors</li>
+<li>[ ] Nunchuk device appears in <code>/dev/input/</code></li>
+<li>[ ] evtest shows joystick events</li>
+<li>[ ] No merge conflicts on kernel updates</li>
+</ul>
+<p><strong>Success criteria:</strong> Functional Nunchuk joystick on BeaglePlay</p>
+<hr />
+<p><strong>End of Lab 14</strong></p>
+<p><em>The Guide rates this lab: </em><em>Mostly Harmless</em><em> ⭐⭐⭐⭐</em></p>
+<p>You now master recipe extension through bbappend files, enabling clean customization of upstream packages without breaking maintainability. This is the foundation of professional Yocto development.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

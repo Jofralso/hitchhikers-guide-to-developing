@@ -1,0 +1,4654 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/embedded-linux/lab01-toolchain/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../lab02-hardware/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 1 - Toolchain - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-1-building-a-cross-compilation-toolchain" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 1 - Toolchain
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-cross-compilation-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Cross-Compilation Toolchain?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-build-your-own-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Build Your Own Toolchain?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-library-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C Library Choices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workspace-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Preparation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-getting-crosstool-ng" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Getting Crosstool-NG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Getting Crosstool-NG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-11-clone-crosstool-ng-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1.1: Clone Crosstool-NG Repository
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-12-bootstrap-crosstool-ng" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1.2: Bootstrap Crosstool-NG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-13-build-crosstool-ng" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1.3: Build Crosstool-NG
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-configuring-the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Configuring the Toolchain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Configuring the Toolchain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-21-list-available-samples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.1: List Available Samples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-22-load-base-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.2: Load Base Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-23-customize-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.3: Customize Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2.3: Customize Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Changes:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-24-review-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.4: Review Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-building-the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Building the Toolchain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Building the Toolchain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-31-start-the-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3.1: Start the Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-32-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3.2: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-testing-the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Testing the Toolchain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Testing the Toolchain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-41-add-toolchain-to-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.1: Add Toolchain to PATH
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-42-create-test-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.2: Create Test Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-43-compile-with-cross-compiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.3: Compile with Cross-Compiler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-44-compare-with-native-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.4: Compare with Native Compilation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-45-inspect-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.5: Inspect Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-qemu-user-mode-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: QEMU User-Mode Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: QEMU User-Mode Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-51-install-qemu-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.1: Install QEMU User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-52-first-run-attempt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.2: First Run Attempt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-53-find-library-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.3: Find Library Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-54-run-with-library-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.4: Run with Library Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-55-test-with-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.5: Test with Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-static-vs-dynamic-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Static vs Dynamic Linking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Static vs Dynamic Linking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-61-create-static-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.1: Create Static Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-62-test-static-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.2: Test Static Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-toolchain-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Toolchain Exploration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Toolchain Exploration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-71-explore-compiler-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.1: Explore Compiler Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-72-compile-with-optimizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.2: Compile with Optimizations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-73-inspect-generated-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.3: Inspect Generated Assembly
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-74-examine-object-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.4: Examine Object Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-your-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Your Work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cleanup-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cleanup (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further-optional-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further (Optional Challenges)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further (Optional Challenges)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-multi-library-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Multi-Library Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-cortex-a72-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Cortex-A72 Toolchain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-custom-gcc-patches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Custom GCC Patches
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-toolchain-wrapper-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Toolchain Wrapper Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-1-build-fails-with-no-space-left-on-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 1: Build Fails with "No space left on device"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-2-configure-error-c-compiler-cannot-create-executables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 2: "configure: error: C compiler cannot create executables"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-3-qemu-illegal-instruction-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 3: QEMU "Illegal instruction" Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-4-toolchain-build-takes-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 4: Toolchain Build Takes Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-cross-compilation-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Cross-Compilation Toolchain?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-build-your-own-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Build Your Own Toolchain?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-library-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C Library Choices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workspace-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Preparation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-getting-crosstool-ng" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Getting Crosstool-NG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Getting Crosstool-NG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-11-clone-crosstool-ng-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1.1: Clone Crosstool-NG Repository
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-12-bootstrap-crosstool-ng" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1.2: Bootstrap Crosstool-NG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-13-build-crosstool-ng" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1.3: Build Crosstool-NG
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-configuring-the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Configuring the Toolchain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Configuring the Toolchain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-21-list-available-samples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.1: List Available Samples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-22-load-base-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.2: Load Base Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-23-customize-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.3: Customize Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2.3: Customize Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Changes:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-24-review-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2.4: Review Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-building-the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Building the Toolchain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Building the Toolchain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-31-start-the-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3.1: Start the Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-32-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3.2: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-testing-the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Testing the Toolchain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Testing the Toolchain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-41-add-toolchain-to-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.1: Add Toolchain to PATH
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-42-create-test-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.2: Create Test Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-43-compile-with-cross-compiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.3: Compile with Cross-Compiler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-44-compare-with-native-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.4: Compare with Native Compilation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-45-inspect-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.5: Inspect Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-qemu-user-mode-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: QEMU User-Mode Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: QEMU User-Mode Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-51-install-qemu-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.1: Install QEMU User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-52-first-run-attempt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.2: First Run Attempt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-53-find-library-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.3: Find Library Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-54-run-with-library-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.4: Run with Library Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-55-test-with-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5.5: Test with Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-static-vs-dynamic-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Static vs Dynamic Linking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Static vs Dynamic Linking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-61-create-static-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.1: Create Static Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-62-test-static-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.2: Test Static Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-toolchain-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Toolchain Exploration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Toolchain Exploration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-71-explore-compiler-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.1: Explore Compiler Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-72-compile-with-optimizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.2: Compile with Optimizations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-73-inspect-generated-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.3: Inspect Generated Assembly
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-74-examine-object-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7.4: Examine Object Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-your-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Your Work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cleanup-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cleanup (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further-optional-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further (Optional Challenges)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further (Optional Challenges)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-multi-library-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Multi-Library Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-cortex-a72-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Cortex-A72 Toolchain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-custom-gcc-patches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Custom GCC Patches
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-toolchain-wrapper-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Toolchain Wrapper Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-1-build-fails-with-no-space-left-on-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 1: Build Fails with "No space left on device"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-2-configure-error-c-compiler-cannot-create-executables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 2: "configure: error: C compiler cannot create executables"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-3-qemu-illegal-instruction-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 3: QEMU "Illegal instruction" Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-4-toolchain-build-takes-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 4: Toolchain Build Takes Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-1-building-a-cross-compilation-toolchain">Lab 1: Building a Cross-Compilation Toolchain<a class="headerlink" href="#lab-1-building-a-cross-compilation-toolchain" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about cross-compilation toolchains:</p>
+<p><em>"A cross-compilation toolchain is a bit like a babel fish for computer architectures. It translates your perfectly reasonable x86_64 instructions into ARM64 gibberish that only a BeaglePlay can understand. The main difference is that the babel fish was designed by a benevolent creator who wanted universal communication, whereas the toolchain was designed by compiler engineers who, while generally quite pleasant at parties, seem to have been educated by Vogons."</em></p>
+<p>This is, of course, unfair to compiler engineers. Most of them are very nice people once you get to know them. They just happen to work in a field where a missing semicolon can cause your computer to develop what can only be described as electronic depression.</p>
+<p><strong>Platform</strong>: BeaglePlay (ARM Cortex-A53, 64-bit) - <em>Also known as "the computer that speaks a different language"</em><br />
+<strong>Prerequisites</strong>: Linux command line basics, C programming, your towel<br />
+<strong>Duration</strong>: 2-3 hours (or approximately 42 minutes in improbable circumstances) (or 42 minutes if you're a time traveler)<br />
+<strong>Difficulty</strong>: ⭐⭐⭐☆☆ (3/5 on the Vogon poetry scale)</p>
+<hr />
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>By the end of this lab, you will be able to:</p>
+<ul>
+<li>[ ] Understand the components of a cross-compilation toolchain (without your brain leaking out your ears)</li>
+<li>[ ] Configure Crosstool-NG for ARM64 architecture (mostly harmless)</li>
+<li>[ ] Build a custom toolchain targeting the BeaglePlay's Cortex-A53 processor</li>
+<li>[ ] Test the toolchain with QEMU user-mode emulation</li>
+<li>[ ] Understand the difference between C libraries (musl, glibc, uclibc) and why this matters more than you'd think</li>
+</ul>
+<hr />
+<h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-a-cross-compilation-toolchain">What is a Cross-Compilation Toolchain?<a class="headerlink" href="#what-is-a-cross-compilation-toolchain" title="Permanent link">&para;</a></h3>
+<p>The Guide's definition of <strong>cross-compilation toolchain</strong>:</p>
+<p><em>Cross-compilation toolchain (n): A set of development tools that allows you to compile code on one platform (your development PC with its fancy x86_64 processor) to run on a completely different platform (the BeaglePlay with its ARM64/AARCH64 processor, which speaks an entirely different dialect of machine code). This is roughly equivalent to writing a letter in English while sitting in London, having it automatically translated to Betelgeusean, and then mailing it to someone in the Betelgeuse system who has never heard of Earth. The remarkable thing is that it actually works.</em></p>
+<p><strong>Components</strong> (All essential, like knowing where your towel is):
+- <strong>Compiler</strong>: <code>gcc</code> or <code>clang</code> - translates C/C++ to machine code (thinks it knows everything)
+- <strong>Binutils</strong>: Tools like <code>ld</code> (linker), <code>as</code> (assembler), <code>objdump</code>, <code>ar</code> (the supporting cast)
+- <strong>C Library</strong>: Provides standard functions (printf, malloc, etc.) - the babel fish of function calls
+- <strong>Kernel Headers</strong>: Interface to Linux system calls (Vogon poetry for the kernel)
+- <strong>GDB</strong>: GNU Debugger for debugging cross-compiled programs (Marvin's favorite tool)</p>
+<h3 id="why-build-your-own-toolchain">Why Build Your Own Toolchain?<a class="headerlink" href="#why-build-your-own-toolchain" title="Permanent link">&para;</a></h3>
+<p>You might reasonably ask, "Why build a toolchain when pre-built ones exist?" This is an excellent question, showing you have the survival instincts Arthur Dent lacked when faced with planetary demolition.</p>
+<p>While pre-built toolchains exist (like <code>gcc-aarch64-linux-gnu</code>), building your own offers:</p>
+<ol>
+<li><strong>Full Control</strong>: Choose specific GCC version, C library, optimizations (be your own Slartibartfast)</li>
+<li><strong>Compatibility</strong>: Match exact kernel version and system requirements (avoid Vogon-level compatibility issues)</li>
+<li><strong>Size Optimization</strong>: Exclude unnecessary features for embedded systems (pack light, like for hitchhiking)</li>
+<li><strong>Learning</strong>: Understanding what's inside the "black box" (because curiosity didn't kill Ford Prefect)</li>
+</ol>
+<p><em>Ford Prefect's note: "Always know how your toolchain works. You never know when you'll need to rebuild it at short notice, possibly while hanging onto the side of a hyperspace freighter."</em></p>
+<h3 id="c-library-choices">C Library Choices<a class="headerlink" href="#c-library-choices" title="Permanent link">&para;</a></h3>
+<p>The Guide's take on C libraries: "Choosing a C library is like choosing which Pan Galactic Gargle Blaster to drink. They all do roughly the same thing, but with vastly different levels of consequences."</p>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Size</th>
+<th>Features</th>
+<th>Best For</th>
+<th>Guide Rating</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>glibc</strong></td>
+<td>Large (~2MB)</td>
+<td>Full POSIX, best compatibility</td>
+<td>Desktop, servers</td>
+<td>"Mostly Harmless"</td>
+</tr>
+<tr>
+<td><strong>musl</strong></td>
+<td>Small (~600KB)</td>
+<td>Clean, standards-compliant</td>
+<td>Modern embedded</td>
+<td>"Froody"</td>
+</tr>
+<tr>
+<td><strong>uclibc-ng</strong></td>
+<td>Tiny (~400KB)</td>
+<td>Configurable features</td>
+<td>Memory-constrained systems</td>
+<td>"Hoopy"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>For this lab</strong>: We'll use <strong>musl</strong> - it's lightweight yet fully functional.</p>
+<hr />
+<h2 id="prerequisites-check">Prerequisites Check<a class="headerlink" href="#prerequisites-check" title="Permanent link">&para;</a></h2>
+<p>Before starting, ensure you have:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Check available disk space (need ~10 GB)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>df<span class="w"> </span>-h<span class="w"> </span>~
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Check RAM (need at least 4 GB)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>free<span class="w"> </span>-h
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Verify Ubuntu version</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>lsb_release<span class="w"> </span>-a
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Recommended: Ubuntu 24.04 LTS</span>
+</code></pre></div>
+<hr />
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<h3 id="workspace-preparation">Workspace Preparation<a class="headerlink" href="#workspace-preparation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Create lab directory</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/embedded-linux-labs/lab01-toolchain
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">cd</span><span class="w"> </span>~/embedded-linux-labs/lab01-toolchain
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Set environment variable for convenience</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LAB_DIR</span><span class="o">=</span><span class="nv">$PWD</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Lab directory: </span><span class="nv">$LAB_DIR</span><span class="s2">&quot;</span>
+</code></pre></div>
+<h3 id="required-packages">Required Packages<a class="headerlink" href="#required-packages" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Update package database</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Install build dependencies</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span>build-essential<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span>git<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span>autoconf<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span>bison<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span>flex<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span>texinfo<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span>help2man<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span>gawk<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span>libtool-bin<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span>libncurses5-dev<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span>unzip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span>gettext<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span>python3<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span>qemu-user
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="c1"># Verify installations</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>gcc<span class="w"> </span>--version
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>git<span class="w"> </span>--version
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>python3<span class="w"> </span>--version
+</code></pre></div>
+<p><strong>Expected</strong>: GCC 11.4 or newer, Git 2.34 or newer, Python 3.10 or newer</p>
+<hr />
+<h2 id="part-1-getting-crosstool-ng">Part 1: Getting Crosstool-NG<a class="headerlink" href="#part-1-getting-crosstool-ng" title="Permanent link">&para;</a></h2>
+<h3 id="step-11-clone-crosstool-ng-repository">Step 1.1: Clone Crosstool-NG Repository<a class="headerlink" href="#step-11-clone-crosstool-ng-repository" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Download the Crosstool-NG source code</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Clone from GitHub</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/crosstool-ng/crosstool-ng.git
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">cd</span><span class="w"> </span>crosstool-ng
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Checkout tested version</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>git<span class="w"> </span>checkout<span class="w"> </span>crosstool-ng-1.26.0
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="c1"># Verify checkout</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>git<span class="w"> </span>describe<span class="w"> </span>--tags
+</code></pre></div>
+<p><strong>Expected Output</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>crosstool-ng-1.26.0
+</code></pre></div></p>
+<p><strong>What is Crosstool-NG?</strong><br />
+A flexible framework for building cross-compilation toolchains. It automates downloading, configuring, and building all toolchain components.</p>
+<h3 id="step-12-bootstrap-crosstool-ng">Step 1.2: Bootstrap Crosstool-NG<a class="headerlink" href="#step-12-bootstrap-crosstool-ng" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Generate configuration scripts</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Run bootstrap to create configure script</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>./bootstrap
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Check for generated files</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>ls<span class="w"> </span>-l<span class="w"> </span>configure
+</code></pre></div>
+<p><strong>Expected</strong>: You should see a <code>configure</code> script created</p>
+<p><strong>Troubleshooting</strong>:
+- <strong>Error</strong>: "autoconf: command not found"
+  - <strong>Solution</strong>: <code>sudo apt install autoconf automake</code></p>
+<h3 id="step-13-build-crosstool-ng">Step 1.3: Build Crosstool-NG<a class="headerlink" href="#step-13-build-crosstool-ng" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Compile Crosstool-NG for local use</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Configure for local installation (no system-wide install)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>./configure<span class="w"> </span>--enable-local
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Build (takes ~2 minutes)</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Verify build</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>./ct-ng<span class="w"> </span>version
+</code></pre></div>
+<p><strong>Expected Output</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>This is crosstool-NG version crosstool-ng-1.26.0
+</code></pre></div></p>
+<p><strong>What is <code>--enable-local</code>?</strong><br />
+Keeps ct-ng in the current directory instead of installing to <code>/usr/local/bin</code>. Useful for testing without root privileges.</p>
+<hr />
+<h2 id="part-2-configuring-the-toolchain">Part 2: Configuring the Toolchain<a class="headerlink" href="#part-2-configuring-the-toolchain" title="Permanent link">&para;</a></h2>
+<h3 id="step-21-list-available-samples">Step 2.1: List Available Samples<a class="headerlink" href="#step-21-list-available-samples" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Explore pre-configured toolchain templates</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># List all sample configurations</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>./ct-ng<span class="w"> </span>list-samples
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Filter for ARM64 samples</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>./ct-ng<span class="w"> </span>list-samples<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>aarch64
+</code></pre></div>
+<p><strong>Expected Output</strong> (partial):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>aarch64-unknown-linux-gnu
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>aarch64-unknown-linux-musl
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>aarch64-rpi3-linux-gnu
+</code></pre></div></p>
+<p><strong>What are samples?</strong><br />
+Pre-made configurations for common architectures. We'll use one as a starting point and customize it.</p>
+<h3 id="step-22-load-base-configuration">Step 2.2: Load Base Configuration<a class="headerlink" href="#step-22-load-base-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Start with ARM64/musl sample</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Load the aarch64-unknown-linux-musl sample</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>./ct-ng<span class="w"> </span>aarch64-unknown-linux-musl
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Verify configuration loaded</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>ls<span class="w"> </span>-l<span class="w"> </span>.config
+</code></pre></div>
+<p><strong>Expected</strong>: <code>.config</code> file created with default settings</p>
+<h3 id="step-23-customize-configuration">Step 2.3: Customize Configuration<a class="headerlink" href="#step-23-customize-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Optimize for BeaglePlay's Cortex-A53 processor</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Launch menuconfig interface</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>./ct-ng<span class="w"> </span>menuconfig
+</code></pre></div>
+<p><strong>Navigation</strong>: Use arrow keys, Enter to select, Space to toggle, <code>/</code> to search, <code>?</code> for help</p>
+<h4 id="configuration-changes">Configuration Changes:<a class="headerlink" href="#configuration-changes" title="Permanent link">&para;</a></h4>
+<p><strong>1. Path and misc options</strong>:
+- Navigate to: <code>Paths and misc options</code>
+- Enable: <code>☑ Try features marked as EXPERIMENTAL</code>
+- <strong>Why</strong>: Allows newer GCC versions and features</p>
+<p><strong>2. Target options</strong>:
+- Navigate to: <code>Target options</code>
+- Set <code>Emit assembly for CPU (ARCH_CPU)</code>: <code>cortex-a53</code>
+  - <strong>Why</strong>: BeaglePlay uses TI AM62 with Cortex-A53 cores
+- Verify <code>Endianness</code>: <code>Little endian</code> (default)
+  - <strong>Why</strong>: ARM Cortex-A53 uses little-endian mode</p>
+<p><strong>3. Toolchain options</strong>:
+- Navigate to: <code>Toolchain options</code>
+- Set <code>Tuple's vendor string</code>: <code>beagleplay</code>
+  - <strong>Result</strong>: Toolchain will be named <code>aarch64-beagleplay-linux-musl</code>
+- Set <code>Tuple's alias</code>: <code>aarch64-linux</code>
+  - <strong>Why</strong>: Allows using shorter command <code>aarch64-linux-gcc</code></p>
+<p><strong>4. Operating System</strong>:
+- Navigate to: <code>Operating System → Version of linux</code>
+- Select: <code>6.6.x</code> (or closest available LTS version)
+  - <strong>Why</strong>: Match kernel version you'll use on BeaglePlay
+  - <strong>Important</strong>: Toolchain kernel headers should NOT be newer than target kernel</p>
+<p><strong>5. C-library</strong>:
+- Navigate to: <code>C-library</code>
+- Verify: <code>C library</code> = <code>musl</code> (LIBC_MUSL)
+- Keep default musl version (latest stable)
+  - <strong>Why</strong>: Lightweight, modern, clean codebase</p>
+<p><strong>6. C compiler</strong>:
+- Navigate to: <code>C compiler</code>
+- Set <code>Version of gcc</code>: <code>13.3.0</code> or latest stable
+- Verify: <code>☑ C++</code> is enabled
+  - <strong>Why</strong>: Many embedded projects use C++</p>
+<p><strong>7. Debug facilities</strong>:
+- Navigate to: <code>Debug facilities</code>
+- <strong>Disable all debug tools</strong> (gdb, strace, ltrace)
+  - <strong>Why</strong>: We'll build these separately later with better control
+  - Saves compilation time and disk space</p>
+<p><strong>Save and Exit</strong>: Press <code>S</code> to save, then <code>Q</code> to quit</p>
+<h3 id="step-24-review-configuration">Step 2.4: Review Configuration<a class="headerlink" href="#step-24-review-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Display current configuration</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>./ct-ng<span class="w"> </span>show-config
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Check tuple (toolchain naming)</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>./ct-ng<span class="w"> </span>show-tuple
+</code></pre></div>
+<p><strong>Expected</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>aarch64-beagleplay-linux-musl
+</code></pre></div></p>
+<hr />
+<h2 id="part-3-building-the-toolchain">Part 3: Building the Toolchain<a class="headerlink" href="#part-3-building-the-toolchain" title="Permanent link">&para;</a></h2>
+<p><em>The Guide notes: "Building a toolchain from scratch is like waiting for a Vogon to finish reading poetry - it takes an improbably long time, but the end result is (hopefully) less painful."</em></p>
+<h3 id="step-31-start-the-build">Step 3.1: Start the Build<a class="headerlink" href="#step-31-start-the-build" title="Permanent link">&para;</a></h3>
+<p><strong>Goal</strong>: Compile the complete toolchain</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Start build (this takes 30-60 minutes)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>./ct-ng<span class="w"> </span>build
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Monitor progress in another terminal (optional)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="c1"># tail -f ~/crosstool-ng/.build/build.log</span>
+</code></pre></div>
+<p><strong>What happens during build</strong>:
+1. Download source tarballs (Linux headers, GCC, binutils, musl)
+2. Extract archives
+3. Configure each component
+4. Build binutils
+5. Build initial GCC (stage 1)
+6. Build musl C library
+7. Build full GCC (stage 2)
+8. Create sysroot with headers and libraries
+9. Install to <code>~/x-tools/</code></p>
+<p><strong>Build time</strong>: 30-60 minutes depending on CPU<br />
+<strong>Disk space used</strong>: ~9 GB during build, ~2 GB final</p>
+<p><strong>Progress indicators</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>[INFO ]  Installing cross-gdb
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>[EXTRA]    Configuring cross-gdb
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>[INFO ]  Building cross-gdb
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>[INFO ]  Installing cross-gdb
+</code></pre></div></p>
+<p><strong>Troubleshooting</strong>:
+- <strong>Error</strong>: "No space left on device"
+  - <strong>Solution</strong>: Free up disk space, need ~10 GB free</p>
+<ul>
+<li><strong>Error</strong>: Build fails with compilation errors</li>
+<li>
+<p><strong>Solution</strong>: Check build.log: <code>tail -100 ~/.build/build.log</code></p>
+</li>
+<li>
+<p><strong>Build takes too long</strong> (&gt;2 hours)</p>
+</li>
+<li><strong>Check</strong>: CPU usage with <code>htop</code>, build should use all cores</li>
+<li><strong>Note</strong>: First build is slow, subsequent builds are faster</li>
+</ul>
+<h3 id="step-32-verify-installation">Step 3.2: Verify Installation<a class="headerlink" href="#step-32-verify-installation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Check toolchain installation</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>ls<span class="w"> </span>-lh<span class="w"> </span>~/x-tools/
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># List toolchain directory</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>ls<span class="w"> </span>~/x-tools/aarch64-beagleplay-linux-musl/
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="c1"># Check bin directory</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>ls<span class="w"> </span>~/x-tools/aarch64-beagleplay-linux-musl/bin/
+</code></pre></div>
+<p><strong>Expected files in bin/</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>aarch64-beagleplay-linux-musl-gcc
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>aarch64-beagleplay-linux-musl-g++
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>aarch64-beagleplay-linux-musl-ld
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>aarch64-beagleplay-linux-musl-as
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>aarch64-beagleplay-linux-musl-objdump
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>aarch64-linux-gcc (alias)
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>aarch64-linux-g++ (alias)
+</code></pre></div></p>
+<hr />
+<h2 id="part-4-testing-the-toolchain">Part 4: Testing the Toolchain<a class="headerlink" href="#part-4-testing-the-toolchain" title="Permanent link">&para;</a></h2>
+<h3 id="step-41-add-toolchain-to-path">Step 4.1: Add Toolchain to PATH<a class="headerlink" href="#step-41-add-toolchain-to-path" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Add toolchain to current session</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/x-tools/aarch64-beagleplay-linux-musl/bin:<span class="nv">$PATH</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># Verify</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>which<span class="w"> </span>aarch64-linux-gcc
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="c1"># Make permanent (optional)</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=$HOME/x-tools/aarch64-beagleplay-linux-musl/bin:$PATH&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+</code></pre></div>
+<h3 id="step-42-create-test-program">Step 4.2: Create Test Program<a class="headerlink" href="#step-42-create-test-program" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Create test directory</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nb">cd</span><span class="w"> </span>~/embedded-linux-labs/lab01-toolchain
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>mkdir<span class="w"> </span><span class="nb">test</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nb">cd</span><span class="w"> </span><span class="nb">test</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># Create hello.c</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>hello.c<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="s">#include &lt;stdio.h&gt;</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="s">#include &lt;stdlib.h&gt;</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="s">int main(int argc, char **argv) {</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="s">    printf(&quot;╔══════════════════════════════════════════╗\n&quot;);</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="s">    printf(&quot;║   Hello from BeaglePlay!                ║\n&quot;);</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="s">    printf(&quot;╚══════════════════════════════════════════╝\n&quot;);</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="s">    printf(&quot;\n&quot;);</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="s">    printf(&quot;System Information:\n&quot;);</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="s">    printf(&quot;  Architecture: ARM64/AARCH64\n&quot;);</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="s">    printf(&quot;  Processor:    Cortex-A53 (64-bit)\n&quot;);</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="s">    printf(&quot;  Platform:     TI AM62x (BeaglePlay)\n&quot;);</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="s">    printf(&quot;  C Library:    musl libc\n&quot;);</span>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="s">    printf(&quot;\n&quot;);</span>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="s">    printf(&quot;Compiled with:\n&quot;);</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="s">    printf(&quot;  GCC version:  %s\n&quot;, __VERSION__);</span>
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="s">    printf(&quot;  Compilation:  %s %s\n&quot;, __DATE__, __TIME__);</span>
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="s">    printf(&quot;\n&quot;);</span>
+<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a>
+<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="s">    if (argc &gt; 1) {</span>
+<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="s">        printf(&quot;Arguments passed: %d\n&quot;, argc - 1);</span>
+<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a><span class="s">        for (int i = 1; i &lt; argc; i++) {</span>
+<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="s">            printf(&quot;  arg[%d]: %s\n&quot;, i, argv[i]);</span>
+<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="s">        }</span>
+<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="s">    }</span>
+<a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a>
+<a id="__codelineno-19-34" name="__codelineno-19-34" href="#__codelineno-19-34"></a><span class="s">    return EXIT_SUCCESS;</span>
+<a id="__codelineno-19-35" name="__codelineno-19-35" href="#__codelineno-19-35"></a><span class="s">}</span>
+<a id="__codelineno-19-36" name="__codelineno-19-36" href="#__codelineno-19-36"></a><span class="s">EOF</span>
+</code></pre></div>
+<h3 id="step-43-compile-with-cross-compiler">Step 4.3: Compile with Cross-Compiler<a class="headerlink" href="#step-43-compile-with-cross-compiler" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Cross-compile for ARM64</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>aarch64-linux-gcc<span class="w"> </span>-o<span class="w"> </span>hello-arm64<span class="w"> </span>hello.c
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># Check binary type</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>file<span class="w"> </span>hello-arm64
+</code></pre></div>
+<p><strong>Expected Output</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>hello-arm64: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV),
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>dynamically linked, interpreter /lib/ld-musl-aarch64.so.1, not stripped
+</code></pre></div></p>
+<p><strong>Key observations</strong>:
+- <code>ARM aarch64</code>: Compiled for 64-bit ARM
+- <code>dynamically linked</code>: Uses shared libraries
+- <code>ld-musl-aarch64.so.1</code>: musl C library dynamic linker</p>
+<h3 id="step-44-compare-with-native-compilation">Step 4.4: Compare with Native Compilation<a class="headerlink" href="#step-44-compare-with-native-compilation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Compile for x86_64 (your PC)</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>gcc<span class="w"> </span>-o<span class="w"> </span>hello-x86<span class="w"> </span>hello.c
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># Compare file sizes</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>ls<span class="w"> </span>-lh<span class="w"> </span>hello-*
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="c1"># Compare binary types</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>file<span class="w"> </span>hello-x86
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>file<span class="w"> </span>hello-arm64
+</code></pre></div>
+<p><strong>Expected</strong>: Different ELF types for x86_64 vs ARM64</p>
+<h3 id="step-45-inspect-binary">Step 4.5: Inspect Binary<a class="headerlink" href="#step-45-inspect-binary" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># View binary header</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>readelf<span class="w"> </span>-h<span class="w"> </span>hello-arm64
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># List shared library dependencies</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>aarch64-linux-readelf<span class="w"> </span>-d<span class="w"> </span>hello-arm64<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>NEEDED
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="c1"># Or use ldd-equivalent</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>aarch64-linux-ldd<span class="w"> </span>hello-arm64
+</code></pre></div>
+<p><strong>Expected dependencies</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>libc.so
+</code></pre></div></p>
+<hr />
+<h2 id="part-5-qemu-user-mode-testing">Part 5: QEMU User-Mode Testing<a class="headerlink" href="#part-5-qemu-user-mode-testing" title="Permanent link">&para;</a></h2>
+<h3 id="step-51-install-qemu-user">Step 5.1: Install QEMU User<a class="headerlink" href="#step-51-install-qemu-user" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Install QEMU user-mode emulator</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>qemu-user
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="c1"># Verify installation</span>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>qemu-aarch64<span class="w"> </span>--version
+</code></pre></div>
+<h3 id="step-52-first-run-attempt">Step 5.2: First Run Attempt<a class="headerlink" href="#step-52-first-run-attempt" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Try to run ARM64 binary on x86_64 host</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>qemu-aarch64<span class="w"> </span>hello-arm64
+</code></pre></div>
+<p><strong>Expected Error</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>qemu-aarch64: Could not open &#39;/lib/ld-musl-aarch64.so.1&#39;: No such file or directory
+</code></pre></div></p>
+<p><strong>Why it fails</strong>: QEMU can emulate ARM64 CPU, but the binary needs ARM64 shared libraries (dynamic linker).</p>
+<h3 id="step-53-find-library-path">Step 5.3: Find Library Path<a class="headerlink" href="#step-53-find-library-path" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Find musl dynamic linker in toolchain</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>find<span class="w"> </span>~/x-tools<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;ld-musl-aarch64.so.1&quot;</span>
+</code></pre></div>
+<p><strong>Expected</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>/home/youruser/x-tools/aarch64-beagleplay-linux-musl/aarch64-beagleplay-linux-musl/sysroot/lib/ld-musl-aarch64.so.1
+</code></pre></div></p>
+<p><strong>What is sysroot?</strong><br />
+The "root filesystem" for cross-compilation containing ARM64 headers and libraries.</p>
+<h3 id="step-54-run-with-library-path">Step 5.4: Run with Library Path<a class="headerlink" href="#step-54-run-with-library-path" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Set SYSROOT variable for convenience</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SYSROOT</span><span class="o">=</span>~/x-tools/aarch64-beagleplay-linux-musl/aarch64-beagleplay-linux-musl/sysroot
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="c1"># Run with -L flag to specify library path</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>qemu-aarch64<span class="w"> </span>-L<span class="w"> </span><span class="nv">$SYSROOT</span><span class="w"> </span>hello-arm64
+</code></pre></div>
+<p><strong>Expected Output</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>╔══════════════════════════════════════════╗
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>║   Hello from BeaglePlay!                ║
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>╚══════════════════════════════════════════╝
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>System Information:
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>  Architecture: ARM64/AARCH64
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>  Processor:    Cortex-A53 (64-bit)
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>  Platform:     TI AM62x (BeaglePlay)
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>  C Library:    musl libc
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a>
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a>Compiled with:
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a>  GCC version:  13.3.0
+<a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a>  Compilation:  Nov 25 2025 14:30:00
+</code></pre></div></p>
+<p>🎉 <strong>Success!</strong> You're running ARM64 code on an x86_64 PC using QEMU!</p>
+<h3 id="step-55-test-with-arguments">Step 5.5: Test with Arguments<a class="headerlink" href="#step-55-test-with-arguments" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># Run with command-line arguments</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>qemu-aarch64<span class="w"> </span>-L<span class="w"> </span><span class="nv">$SYSROOT</span><span class="w"> </span>hello-arm64<span class="w"> </span>arg1<span class="w"> </span>arg2<span class="w"> </span><span class="s2">&quot;test argument&quot;</span>
+</code></pre></div>
+<p><strong>Expected</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Arguments passed: 3
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>  arg[1]: arg1
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>  arg[2]: arg2
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>  arg[3]: test argument
+</code></pre></div></p>
+<hr />
+<h2 id="part-6-static-vs-dynamic-linking">Part 6: Static vs Dynamic Linking<a class="headerlink" href="#part-6-static-vs-dynamic-linking" title="Permanent link">&para;</a></h2>
+<h3 id="step-61-create-static-binary">Step 6.1: Create Static Binary<a class="headerlink" href="#step-61-create-static-binary" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># Compile with static linking</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>aarch64-linux-gcc<span class="w"> </span>-static<span class="w"> </span>-o<span class="w"> </span>hello-arm64-static<span class="w"> </span>hello.c
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># Compare sizes</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>ls<span class="w"> </span>-lh<span class="w"> </span>hello-arm64*
+</code></pre></div>
+<p><strong>Expected</strong>:
+- <code>hello-arm64</code>: ~16 KB (dynamic)
+- <code>hello-arm64-static</code>: ~800 KB (static)</p>
+<p><strong>Why the difference?</strong><br />
+Static binary includes entire C library, dynamic binary only references it.</p>
+<h3 id="step-62-test-static-binary">Step 6.2: Test Static Binary<a class="headerlink" href="#step-62-test-static-binary" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="c1"># Run without -L flag (no external libraries needed)</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>qemu-aarch64<span class="w"> </span>hello-arm64-static
+</code></pre></div>
+<p><strong>Expected</strong>: Works without SYSROOT because all code is embedded.</p>
+<p><strong>Trade-offs</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Linking</th>
+<th>Size</th>
+<th>Advantages</th>
+<th>Disadvantages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dynamic</strong></td>
+<td>Small</td>
+<td>Shared libs, updates easy</td>
+<td>Needs libraries at runtime</td>
+</tr>
+<tr>
+<td><strong>Static</strong></td>
+<td>Large</td>
+<td>Self-contained</td>
+<td>Large, no shared updates</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use each</strong>:
+- <strong>Dynamic</strong>: Normal applications, space-constrained systems
+- <strong>Static</strong>: Initial bootup programs, rescue systems, containers</p>
+<hr />
+<h2 id="part-7-toolchain-exploration">Part 7: Toolchain Exploration<a class="headerlink" href="#part-7-toolchain-exploration" title="Permanent link">&para;</a></h2>
+<h3 id="step-71-explore-compiler-options">Step 7.1: Explore Compiler Options<a class="headerlink" href="#step-71-explore-compiler-options" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># View compiler version and configuration</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>aarch64-linux-gcc<span class="w"> </span>-v
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># List supported CPU types</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>aarch64-linux-gcc<span class="w"> </span>--target-help<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>march
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1"># Check optimization levels</span>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>aarch64-linux-gcc<span class="w"> </span>--help<span class="o">=</span>optimizers
+</code></pre></div>
+<h3 id="step-72-compile-with-optimizations">Step 7.2: Compile with Optimizations<a class="headerlink" href="#step-72-compile-with-optimizations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="c1"># No optimization</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>aarch64-linux-gcc<span class="w"> </span>-O0<span class="w"> </span>-o<span class="w"> </span>hello-O0<span class="w"> </span>hello.c
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="c1"># Optimize for size</span>
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>aarch64-linux-gcc<span class="w"> </span>-Os<span class="w"> </span>-o<span class="w"> </span>hello-Os<span class="w"> </span>hello.c
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a><span class="c1"># Optimize for speed</span>
+<a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a>aarch64-linux-gcc<span class="w"> </span>-O3<span class="w"> </span>-o<span class="w"> </span>hello-O3<span class="w"> </span>hello.c
+<a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>
+<a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a><span class="c1"># Compare sizes</span>
+<a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a>ls<span class="w"> </span>-lh<span class="w"> </span>hello-O*
+</code></pre></div>
+<p><strong>Expected</strong>: Os (size) &lt; O0 (none) &lt; O3 (speed)</p>
+<h3 id="step-73-inspect-generated-assembly">Step 7.3: Inspect Generated Assembly<a class="headerlink" href="#step-73-inspect-generated-assembly" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="c1"># Generate assembly output</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>aarch64-linux-gcc<span class="w"> </span>-S<span class="w"> </span>-O2<span class="w"> </span>hello.c<span class="w"> </span>-o<span class="w"> </span>hello.s
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="c1"># View assembly</span>
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>head<span class="w"> </span>-50<span class="w"> </span>hello.s
+</code></pre></div>
+<p><strong>Learning</strong>: See how C code translates to ARM64 instructions.</p>
+<h3 id="step-74-examine-object-files">Step 7.4: Examine Object Files<a class="headerlink" href="#step-74-examine-object-files" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># Compile to object file (not linked)</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>aarch64-linux-gcc<span class="w"> </span>-c<span class="w"> </span>hello.c<span class="w"> </span>-o<span class="w"> </span>hello.o
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="c1"># Display symbols</span>
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>aarch64-linux-nm<span class="w"> </span>hello.o
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="c1"># Disassemble</span>
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a>aarch64-linux-objdump<span class="w"> </span>-d<span class="w"> </span>hello.o<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-50
+</code></pre></div>
+<hr />
+<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h2>
+<h3 id="test-your-work">Test Your Work<a class="headerlink" href="#test-your-work" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1"># Verification script</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>verify-toolchain.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="s">#!/bin/bash</span>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="s">set -e</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a><span class="s">echo &quot;=== Toolchain Verification ===&quot;</span>
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="s">echo &quot;&quot;</span>
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>
+<a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a><span class="s"># Check toolchain exists</span>
+<a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a><span class="s">if [ -d ~/x-tools/aarch64-beagleplay-linux-musl ]; then</span>
+<a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a><span class="s">    echo &quot;✓ Toolchain installed&quot;</span>
+<a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a><span class="s">else</span>
+<a id="__codelineno-40-13" name="__codelineno-40-13" href="#__codelineno-40-13"></a><span class="s">    echo &quot;✗ Toolchain not found&quot;</span>
+<a id="__codelineno-40-14" name="__codelineno-40-14" href="#__codelineno-40-14"></a><span class="s">    exit 1</span>
+<a id="__codelineno-40-15" name="__codelineno-40-15" href="#__codelineno-40-15"></a><span class="s">fi</span>
+<a id="__codelineno-40-16" name="__codelineno-40-16" href="#__codelineno-40-16"></a>
+<a id="__codelineno-40-17" name="__codelineno-40-17" href="#__codelineno-40-17"></a><span class="s"># Check compiler</span>
+<a id="__codelineno-40-18" name="__codelineno-40-18" href="#__codelineno-40-18"></a><span class="s">if command -v aarch64-linux-gcc &amp;&gt; /dev/null; then</span>
+<a id="__codelineno-40-19" name="__codelineno-40-19" href="#__codelineno-40-19"></a><span class="s">    echo &quot;✓ Compiler in PATH&quot;</span>
+<a id="__codelineno-40-20" name="__codelineno-40-20" href="#__codelineno-40-20"></a><span class="s">    echo &quot;  Version: $(aarch64-linux-gcc --version | head -1)&quot;</span>
+<a id="__codelineno-40-21" name="__codelineno-40-21" href="#__codelineno-40-21"></a><span class="s">else</span>
+<a id="__codelineno-40-22" name="__codelineno-40-22" href="#__codelineno-40-22"></a><span class="s">    echo &quot;✗ Compiler not in PATH&quot;</span>
+<a id="__codelineno-40-23" name="__codelineno-40-23" href="#__codelineno-40-23"></a><span class="s">    exit 1</span>
+<a id="__codelineno-40-24" name="__codelineno-40-24" href="#__codelineno-40-24"></a><span class="s">fi</span>
+<a id="__codelineno-40-25" name="__codelineno-40-25" href="#__codelineno-40-25"></a>
+<a id="__codelineno-40-26" name="__codelineno-40-26" href="#__codelineno-40-26"></a><span class="s"># Test compilation</span>
+<a id="__codelineno-40-27" name="__codelineno-40-27" href="#__codelineno-40-27"></a><span class="s">cd /tmp</span>
+<a id="__codelineno-40-28" name="__codelineno-40-28" href="#__codelineno-40-28"></a><span class="s">echo &#39;int main() { return 0; }&#39; &gt; test.c</span>
+<a id="__codelineno-40-29" name="__codelineno-40-29" href="#__codelineno-40-29"></a><span class="s">if aarch64-linux-gcc -o test test.c 2&gt;/dev/null; then</span>
+<a id="__codelineno-40-30" name="__codelineno-40-30" href="#__codelineno-40-30"></a><span class="s">    echo &quot;✓ Can compile test program&quot;</span>
+<a id="__codelineno-40-31" name="__codelineno-40-31" href="#__codelineno-40-31"></a><span class="s">    rm -f test test.c</span>
+<a id="__codelineno-40-32" name="__codelineno-40-32" href="#__codelineno-40-32"></a><span class="s">else</span>
+<a id="__codelineno-40-33" name="__codelineno-40-33" href="#__codelineno-40-33"></a><span class="s">    echo &quot;✗ Compilation failed&quot;</span>
+<a id="__codelineno-40-34" name="__codelineno-40-34" href="#__codelineno-40-34"></a><span class="s">    exit 1</span>
+<a id="__codelineno-40-35" name="__codelineno-40-35" href="#__codelineno-40-35"></a><span class="s">fi</span>
+<a id="__codelineno-40-36" name="__codelineno-40-36" href="#__codelineno-40-36"></a>
+<a id="__codelineno-40-37" name="__codelineno-40-37" href="#__codelineno-40-37"></a><span class="s"># Check QEMU</span>
+<a id="__codelineno-40-38" name="__codelineno-40-38" href="#__codelineno-40-38"></a><span class="s">if command -v qemu-aarch64 &amp;&gt; /dev/null; then</span>
+<a id="__codelineno-40-39" name="__codelineno-40-39" href="#__codelineno-40-39"></a><span class="s">    echo &quot;✓ QEMU installed&quot;</span>
+<a id="__codelineno-40-40" name="__codelineno-40-40" href="#__codelineno-40-40"></a><span class="s">else</span>
+<a id="__codelineno-40-41" name="__codelineno-40-41" href="#__codelineno-40-41"></a><span class="s">    echo &quot;✗ QEMU not found&quot;</span>
+<a id="__codelineno-40-42" name="__codelineno-40-42" href="#__codelineno-40-42"></a><span class="s">    exit 1</span>
+<a id="__codelineno-40-43" name="__codelineno-40-43" href="#__codelineno-40-43"></a><span class="s">fi</span>
+<a id="__codelineno-40-44" name="__codelineno-40-44" href="#__codelineno-40-44"></a>
+<a id="__codelineno-40-45" name="__codelineno-40-45" href="#__codelineno-40-45"></a><span class="s">echo &quot;&quot;</span>
+<a id="__codelineno-40-46" name="__codelineno-40-46" href="#__codelineno-40-46"></a><span class="s">echo &quot;=== All checks passed! ===&quot;</span>
+<a id="__codelineno-40-47" name="__codelineno-40-47" href="#__codelineno-40-47"></a><span class="s">EOF</span>
+<a id="__codelineno-40-48" name="__codelineno-40-48" href="#__codelineno-40-48"></a>
+<a id="__codelineno-40-49" name="__codelineno-40-49" href="#__codelineno-40-49"></a>chmod<span class="w"> </span>+x<span class="w"> </span>verify-toolchain.sh
+<a id="__codelineno-40-50" name="__codelineno-40-50" href="#__codelineno-40-50"></a>./verify-toolchain.sh
+</code></pre></div>
+<h3 id="checklist">Checklist<a class="headerlink" href="#checklist" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] Crosstool-NG built successfully</li>
+<li>[ ] Toolchain configured for Cortex-A53</li>
+<li>[ ] Toolchain build completed without errors</li>
+<li>[ ] <code>aarch64-linux-gcc</code> accessible in PATH</li>
+<li>[ ] Test program compiles for ARM64</li>
+<li>[ ] <code>file</code> command shows correct architecture</li>
+<li>[ ] QEMU can run the cross-compiled binary</li>
+<li>[ ] Both dynamic and static linking work</li>
+</ul>
+<hr />
+<h2 id="cleanup-optional">Cleanup (Optional)<a class="headerlink" href="#cleanup-optional" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># Remove build artifacts to save space (~9 GB)</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="nb">cd</span><span class="w"> </span>~/embedded-linux-labs/lab01-toolchain/crosstool-ng
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>./ct-ng<span class="w"> </span>clean
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="c1"># This removes:</span>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a><span class="c1"># - Downloaded source tarballs</span>
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="c1"># - Temporary build files</span>
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a><span class="c1"># - Keeps: Final toolchain in ~/x-tools/</span>
+</code></pre></div>
+<p><strong>Warning</strong>: Only clean if build was successful. If you need to rebuild, you'll download everything again.</p>
+<hr />
+<h2 id="going-further-optional-challenges">Going Further (Optional Challenges)<a class="headerlink" href="#going-further-optional-challenges" title="Permanent link">&para;</a></h2>
+<h3 id="challenge-1-multi-library-comparison">Challenge 1: Multi-Library Comparison<a class="headerlink" href="#challenge-1-multi-library-comparison" title="Permanent link">&para;</a></h3>
+<p>Build three toolchains with different C libraries:
+1. musl (lightweight)
+2. glibc (full-featured)
+3. uclibc-ng (minimal)</p>
+<p>Compare:
+- Build time
+- Final size
+- Binary size
+- Feature differences</p>
+<h3 id="challenge-2-cortex-a72-toolchain">Challenge 2: Cortex-A72 Toolchain<a class="headerlink" href="#challenge-2-cortex-a72-toolchain" title="Permanent link">&para;</a></h3>
+<p>Build a second toolchain optimized for Raspberry Pi 4 (Cortex-A72):
+- Change <code>ARCH_CPU</code> to <code>cortex-a72</code>
+- Compare performance of binaries on same hardware</p>
+<h3 id="challenge-3-custom-gcc-patches">Challenge 3: Custom GCC Patches<a class="headerlink" href="#challenge-3-custom-gcc-patches" title="Permanent link">&para;</a></h3>
+<p>Research and apply GCC patches:
+- Download GCC sources
+- Apply optimization patches
+- Build and benchmark</p>
+<h3 id="challenge-4-toolchain-wrapper-script">Challenge 4: Toolchain Wrapper Script<a class="headerlink" href="#challenge-4-toolchain-wrapper-script" title="Permanent link">&para;</a></h3>
+<p>Create a wrapper script that:
+- Automatically sets SYSROOT
+- Adds default compiler flags
+- Logs compilation commands
+- Simplifies cross-compilation workflow</p>
+<hr />
+<h2 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h2>
+<h3 id="issue-1-build-fails-with-no-space-left-on-device">Issue 1: Build Fails with "No space left on device"<a class="headerlink" href="#issue-1-build-fails-with-no-space-left-on-device" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms</strong>:
+- Build stops mid-way
+- Error message about disk space</p>
+<p><strong>Solution</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Check available space</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>df<span class="w"> </span>-h<span class="w"> </span>~
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1"># Clean up if needed</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>sudo<span class="w"> </span>apt<span class="w"> </span>clean
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/.cache/*
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a><span class="c1"># Need minimum 10 GB free</span>
+</code></pre></div></p>
+<h3 id="issue-2-configure-error-c-compiler-cannot-create-executables">Issue 2: "configure: error: C compiler cannot create executables"<a class="headerlink" href="#issue-2-configure-error-c-compiler-cannot-create-executables" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms</strong>:
+- Build fails early during binutils configuration</p>
+<p><strong>Causes</strong>:
+- Missing build-essential package
+- Corrupted GCC installation</p>
+<p><strong>Solutions</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># Reinstall build tools</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>--reinstall<span class="w"> </span>build-essential
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="c1"># Verify native compiler works</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>gcc<span class="w"> </span>--version
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;int main() { return 0; }&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcc<span class="w"> </span>-x<span class="w"> </span>c<span class="w"> </span>-<span class="w"> </span>-o<span class="w"> </span>/tmp/test
+</code></pre></div></p>
+<h3 id="issue-3-qemu-illegal-instruction-error">Issue 3: QEMU "Illegal instruction" Error<a class="headerlink" href="#issue-3-qemu-illegal-instruction-error" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms</strong>:
+- Binary crashes when run with QEMU</p>
+<p><strong>Causes</strong>:
+- Binary built for wrong architecture
+- QEMU version too old</p>
+<p><strong>Solutions</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1"># Verify binary architecture</span>
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>file<span class="w"> </span>hello-arm64
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="c1"># Should show: ARM aarch64</span>
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="c1"># Update QEMU</span>
+<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>qemu-user
+<a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>
+<a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a><span class="c1"># Check QEMU version</span>
+<a id="__codelineno-44-9" name="__codelineno-44-9" href="#__codelineno-44-9"></a>qemu-aarch64<span class="w"> </span>--version
+</code></pre></div></p>
+<h3 id="issue-4-toolchain-build-takes-hours">Issue 4: Toolchain Build Takes Hours<a class="headerlink" href="#issue-4-toolchain-build-takes-hours" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms</strong>:
+- Build running for &gt;2 hours</p>
+<p><strong>Causes</strong>:
+- Low-end CPU
+- Single-core building
+- Slow disk I/O</p>
+<p><strong>Solutions</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="c1"># Check if using multiple cores</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>htop
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="c1"># Should see high CPU usage across all cores</span>
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>
+<a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a><span class="c1"># Force parallel build</span>
+<a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>./ct-ng<span class="w"> </span>build<span class="w"> </span><span class="nv">CT_JOBS</span><span class="o">=</span><span class="k">$(</span>nproc<span class="k">)</span>
+<a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>
+<a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a><span class="c1"># Use tmpfs for faster builds (if enough RAM)</span>
+<a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a>./ct-ng<span class="w"> </span>build<span class="w"> </span><span class="nv">CT_PREFIX</span><span class="o">=</span>/tmp/toolchain
+</code></pre></div></p>
+<hr />
+<h2 id="key-takeaways">Key Takeaways<a class="headerlink" href="#key-takeaways" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Cross-compilation is essential</strong> for embedded development - target hardware is too slow/limited for compilation</li>
+<li><strong>Toolchain components</strong> work together: compiler, linker, libraries, headers</li>
+<li><strong>C library choice matters</strong>: musl (small), glibc (compatible), uclibc (minimal)</li>
+<li><strong>CPU optimization</strong> improves performance: <code>-mcpu=cortex-a53</code> uses specific instructions</li>
+<li><strong>QEMU user-mode</strong> allows testing ARM binaries without hardware</li>
+<li><strong>Sysroot</strong> is the cross-compilation "root filesystem" with ARM libraries</li>
+<li><strong>Static linking</strong> creates larger but self-contained binaries</li>
+<li><strong>Toolchain naming</strong> follows pattern: <code>arch-vendor-os-abi</code> (e.g., <code>aarch64-beagleplay-linux-musl</code>)</li>
+</ol>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Crosstool-NG Documentation</strong>: https://crosstool-ng.github.io/docs/</li>
+<li><strong>GCC Cross-Compilation</strong>: https://gcc.gnu.org/onlinedocs/gcc/Cross-Compilation.html</li>
+<li><strong>musl libc</strong>: https://musl.libc.org/</li>
+<li><strong>ARM Cortex-A53 TRM</strong>: https://developer.arm.com/documentation/ddi0500/latest/</li>
+<li><strong>QEMU User Mode</strong>: https://qemu.readthedocs.io/en/latest/user/index.html</li>
+</ul>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>✅ <strong>Completed</strong>: Lab 1 - Cross-Compilation Toolchain<br />
+⏭️ <strong>Up Next</strong>: Lab 2 - BeaglePlay Hardware Discovery</p>
+<p><strong>What you'll learn next</strong>:
+- BeaglePlay hardware architecture
+- Serial console communication
+- Device Tree basics
+- GPIO and peripheral access</p>
+<p><strong>Recommended preparation</strong>:
+- Read BeaglePlay Technical Reference Manual
+- Review Device Tree specification
+- Set up serial console connection</p>
+<hr />
+<p><em>Lab created: November 25, 2025</em><br />
+<em>Last updated: November 25, 2025</em><br />
+<em>Tested on: Ubuntu 24.04 LTS, Crosstool-NG 1.26.0</em><br />
+<em>Target: BeaglePlay (TI AM62x Cortex-A53)</em></p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

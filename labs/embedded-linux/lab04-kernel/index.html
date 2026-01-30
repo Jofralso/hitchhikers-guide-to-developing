@@ -1,0 +1,4822 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/embedded-linux/lab04-kernel/">
+      
+      
+        <link rel="prev" href="../lab03-bootloader/">
+      
+      
+        <link rel="next" href="../lab05-rootfs/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 4 - Linux Kernel - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-4-linux-kernel-for-beagleplay" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 4 - Linux Kernel
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#learning-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-build-your-own-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Build Your Own Kernel?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-well-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What We'll Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workspace-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-getting-the-kernel-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Getting the Kernel Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Getting the Kernel Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-kernel-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Kernel Versions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clone the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-stable-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Stable Releases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkout-stable-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checkout Stable Version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Kernel Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Kernel Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Kernel Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-cross-compilation-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set Cross-Compilation Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-default-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find Default Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-base-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Base Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customize-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customize Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-cross-compiling-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Cross-Compiling the Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Cross-Compiling the Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-build-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Build Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compile-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compile the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-build-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Build Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-the-device-tree-blob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find the Device Tree Blob
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-build-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Build Artifacts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-network-boot-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Network Boot Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Network Boot Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-u-boot-networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure U-Boot Networking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-pc-network-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure PC Network Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-tftp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install TFTP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-tftp-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare TFTP Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-tftp-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test TFTP Connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-booting-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Booting the Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Booting the Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#copy-kernel-files-to-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copy Kernel Files to TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-kernel-boot-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Kernel Boot Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-kernel-via-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Kernel via TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-device-tree-via-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Device Tree via TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-decompression-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Decompression Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boot the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-the-boot-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing the Boot Messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-streamlining-the-boot-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Streamlining the Boot Process
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Streamlining the Boot Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-boot-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Boot Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-the-boot-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test the Boot Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#make-it-automatic-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Make It Automatic (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-kernel-configuration-deep-dive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Kernel Configuration Deep Dive
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Kernel Configuration Deep Dive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting Configuration Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparing-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparing Configurations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-all-enabled-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing All Enabled Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kernel-panics-on-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Panics on Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tftp-download-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TFTP Download Fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kernel-decompression-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Decompression Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrong-console-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wrong Console Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-interface-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Interface Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further-optional-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further (Optional Challenges)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further (Optional Challenges)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-kernel-size-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Kernel Size Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-custom-kernel-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Custom Kernel Command Line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-device-tree-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Device Tree Exploration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-enable-kernel-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Enable Kernel Debugging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-5-build-a-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 5: Build a Module
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Next?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab10-yocto-first-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../yocto/lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#learning-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-build-your-own-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Build Your Own Kernel?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-well-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What We'll Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workspace-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-getting-the-kernel-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Getting the Kernel Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Getting the Kernel Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-kernel-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Kernel Versions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clone the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-stable-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Stable Releases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkout-stable-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checkout Stable Version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Kernel Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Kernel Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-kernel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Kernel Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-cross-compilation-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set Cross-Compilation Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-default-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find Default Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-base-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Base Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customize-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customize Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-cross-compiling-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Cross-Compiling the Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Cross-Compiling the Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-build-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Build Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compile-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compile the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-build-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Build Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-the-device-tree-blob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find the Device Tree Blob
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-build-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Build Artifacts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-network-boot-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Network Boot Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Network Boot Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-u-boot-networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure U-Boot Networking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-pc-network-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure PC Network Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-tftp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install TFTP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-tftp-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prepare TFTP Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-tftp-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test TFTP Connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-booting-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Booting the Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Booting the Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#copy-kernel-files-to-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copy Kernel Files to TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-kernel-boot-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Kernel Boot Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-kernel-via-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Kernel via TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-device-tree-via-tftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Device Tree via TFTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-decompression-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Decompression Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boot the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-the-boot-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing the Boot Messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-streamlining-the-boot-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Streamlining the Boot Process
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Streamlining the Boot Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-boot-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Boot Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-the-boot-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test the Boot Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#make-it-automatic-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Make It Automatic (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-kernel-configuration-deep-dive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Kernel Configuration Deep Dive
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Kernel Configuration Deep Dive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting Configuration Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparing-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparing Configurations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-all-enabled-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing All Enabled Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kernel-panics-on-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Panics on Boot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tftp-download-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TFTP Download Fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kernel-decompression-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Decompression Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrong-console-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wrong Console Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-interface-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Interface Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#going-further-optional-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Going Further (Optional Challenges)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Going Further (Optional Challenges)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#challenge-1-kernel-size-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 1: Kernel Size Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-2-custom-kernel-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 2: Custom Kernel Command Line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-3-device-tree-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 3: Device Tree Exploration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-4-enable-kernel-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 4: Enable Kernel Debugging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#challenge-5-build-a-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Challenge 5: Build a Module
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Next?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-4-linux-kernel-for-beagleplay">Lab 4: Linux Kernel for BeaglePlay<a class="headerlink" href="#lab-4-linux-kernel-for-beagleplay" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about the Linux kernel:</p>
+<p><em>"The Linux kernel is the brain of your embedded system. Unlike certain galactic presidents, it's actually quite good at multitasking, managing hardware, and not generally causing chaos. Though both occasionally crash when faced with infinite improbability."</em></p>
+<h2 id="learning-objectives">Learning Objectives<a class="headerlink" href="#learning-objectives" title="Permanent link">&para;</a></h2>
+<p>By the end of this lab, you will be able to:</p>
+<ul>
+<li>Clone and navigate the Linux kernel source tree</li>
+<li>Configure the kernel for ARM64 and BeaglePlay hardware</li>
+<li>Cross-compile the Linux kernel and Device Tree Blobs</li>
+<li>Load kernel and DTB via TFTP network boot</li>
+<li>Set up U-Boot to boot Linux</li>
+<li>Understand kernel boot arguments and console configuration</li>
+<li>Troubleshoot kernel boot issues</li>
+</ul>
+<p><strong>Estimated Time:</strong> 3-4 hours</p>
+<p><strong>Prerequisites:</strong>
+- Completed Lab 1 (Custom Toolchain)
+- Completed Lab 2 (Hardware Discovery)
+- Completed Lab 3 (U-Boot Bootloader)
+- Familiarity with git
+- Basic understanding of kernel configuration</p>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<h3 id="why-build-your-own-kernel">Why Build Your Own Kernel?<a class="headerlink" href="#why-build-your-own-kernel" title="Permanent link">&para;</a></h3>
+<p>The Linux kernel is the heart of your embedded system. While many projects use pre-built kernels, building your own gives you:</p>
+<p><strong>Control</strong>
+- Enable/disable drivers for your specific hardware
+- Optimize for size, performance, or power consumption
+- Add custom patches or out-of-tree drivers</p>
+<p><strong>Learning</strong>
+- Understand what's actually running on your hardware
+- Debug kernel issues with symbols and source access
+- Experiment with new kernel features</p>
+<p><strong>Customization</strong>
+- Remove unnecessary features to reduce boot time
+- Add security features (SELinux, AppArmor, etc.)
+- Tune for real-time performance (PREEMPT_RT)</p>
+<p>For BeaglePlay, we need a kernel that supports:
+- TI AM62x SoC (K3 multicore architecture)
+- ARM Cortex-A53 processors (ARMv8-A, 64-bit)
+- BeaglePlay peripherals (Ethernet, mikroBUS, GPIO, etc.)
+- Device Tree for hardware description</p>
+<h3 id="what-well-build">What We'll Build<a class="headerlink" href="#what-well-build" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│  Linux Kernel Sources  │ ← Clone from kernel.org
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>└───────────┬────────────┘
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>            │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>            ▼
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>┌────────────────────────┐
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  Configuration         │ ← defconfig + menuconfig
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  (arm64 + K3 SoC)      │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>└───────────┬────────────┘
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>            ▼
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>┌────────────────────────┐
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  Cross-Compilation     │ ← aarch64-beagleplay-linux-musl-gcc
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>└───────────┬────────────┘
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>            ▼
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>┌─────────────────────────────────────────┐
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  Output Files:                          │
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│  - Image.gz (compressed kernel)         │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  - k3-am625-beagleplay.dtb (Device Tree)│
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>└───────────┬─────────────────────────────┘
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>            │
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>            ▼
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>┌────────────────────────┐
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│  U-Boot TFTP Boot      │ ← Network loading
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  - tftp Image.gz       │
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│  - tftp DTB            │
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│  - booti command       │
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>└────────────────────────┘
+</code></pre></div>
+<h2 id="workspace-setup">Workspace Setup<a class="headerlink" href="#workspace-setup" title="Permanent link">&para;</a></h2>
+<p>Create kernel lab directory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>kernel
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">cd</span><span class="w"> </span>kernel
+</code></pre></div>
+<p>All kernel work happens here.</p>
+<h2 id="part-1-getting-the-kernel-sources">Part 1: Getting the Kernel Sources<a class="headerlink" href="#part-1-getting-the-kernel-sources" title="Permanent link">&para;</a></h2>
+<h3 id="understanding-kernel-versions">Understanding Kernel Versions<a class="headerlink" href="#understanding-kernel-versions" title="Permanent link">&para;</a></h3>
+<p>The Linux kernel has two main development branches:</p>
+<p><strong>Mainline (Linus Tree)</strong>
+- Latest development code
+- Managed by Linus Torvalds
+- New features, potentially less stable
+- Repository: <code>https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux</code></p>
+<p><strong>Stable Releases</strong>
+- Long-term support versions
+- Bug fixes and security patches
+- More stable for production
+- Repository: <code>https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux</code></p>
+<p>For this lab, we'll use <strong>Linux 6.6.x</strong> (LTS - Long Term Support).</p>
+<h3 id="clone-the-kernel">Clone the Kernel<a class="headerlink" href="#clone-the-kernel" title="Permanent link">&para;</a></h3>
+<p><strong>⚠️  WARNING (in large, friendly letters):</strong> The kernel repository is <strong>huge</strong> (~3GB). This will take 15-30 minutes on a typical connection.</p>
+<p>Clone Linus's mainline tree:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/kernel
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>linux
+</code></pre></div>
+<p>While it downloads, understand what you're getting:
+- <strong>50,000+</strong> files
+- <strong>30+ million</strong> lines of code
+- <strong>80,000+</strong> git commits
+- Drivers for thousands of devices</p>
+<p>Check the current version:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>make<span class="w"> </span>kernelversion
+</code></pre></div>
+<p>You'll see something like <code>6.12.0-rc5</code> (a release candidate from mainline).</p>
+<h3 id="add-stable-releases">Add Stable Releases<a class="headerlink" href="#add-stable-releases" title="Permanent link">&para;</a></h3>
+<p>The stable tree contains tested LTS versions. Add it as a remote:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>stable<span class="w"> </span>https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>fetch<span class="w"> </span>stable
+</code></pre></div>
+<p>This fetches stable branches (another ~2GB download, but incremental).</p>
+<p>List available stable branches:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>git<span class="w"> </span>branch<span class="w"> </span>-r<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>stable
+</code></pre></div>
+<p>You'll see many branches:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>stable/linux-4.19.y
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>stable/linux-5.4.y
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>stable/linux-5.10.y
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>stable/linux-5.15.y
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>stable/linux-6.1.y
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>stable/linux-6.6.y   ← We&#39;ll use this one
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>stable/linux-6.12.y
+</code></pre></div>
+<p>The <code>.y</code> suffix means "all patch releases" (e.g., 6.6.1, 6.6.2, 6.6.3...).</p>
+<h3 id="checkout-stable-version">Checkout Stable Version<a class="headerlink" href="#checkout-stable-version" title="Permanent link">&para;</a></h3>
+<p>Switch to Linux 6.6.x:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>stable/linux-6.6.y
+</code></pre></div>
+<p>Verify the version:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>make<span class="w"> </span>kernelversion
+</code></pre></div>
+<p>Should show something like <code>6.6.60</code> (exact patch version depends on when you ran this).</p>
+<p><strong>Why 6.6?</strong>
+- LTS version (supported until December 2026)
+- Excellent TI AM62x support
+- Tested with BeaglePlay
+- Good balance of features vs stability</p>
+<h2 id="part-2-kernel-configuration">Part 2: Kernel Configuration<a class="headerlink" href="#part-2-kernel-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="understanding-kernel-configuration">Understanding Kernel Configuration<a class="headerlink" href="#understanding-kernel-configuration" title="Permanent link">&para;</a></h3>
+<p>The kernel has <strong>10,000+</strong> configuration options! Examples:
+- Which filesystems to support (ext4, FAT, NFS)
+- Which drivers to include (Ethernet, USB, GPIO)
+- Processor-specific optimizations
+- Debug features</p>
+<p>Configuration is managed by <strong>Kconfig</strong>, similar to U-Boot's system.</p>
+<p>Three build options for each feature:
+- <strong><code>y</code></strong> - Built into kernel image (always loaded)
+- <strong><code>m</code></strong> - Built as loadable module (can be loaded at runtime)
+- <strong><code>n</code></strong> - Not built (disabled)</p>
+<h3 id="set-cross-compilation-environment">Set Cross-Compilation Environment<a class="headerlink" href="#set-cross-compilation-environment" title="Permanent link">&para;</a></h3>
+<p>Tell the kernel build system we're cross-compiling:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ARCH</span><span class="o">=</span>arm64
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span>aarch64-beagleplay-linux-musl-
+</code></pre></div>
+<p><strong>Important (like knowing where your towel is):</strong> We use <strong>arm64</strong> (not aarch64) for the kernel!
+- Kernel calls 64-bit ARM "arm64"
+- Toolchains call it "aarch64"
+- Both mean the same thing</p>
+<p>Add to <code>~/.bashrc</code> for persistence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export ARCH=arm64&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export CROSS_COMPILE=aarch64-beagleplay-linux-musl-&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+</code></pre></div>
+<p>Verify toolchain is in PATH:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="si">${</span><span class="nv">CROSS_COMPILE</span><span class="si">}</span>gcc<span class="w"> </span>--version
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>aarch64-beagleplay-linux-musl-gcc (GCC) 13.2.0
+</code></pre></div>
+<h3 id="find-default-configuration">Find Default Configuration<a class="headerlink" href="#find-default-configuration" title="Permanent link">&para;</a></h3>
+<p>List available default configurations for arm64:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make<span class="w"> </span><span class="nb">help</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>defconfig
+</code></pre></div>
+<p>Or see all arm64 defconfigs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ls<span class="w"> </span>-1<span class="w"> </span>arch/arm64/configs/
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>defconfig  ← This is the one we want!
+</code></pre></div>
+<p>Unlike some architectures, ARM64 has a single unified <code>defconfig</code> that supports many boards through Device Tree.</p>
+<h3 id="load-base-configuration">Load Base Configuration<a class="headerlink" href="#load-base-configuration" title="Permanent link">&para;</a></h3>
+<p>Load the ARM64 default configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>make<span class="w"> </span>defconfig
+</code></pre></div>
+<p>This creates <code>.config</code> in the kernel source directory with ~8,000 configuration options.</p>
+<p>Inspect the config file (optional):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>head<span class="w"> </span>-50<span class="w"> </span>.config
+</code></pre></div>
+<p>You'll see lines like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>CONFIG_ARM64=y
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>CONFIG_64BIT=y
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>CONFIG_ARCH_K3=y
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>...
+</code></pre></div>
+<h3 id="customize-configuration">Customize Configuration<a class="headerlink" href="#customize-configuration" title="Permanent link">&para;</a></h3>
+<p>Now fine-tune the config with menuconfig:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>make<span class="w"> </span>menuconfig
+</code></pre></div>
+<p>This opens a text-based UI. Navigate with:
+- <strong>Arrow keys</strong> - Move around
+- <strong>Enter</strong> - Select submenu
+- <strong>Space</strong> - Toggle option (y/m/n)
+- <strong>/</strong> - Search for config option
+- <strong>?</strong> - Help on current option
+- <strong>Save</strong> - Write .config
+- <strong>Exit</strong> - Go back or quit</p>
+<p><strong>Recommended Changes:</strong></p>
+<p><strong>1. Disable GCC Plugins (avoid build dependencies)</strong></p>
+<p>Navigate to:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Kernel hacking →
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  Compile-time checks and compiler options →
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    [ ] GCC plugins
+</code></pre></div></p>
+<p>Press Space to disable (no asterisk).</p>
+<p><strong>2. Optimize for BeaglePlay (reduce kernel size)</strong></p>
+<p>Navigate to:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Platform selection →
+</code></pre></div></p>
+<p>You'll see options for:
+- <code>[ ]</code> Actions Semi Platforms
+- <code>[ ]</code> NVIDIA Tegra SoC Family<br />
+- <code>[*]</code> Texas Instruments Inc. K3 multicore SoC architecture ← Keep ONLY this!
+- <code>[ ]</code> ARMv8 software model (Versatile Express)
+- Many more...</p>
+<p><strong>Disable everything except "Texas Instruments Inc. K3"</strong> - this removes support for hundreds of boards we don't need.</p>
+<p><strong>3. Disable Display Drivers (not needed for initial testing)</strong></p>
+<p>Navigate to:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Device Drivers →
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>  Graphics support →
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>    [ ] Direct Rendering Manager (XFree86 4.1.0 and higher DRI support)
+</code></pre></div></p>
+<p>Disable this whole section - saves ~50MB in kernel size!</p>
+<p><strong>4. Enable Networking Features (for TFTP and NFS)</strong></p>
+<p>Navigate to:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Device Drivers →
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  Network device support →
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>    Ethernet driver support →
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>      [*] Texas Instruments (TI) devices
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>        &lt;*&gt; TI K3 AM65 CPSW Ethernet driver
+</code></pre></div></p>
+<p>Make sure this is enabled (built-in, not module) - we need it for network boot!</p>
+<p><strong>Optional Configuration Changes:</strong></p>
+<p>Search (<code>/</code>) for these and verify they're enabled:
+- <code>CONFIG_NFS_FS</code> - NFS client (for root filesystem over network later)
+- <code>CONFIG_IP_PNP</code> - IP autoconfiguration (simplifies network boot)
+- <code>CONFIG_ROOT_NFS</code> - Root filesystem over NFS
+- <code>CONFIG_DEVTMPFS_MOUNT</code> - Auto-mount /dev (needed for init)</p>
+<p>Save configuration and exit menuconfig.</p>
+<h3 id="verify-configuration">Verify Configuration<a class="headerlink" href="#verify-configuration" title="Permanent link">&para;</a></h3>
+<p>Check that key options are set:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;CONFIG_ARCH_K3|CONFIG_NFS_FS|CONFIG_DEVTMPFS_MOUNT&quot;</span><span class="w"> </span>.config
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>CONFIG_ARCH_K3=y
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>CONFIG_NFS_FS=y
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>CONFIG_DEVTMPFS_MOUNT=y
+</code></pre></div>
+<h2 id="part-3-cross-compiling-the-kernel">Part 3: Cross-Compiling the Kernel<a class="headerlink" href="#part-3-cross-compiling-the-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="install-build-dependencies">Install Build Dependencies<a class="headerlink" href="#install-build-dependencies" title="Permanent link">&para;</a></h3>
+<p>The kernel build needs several development packages:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>libssl-dev<span class="w"> </span>libelf-dev<span class="w"> </span>flex<span class="w"> </span>bison
+</code></pre></div>
+<p>What these provide:
+- <strong>build-essential</strong> - GCC, make, etc. (for host tools)
+- <strong>libssl-dev</strong> - Cryptographic signing of kernel modules
+- <strong>libelf-dev</strong> - ELF binary parsing (for objtool)
+- <strong>flex</strong> - Lexical analyzer (for config parsers)
+- <strong>bison</strong> - Parser generator (for config parsers)</p>
+<h3 id="compile-the-kernel">Compile the Kernel<a class="headerlink" href="#compile-the-kernel" title="Permanent link">&para;</a></h3>
+<p>Now build it!</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</code></pre></div>
+<p><strong>What happens during the build:</strong></p>
+<ol>
+<li><strong>Host tools compilation</strong> (~30 seconds)</li>
+<li>
+<p>Builds scripts and utilities needed for kernel build</p>
+</li>
+<li>
+<p><strong>Kernel compilation</strong> (~10-20 minutes on 4-core machine)</p>
+</li>
+<li>Compiles ~8,000 .c files</li>
+<li>
+<p>Links into vmlinux (uncompressed kernel)</p>
+</li>
+<li>
+<p><strong>Image creation</strong> (~30 seconds)</p>
+</li>
+<li>
+<p>Compresses vmlinux → Image.gz</p>
+</li>
+<li>
+<p><strong>Device Tree compilation</strong> (~10 seconds)</p>
+</li>
+<li>
+<p>Compiles .dts files → .dtb blobs</p>
+</li>
+<li>
+<p><strong>Module compilation</strong> (if any modules enabled)</p>
+</li>
+</ol>
+<p>Total time: <strong>10-25 minutes</strong> depending on CPU.</p>
+<p><strong>Progress output</strong> looks like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>  CC      init/main.o
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>  CC      init/version.o
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>  CC      init/do_mounts.o
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>  ...
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>  LD      vmlinux
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>  OBJCOPY arch/arm64/boot/Image
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>  GZIP    arch/arm64/boot/Image.gz
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>  DTC     arch/arm64/boot/dts/ti/k3-am625-beagleplay.dtb
+</code></pre></div>
+<h3 id="verify-build-output">Verify Build Output<a class="headerlink" href="#verify-build-output" title="Permanent link">&para;</a></h3>
+<p>Check what was produced:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span>arch/arm64/boot/
+</code></pre></div>
+<p>You should see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>-rw-r--r-- 1 you you  22M Image          ← Uncompressed kernel
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>-rw-r--r-- 1 you you 9.8M Image.gz       ← Compressed kernel (use this!)
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>drwxr-xr-x 8 you you 4.0K dts            ← Device Tree sources
+</code></pre></div>
+<p>The <strong>Image.gz</strong> is our bootable kernel - compressed from 22MB to 9.8MB!</p>
+<h3 id="find-the-device-tree-blob">Find the Device Tree Blob<a class="headerlink" href="#find-the-device-tree-blob" title="Permanent link">&para;</a></h3>
+<p>Device Trees are in subdirectories by vendor:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>ls<span class="w"> </span>arch/arm64/boot/dts/ti/*.dtb<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>beagleplay
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>arch/arm64/boot/dts/ti/k3-am625-beagleplay.dtb
+</code></pre></div>
+<p>This is our <strong>Device Tree Blob (DTB)</strong> for BeaglePlay!</p>
+<p>Inspect its size:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span>arch/arm64/boot/dts/ti/k3-am625-beagleplay.dtb
+</code></pre></div>
+<p>Should be around <strong>200-250KB</strong>.</p>
+<h3 id="understanding-build-artifacts">Understanding Build Artifacts<a class="headerlink" href="#understanding-build-artifacts" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Size</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>vmlinux</strong></td>
+<td>Uncompressed kernel ELF</td>
+<td>~150MB</td>
+<td>Debugging with symbols</td>
+</tr>
+<tr>
+<td><strong>Image</strong></td>
+<td>Raw uncompressed kernel binary</td>
+<td>~22MB</td>
+<td>Direct boot (no compression)</td>
+</tr>
+<tr>
+<td><strong>Image.gz</strong></td>
+<td>Gzip compressed kernel</td>
+<td>~10MB</td>
+<td><strong>← Use this for boot!</strong></td>
+</tr>
+<tr>
+<td><strong>k3-am625-beagleplay.dtb</strong></td>
+<td>Device Tree Blob</td>
+<td>~250KB</td>
+<td>Hardware description</td>
+</tr>
+</tbody>
+</table>
+<p>We'll use <strong>Image.gz</strong> and <strong>k3-am625-beagleplay.dtb</strong> for booting.</p>
+<h2 id="part-4-network-boot-setup">Part 4: Network Boot Setup<a class="headerlink" href="#part-4-network-boot-setup" title="Permanent link">&para;</a></h2>
+<p>Before we can boot the kernel, we need to set up TFTP for network loading.</p>
+<h3 id="configure-u-boot-networking">Configure U-Boot Networking<a class="headerlink" href="#configure-u-boot-networking" title="Permanent link">&para;</a></h3>
+<p>Power on BeaglePlay, hold USR button, stop at U-Boot prompt.</p>
+<p>Set IP addresses in U-Boot:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>=&gt; setenv ipaddr 192.168.1.100
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>=&gt; setenv serverip 192.168.1.1
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>=&gt; saveenv
+</code></pre></div>
+<p><strong>Adjust these IPs for your network!</strong> The board (ipaddr) and your PC (serverip) must be on the same subnet.</p>
+<p>Verify the settings:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>=&gt; printenv ipaddr serverip
+</code></pre></div>
+<h3 id="configure-pc-network-interface">Configure PC Network Interface<a class="headerlink" href="#configure-pc-network-interface" title="Permanent link">&para;</a></h3>
+<p>Find your Ethernet interface connected to BeaglePlay:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>ip<span class="w"> </span>a
+</code></pre></div>
+<p>Look for the interface that appears when you plug in the Ethernet cable. It might be named:
+- <code>enp0s31f6</code> (PCIe Ethernet)
+- <code>enx...</code> (USB Ethernet adapter)
+- <code>eth0</code> (older naming)</p>
+<p><strong>Method 1: Using NetworkManager CLI (recommended)</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>sudo<span class="w"> </span>nmcli<span class="w"> </span>con<span class="w"> </span>add<span class="w"> </span><span class="nb">type</span><span class="w"> </span>ethernet<span class="w"> </span>ifname<span class="w"> </span>YOUR_INTERFACE<span class="w"> </span>ip4<span class="w"> </span><span class="m">192</span>.168.1.1/24
+</code></pre></div>
+<p>Replace <code>YOUR_INTERFACE</code> with your actual interface name.</p>
+<p><strong>Method 2: Manual configuration (if NetworkManager not available)</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>sudo<span class="w"> </span>ip<span class="w"> </span>addr<span class="w"> </span>add<span class="w"> </span><span class="m">192</span>.168.1.1/24<span class="w"> </span>dev<span class="w"> </span>YOUR_INTERFACE
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>YOUR_INTERFACE<span class="w"> </span>up
+</code></pre></div>
+<p>Verify the configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span>YOUR_INTERFACE
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>inet 192.168.1.1/24 scope global YOUR_INTERFACE
+</code></pre></div>
+<h3 id="install-tftp-server">Install TFTP Server<a class="headerlink" href="#install-tftp-server" title="Permanent link">&para;</a></h3>
+<p>Install <code>tftpd-hpa</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>tftpd-hpa
+</code></pre></div>
+<p>Check the TFTP server configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>cat<span class="w"> </span>/etc/default/tftpd-hpa
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>TFTP_USERNAME=&quot;tftp&quot;
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>TFTP_DIRECTORY=&quot;/srv/tftp&quot;
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>TFTP_ADDRESS=&quot;:69&quot;
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>TFTP_OPTIONS=&quot;--secure&quot;
+</code></pre></div>
+<p>The default TFTP directory is <code>/srv/tftp</code>.</p>
+<h3 id="prepare-tftp-directory">Prepare TFTP Directory<a class="headerlink" href="#prepare-tftp-directory" title="Permanent link">&para;</a></h3>
+<p>Create and set permissions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/srv/tftp
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>/srv/tftp
+</code></pre></div>
+<p>Restart TFTP server:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>tftpd-hpa
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>tftpd-hpa
+</code></pre></div>
+<p>Should show "active (running)".</p>
+<h3 id="test-tftp-connection">Test TFTP Connection<a class="headerlink" href="#test-tftp-connection" title="Permanent link">&para;</a></h3>
+<p>Create a test file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;TFTP test from BeaglePlay&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/srv/tftp/test.txt
+</code></pre></div>
+<p>From U-Boot on BeaglePlay:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>=&gt; tftp 0x82000000 test.txt
+</code></pre></div>
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>Using ethernet@8000000 port@1 device
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>TFTP from server 192.168.1.1; our IP address is 192.168.1.100
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>Filename &#39;test.txt&#39;.
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a>Load address: 0x82000000
+<a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>Loading: #
+<a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a>         5.9 KiB/s
+<a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a>done
+<a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a>Bytes transferred = 28 (1c hex)
+</code></pre></div>
+<p>Success! TFTP is working.</p>
+<p>Verify the data was downloaded:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>=&gt; md 0x82000000
+</code></pre></div>
+<p>Should show the test file content.</p>
+<h3 id="troubleshooting-tftp">Troubleshooting TFTP<a class="headerlink" href="#troubleshooting-tftp" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> <code>TFTP error: 'Access violation'</code></p>
+<p><strong>Cause:</strong> File permissions or wrong directory</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">755</span><span class="w"> </span>/srv/tftp
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>tftp:tftp<span class="w"> </span>/srv/tftp
+</code></pre></div>
+<p><strong>Problem:</strong> <code>TFTP timeout</code></p>
+<p><strong>Cause:</strong> Firewall blocking TFTP port 69</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span>from<span class="w"> </span><span class="m">192</span>.168.1.100<span class="w"> </span>to<span class="w"> </span>any<span class="w"> </span>port<span class="w"> </span><span class="m">69</span><span class="w"> </span>proto<span class="w"> </span>udp
+</code></pre></div>
+<p>Or temporarily disable firewall:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>disable
+</code></pre></div>
+<p><strong>Problem:</strong> <code>T T T T</code> (continuous timeouts)</p>
+<p><strong>Cause:</strong> Network cable not connected or wrong interface configured</p>
+<p><strong>Solution:</strong>
+- Check Ethernet cable is firmly connected
+- Verify PC interface has correct IP: <code>ip addr</code>
+- Try different network cable</p>
+<h2 id="part-5-booting-the-kernel">Part 5: Booting the Kernel<a class="headerlink" href="#part-5-booting-the-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="copy-kernel-files-to-tftp">Copy Kernel Files to TFTP<a class="headerlink" href="#copy-kernel-files-to-tftp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>cp<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/kernel/linux/arch/arm64/boot/Image.gz<span class="w"> </span>/srv/tftp/
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>cp<span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/kernel/linux/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dtb<span class="w"> </span>/srv/tftp/
+</code></pre></div>
+<p>Verify files are present:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>ls<span class="w"> </span>-lh<span class="w"> </span>/srv/tftp/
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>-rw-r--r-- 1 you you  28 test.txt
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>-rw-r--r-- 1 you you 9.8M Image.gz
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>-rw-r--r-- 1 you you 236K k3-am625-beagleplay.dtb
+</code></pre></div>
+<h3 id="configure-kernel-boot-arguments">Configure Kernel Boot Arguments<a class="headerlink" href="#configure-kernel-boot-arguments" title="Permanent link">&para;</a></h3>
+<p>From U-Boot, set the kernel command line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>=&gt; setenv bootargs console=ttyS2,115200n8
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>=&gt; saveenv
+</code></pre></div>
+<p><strong>Bootargs explanation:</strong>
+- <strong>console=ttyS2</strong> - Use serial port 2 for console output
+- <strong>115200n8</strong> - Baud rate 115200, no parity, 8 data bits</p>
+<p>This tells the kernel where to send console messages.</p>
+<h3 id="load-kernel-via-tftp">Load Kernel via TFTP<a class="headerlink" href="#load-kernel-via-tftp" title="Permanent link">&para;</a></h3>
+<p>Load the compressed kernel image:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>=&gt; tftp 0x82000000 Image.gz
+</code></pre></div>
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>Using ethernet@8000000 port@1 device
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>TFTP from server 192.168.1.1; our IP address is 192.168.1.100
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>Filename &#39;Image.gz&#39;.
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>Load address: 0x82000000
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>Loading: ########################### ... ###
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>         9.1 MiB/s
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>done
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>Bytes transferred = 10281472 (9ce300 hex)
+</code></pre></div>
+<p>Note the hex size - we'll need this in the next step.</p>
+<h3 id="load-device-tree-via-tftp">Load Device Tree via TFTP<a class="headerlink" href="#load-device-tree-via-tftp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>=&gt; tftp 0x88000000 k3-am625-beagleplay.dtb
+</code></pre></div>
+<p>Different address (0x88000000) to avoid overwriting the kernel!</p>
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>Bytes transferred = 241664 (3b000 hex)
+</code></pre></div>
+<h3 id="understanding-decompression-requirements">Understanding Decompression Requirements<a class="headerlink" href="#understanding-decompression-requirements" title="Permanent link">&para;</a></h3>
+<p>Try to boot:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>=&gt; booti 0x82000000 - 0x88000000
+</code></pre></div>
+<p>You'll get an error:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>kernel_comp_addr_r or kernel_comp_size is not provided!
+</code></pre></div>
+<p><strong>What's happening:</strong>
+- <code>Image.gz</code> is compressed (9.8MB)
+- Before booting, U-Boot must decompress it
+- Decompressed size is ~22MB
+- U-Boot needs to know where to put the decompressed image and its maximum size</p>
+<p>Set decompression parameters:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>=&gt; setenv kernel_comp_addr_r 0x90000000
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>=&gt; setenv kernel_comp_size 0x2000000
+</code></pre></div>
+<p>Parameters explained:
+- <strong>kernel_comp_addr_r</strong> - RAM address for decompressed kernel (1.5GB offset)
+- <strong>kernel_comp_size</strong> - Max decompressed size (32MB = 0x2000000)</p>
+<p>Why 32MB? Our uncompressed Image is 22MB, so 32MB gives a safe margin.</p>
+<p>Save these settings:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>=&gt; saveenv
+</code></pre></div>
+<h3 id="boot-the-kernel">Boot the Kernel<a class="headerlink" href="#boot-the-kernel" title="Permanent link">&para;</a></h3>
+<p>Now try again:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>=&gt; booti 0x82000000 - 0x88000000
+</code></pre></div>
+<p><strong>Success!</strong> You should see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>## Flattened Device Tree blob at 88000000
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>   Booting using the fdt blob at 0x88000000
+<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>Working FDT set to 88000000
+<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>   Uncompressing Kernel Image to 90000000
+<a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>   Loading Device Tree to 000000009f7f5000, end 000000009f7ff3bf ... OK
+<a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>Working FDT set to 9f7f5000
+<a id="__codelineno-66-7" name="__codelineno-66-7" href="#__codelineno-66-7"></a>
+<a id="__codelineno-66-8" name="__codelineno-66-8" href="#__codelineno-66-8"></a>Starting kernel ...
+<a id="__codelineno-66-9" name="__codelineno-66-9" href="#__codelineno-66-9"></a>
+<a id="__codelineno-66-10" name="__codelineno-66-10" href="#__codelineno-66-10"></a>[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+<a id="__codelineno-66-11" name="__codelineno-66-11" href="#__codelineno-66-11"></a>[    0.000000] Linux version 6.6.60 (you@hostname) (aarch64-beagleplay-linux-musl-gcc (GCC) 13.2.0, GNU ld (GNU Binutils) 2.41) #1 SMP PREEMPT Wed Jan 15 16:45:12 UTC 2025
+<a id="__codelineno-66-12" name="__codelineno-66-12" href="#__codelineno-66-12"></a>[    0.000000] Machine model: BeagleBoard.org BeaglePlay
+<a id="__codelineno-66-13" name="__codelineno-66-13" href="#__codelineno-66-13"></a>[    0.000000] efi: UEFI not found.
+<a id="__codelineno-66-14" name="__codelineno-66-14" href="#__codelineno-66-14"></a>[    0.000000] Reserved memory: created DMA memory pool at 0x000000009c800000, size 3 MiB
+<a id="__codelineno-66-15" name="__codelineno-66-15" href="#__codelineno-66-15"></a>[    0.000000] OF: reserved mem: initialized node r5f-dma-memory@9c800000, compatible id shared-dma-pool
+<a id="__codelineno-66-16" name="__codelineno-66-16" href="#__codelineno-66-16"></a>...
+<a id="__codelineno-66-17" name="__codelineno-66-17" href="#__codelineno-66-17"></a>[    0.847623] ti-sci 44043000.system-controller: ABI: 3.1 (firmware rev 0x0009 &#39;9.1.8--v09.01.08 (Kool Koala)&#39;)
+<a id="__codelineno-66-18" name="__codelineno-66-18" href="#__codelineno-66-18"></a>...
+<a id="__codelineno-66-19" name="__codelineno-66-19" href="#__codelineno-66-19"></a>[    2.156842] am65-cpsw-nuss 8000000.ethernet: initialized cpsw ale version 1.5
+<a id="__codelineno-66-20" name="__codelineno-66-20" href="#__codelineno-66-20"></a>[    2.163789] am65-cpsw-nuss 8000000.ethernet: ALE Table size 512
+<a id="__codelineno-66-21" name="__codelineno-66-21" href="#__codelineno-66-21"></a>...
+</code></pre></div>
+<p>The kernel will boot and eventually panic:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>[    5.234567] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+</code></pre></div>
+<p><strong>This is expected!</strong> We haven't provided a root filesystem yet. The kernel successfully booted - it just has nowhere to find <code>/sbin/init</code>.</p>
+<h3 id="analyzing-the-boot-messages">Analyzing the Boot Messages<a class="headerlink" href="#analyzing-the-boot-messages" title="Permanent link">&para;</a></h3>
+<p>Let's understand what happened:</p>
+<p><strong>Initial Boot:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+</code></pre></div>
+- CPU ID 0x410fd034 = ARM Cortex-A53
+- Physical CPU 0 (first of four A53 cores)</p>
+<p><strong>Kernel Version:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>[    0.000000] Linux version 6.6.60 (you@hostname) (aarch64-beagleplay-linux-musl-gcc...)
+</code></pre></div>
+- Confirms we're running our custom-built kernel
+- Built with our Musl toolchain!</p>
+<p><strong>Hardware Detection:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>[    0.000000] Machine model: BeagleBoard.org BeaglePlay
+</code></pre></div>
+- Device Tree correctly identified the board</p>
+<p><strong>TI System Firmware:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>[    0.847623] ti-sci 44043000.system-controller: ABI: 3.1 (firmware rev 0x0009 &#39;9.1.8--v09.01.08 (Kool Koala)&#39;)
+</code></pre></div>
+- Communication with TIFS firmware working
+- Same "Kool Koala" version we saw in U-Boot</p>
+<p><strong>Ethernet:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>[    2.156842] am65-cpsw-nuss 8000000.ethernet: initialized cpsw ale version 1.5
+</code></pre></div>
+- Ethernet controller initialized (we'll use this for NFS root later)</p>
+<p><strong>Expected Panic:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>[    5.234567] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+</code></pre></div>
+- Normal - we haven't configured a root filesystem yet
+- Lab 5 will build a root filesystem</p>
+<h2 id="part-6-streamlining-the-boot-process">Part 6: Streamlining the Boot Process<a class="headerlink" href="#part-6-streamlining-the-boot-process" title="Permanent link">&para;</a></h2>
+<p>Manually typing TFTP commands every boot is tedious. Let's automate it!</p>
+<h3 id="create-boot-script">Create Boot Script<a class="headerlink" href="#create-boot-script" title="Permanent link">&para;</a></h3>
+<p>In U-Boot, set environment variables for automatic boot:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>=&gt; setenv load_kernel &#39;tftp ${kernel_addr_r} Image.gz&#39;
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>=&gt; setenv load_dtb &#39;tftp ${fdt_addr_r} k3-am625-beagleplay.dtb&#39;
+<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>=&gt; setenv netboot &#39;run load_kernel; run load_dtb; booti ${kernel_addr_r} - ${fdt_addr_r}&#39;
+</code></pre></div>
+<p>Variables explained:
+- <strong>load_kernel</strong> - Command to load kernel
+- <strong>load_dtb</strong> - Command to load Device Tree
+- <strong>netboot</strong> - Run both loads and boot</p>
+<p>The <code>${kernel_addr_r}</code> and <code>${fdt_addr_r}</code> are predefined U-Boot variables for safe load addresses.</p>
+<p>Check their values:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>=&gt; printenv kernel_addr_r fdt_addr_r
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>kernel_addr_r=0x82000000
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>fdt_addr_r=0x88000000
+</code></pre></div>
+<p>Perfect - these are the addresses we used earlier!</p>
+<h3 id="test-the-boot-script">Test the Boot Script<a class="headerlink" href="#test-the-boot-script" title="Permanent link">&para;</a></h3>
+<p>Now you can boot with a single command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>=&gt; run netboot
+</code></pre></div>
+<p>Should load both files and boot the kernel.</p>
+<h3 id="make-it-automatic-optional">Make It Automatic (Optional)<a class="headerlink" href="#make-it-automatic-optional" title="Permanent link">&para;</a></h3>
+<p>To boot automatically after a delay:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>=&gt; setenv bootcmd &#39;run netboot&#39;
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>=&gt; setenv bootdelay 3
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>=&gt; saveenv
+</code></pre></div>
+<p>Now on every boot, U-Boot will:
+1. Wait 3 seconds (press SPACE to interrupt)
+2. Automatically run <code>netboot</code>
+3. Load kernel and DTB via TFTP
+4. Boot Linux</p>
+<p><strong>Caution:</strong> Make sure TFTP server is always running! Otherwise, boot will fail.</p>
+<p>To disable auto-boot:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>=&gt; setenv bootcmd
+<a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>=&gt; saveenv
+</code></pre></div>
+<p>(Empty bootcmd disables auto-boot)</p>
+<h2 id="part-7-kernel-configuration-deep-dive">Part 7: Kernel Configuration Deep Dive<a class="headerlink" href="#part-7-kernel-configuration-deep-dive" title="Permanent link">&para;</a></h2>
+<h3 id="inspecting-configuration-options">Inspecting Configuration Options<a class="headerlink" href="#inspecting-configuration-options" title="Permanent link">&para;</a></h3>
+<p>Find out what a specific config does:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/embedded-labs/kernel/linux
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>make<span class="w"> </span>menuconfig
+</code></pre></div>
+<p>Press <code>/</code> (search) and type <code>NFS_FS</code>. You'll see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>Symbol: NFS_FS [=y]
+<a id="__codelineno-81-2" name="__codelineno-81-2" href="#__codelineno-81-2"></a>Type  : tristate
+<a id="__codelineno-81-3" name="__codelineno-81-3" href="#__codelineno-81-3"></a>Defined at fs/nfs/Kconfig:1
+<a id="__codelineno-81-4" name="__codelineno-81-4" href="#__codelineno-81-4"></a>Prompt: NFS client support
+<a id="__codelineno-81-5" name="__codelineno-81-5" href="#__codelineno-81-5"></a>Depends on: NETWORK_FILESYSTEMS [=y] &amp;&amp; INET [=y]
+<a id="__codelineno-81-6" name="__codelineno-81-6" href="#__codelineno-81-6"></a>Location:
+<a id="__codelineno-81-7" name="__codelineno-81-7" href="#__codelineno-81-7"></a>  -&gt; File systems
+<a id="__codelineno-81-8" name="__codelineno-81-8" href="#__codelineno-81-8"></a>    -&gt; Network File Systems
+</code></pre></div>
+<p>This shows:
+- <strong>Symbol name:</strong> CONFIG_NFS_FS
+- <strong>Current value:</strong> y (built-in)
+- <strong>Dependencies:</strong> Requires networking enabled
+- <strong>Location:</strong> Where to find it in menuconfig</p>
+<h3 id="comparing-configurations">Comparing Configurations<a class="headerlink" href="#comparing-configurations" title="Permanent link">&para;</a></h3>
+<p>Save your current config:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>cp<span class="w"> </span>.config<span class="w"> </span>my_beagleplay_config
+</code></pre></div>
+<p>Try changing something in menuconfig, then compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>make<span class="w"> </span>menuconfig
+<a id="__codelineno-83-2" name="__codelineno-83-2" href="#__codelineno-83-2"></a><span class="c1"># Change some options</span>
+<a id="__codelineno-83-3" name="__codelineno-83-3" href="#__codelineno-83-3"></a>scripts/diffconfig<span class="w"> </span>my_beagleplay_config<span class="w"> </span>.config
+</code></pre></div>
+<p>This shows only the differences!</p>
+<h3 id="viewing-all-enabled-options">Viewing All Enabled Options<a class="headerlink" href="#viewing-all-enabled-options" title="Permanent link">&para;</a></h3>
+<p>See every CONFIG_* set to <code>y</code> or <code>m</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;^CONFIG_&quot;</span><span class="w"> </span>.config<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;# CONFIG&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+</code></pre></div>
+<p>Typical ARM64 defconfig: <strong>~2,500</strong> options enabled!</p>
+<p>See the largest categories:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;^CONFIG_&quot;</span><span class="w"> </span>.config<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d_<span class="w"> </span>-f1-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p><em>Marvin's note: "I've calculated your chances of success. You won't like them. But here's how to improve the odds anyway."</em></p>
+<h3 id="kernel-panics-on-boot">Kernel Panics on Boot<a class="headerlink" href="#kernel-panics-on-boot" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> Kernel panics before mounting root</p>
+<p><strong>Possible Causes:</strong>
+1. Wrong Device Tree (DTB)
+2. Missing critical drivers
+3. Incorrect bootargs</p>
+<p><strong>Solution:</strong>
+- Verify DTB filename: <code>k3-am625-beagleplay.dtb</code>
+- Check bootargs: <code>console=ttyS2,115200n8</code>
+- Enable debug output: <code>setenv bootargs '${bootargs} debug'</code></p>
+<h3 id="tftp-download-fails">TFTP Download Fails<a class="headerlink" href="#tftp-download-fails" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> <code>T T T T</code> timeout errors</p>
+<p><strong>Check List:</strong>
+- [ ] Ethernet cable connected
+- [ ] PC IP configured: <code>ip addr show</code>
+- [ ] TFTP server running: <code>systemctl status tftpd-hpa</code>
+- [ ] Files in <code>/srv/tftp/</code>: <code>ls /srv/tftp/</code>
+- [ ] Firewall allows TFTP: <code>sudo ufw status</code>
+- [ ] U-Boot IP correct: <code>printenv ipaddr serverip</code></p>
+<h3 id="kernel-decompression-error">Kernel Decompression Error<a class="headerlink" href="#kernel-decompression-error" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> <code>kernel_comp_addr_r or kernel_comp_size is not provided!</code></p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>setenv kernel_comp_addr_r 0x90000000
+<a id="__codelineno-86-2" name="__codelineno-86-2" href="#__codelineno-86-2"></a>setenv kernel_comp_size 0x2000000
+<a id="__codelineno-86-3" name="__codelineno-86-3" href="#__codelineno-86-3"></a>saveenv
+</code></pre></div>
+<h3 id="wrong-console-output">Wrong Console Output<a class="headerlink" href="#wrong-console-output" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> No kernel messages on serial console</p>
+<p><strong>Cause:</strong> Wrong console device in bootargs</p>
+<p><strong>Solution:</strong></p>
+<p>Check Device Tree for correct serial port:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;chosen&quot;</span><span class="w"> </span>arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+</code></pre></div>
+<p>Should show:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>chosen {
+<a id="__codelineno-88-2" name="__codelineno-88-2" href="#__codelineno-88-2"></a>    stdout-path = &quot;serial2:115200n8&quot;;
+<a id="__codelineno-88-3" name="__codelineno-88-3" href="#__codelineno-88-3"></a>};
+</code></pre></div>
+<p>This means <code>console=ttyS2</code> (serial2 = ttyS2).</p>
+<h3 id="build-errors">Build Errors<a class="headerlink" href="#build-errors" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong> <code>No rule to make target 'debian/canonical-certs.pem'</code></p>
+<p><strong>Cause:</strong> Ubuntu-specific certificate config</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>scripts/config<span class="w"> </span>--disable<span class="w"> </span>SYSTEM_TRUSTED_KEYS
+<a id="__codelineno-89-2" name="__codelineno-89-2" href="#__codelineno-89-2"></a>scripts/config<span class="w"> </span>--disable<span class="w"> </span>SYSTEM_REVOCATION_KEYS
+<a id="__codelineno-89-3" name="__codelineno-89-3" href="#__codelineno-89-3"></a>make<span class="w"> </span>olddefconfig
+</code></pre></div>
+<p><strong>Error:</strong> <code>ld: cannot find -lelf</code></p>
+<p><strong>Cause:</strong> Missing libelf-dev</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libelf-dev
+</code></pre></div>
+<p><strong>Error:</strong> <code>flex: not found</code></p>
+<p><strong>Cause:</strong> Missing flex/bison</p>
+<p><strong>Solution:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>flex<span class="w"> </span>bison
+</code></pre></div>
+<h3 id="network-interface-not-found">Network Interface Not Found<a class="headerlink" href="#network-interface-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> Ethernet not working in kernel</p>
+<p><strong>Solution:</strong></p>
+<p>Enable TI K3 Ethernet driver:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>make<span class="w"> </span>menuconfig
+<a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a><span class="c1"># Navigate to:</span>
+<a id="__codelineno-92-3" name="__codelineno-92-3" href="#__codelineno-92-3"></a><span class="c1"># Device Drivers → Network device support → Ethernet driver support →</span>
+<a id="__codelineno-92-4" name="__codelineno-92-4" href="#__codelineno-92-4"></a><span class="c1"># [*] Texas Instruments (TI) devices</span>
+<a id="__codelineno-92-5" name="__codelineno-92-5" href="#__codelineno-92-5"></a><span class="c1">#   &lt;*&gt; TI K3 AM65 CPSW Ethernet driver</span>
+</code></pre></div>
+<p>Rebuild:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</code></pre></div>
+<h2 id="verification-checklist">Verification Checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">&para;</a></h2>
+<p><em>Ford Prefect says: "Always verify your work. It's the difference between a working system and a very expensive paperweight."</em></p>
+<p>Before moving to the next lab, ensure:</p>
+<ul>
+<li>[ ] Linux kernel source cloned and stable/linux-6.6.y checked out</li>
+<li>[ ] Kernel configured with ARM64 defconfig and customized for BeaglePlay</li>
+<li>[ ] Kernel compilation successful</li>
+<li>[ ] Image.gz and k3-am625-beagleplay.dtb files generated</li>
+<li>[ ] TFTP server installed and running on development PC</li>
+<li>[ ] Network configured (PC and BeaglePlay on same subnet)</li>
+<li>[ ] TFTP download test successful from U-Boot</li>
+<li>[ ] Kernel boots via TFTP and displays boot messages</li>
+<li>[ ] Kernel panics with "Unable to mount root fs" (expected!)</li>
+<li>[ ] U-Boot boot script created for streamlined booting</li>
+</ul>
+<h2 id="going-further-optional-challenges">Going Further (Optional Challenges)<a class="headerlink" href="#going-further-optional-challenges" title="Permanent link">&para;</a></h2>
+<h3 id="challenge-1-kernel-size-optimization">Challenge 1: Kernel Size Optimization<a class="headerlink" href="#challenge-1-kernel-size-optimization" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Reduce kernel size by disabling unnecessary features</p>
+<p><strong>Tasks:</strong>
+1. Current Image.gz size: ~10MB
+2. Target: Get it under 5MB
+3. Disable unused drivers (sound, graphics, USB gadgets)
+4. Compare boot time before/after</p>
+<p><strong>Hints:</strong>
+- Use <code>make localmodconfig</code> to only enable currently loaded modules (won't help much on first build)
+- Disable entire subsystems: sound, media, staging drivers
+- Check size: <code>ls -lh arch/arm64/boot/Image.gz</code></p>
+<h3 id="challenge-2-custom-kernel-command-line">Challenge 2: Custom Kernel Command Line<a class="headerlink" href="#challenge-2-custom-kernel-command-line" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Pass custom parameters to the kernel</p>
+<p><strong>Tasks:</strong>
+1. Add <code>initcall_debug</code> to bootargs (shows function call timings)
+2. Add <code>quiet</code> to reduce boot messages
+3. Compare boot times with different log levels</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>setenv bootargs &#39;console=ttyS2,115200n8 initcall_debug&#39;
+</code></pre></div>
+<p>Research kernel parameters: <code>Documentation/admin-guide/kernel-parameters.txt</code></p>
+<h3 id="challenge-3-device-tree-exploration">Challenge 3: Device Tree Exploration<a class="headerlink" href="#challenge-3-device-tree-exploration" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Understand how Device Tree describes hardware</p>
+<p><strong>Tasks:</strong>
+1. Read the Device Tree source: <code>arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts</code>
+2. Find the serial console node
+3. Find the Ethernet controller node
+4. Identify mikroBUS connector pinout</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>less<span class="w"> </span>arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+<a id="__codelineno-95-2" name="__codelineno-95-2" href="#__codelineno-95-2"></a><span class="c1"># Search for: /serial@, /ethernet@, /chosen</span>
+</code></pre></div>
+<h3 id="challenge-4-enable-kernel-debugging">Challenge 4: Enable Kernel Debugging<a class="headerlink" href="#challenge-4-enable-kernel-debugging" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Build kernel with debug symbols for GDB debugging</p>
+<p><strong>Tasks:</strong>
+1. Enable CONFIG_DEBUG_INFO
+2. Enable CONFIG_GDB_SCRIPTS
+3. Build and compare vmlinux size
+4. Explore debug symbols with GDB (later lab)</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>make<span class="w"> </span>menuconfig
+<a id="__codelineno-96-2" name="__codelineno-96-2" href="#__codelineno-96-2"></a><span class="c1"># Kernel hacking → Compile-time checks and compiler options →</span>
+<a id="__codelineno-96-3" name="__codelineno-96-3" href="#__codelineno-96-3"></a><span class="c1">#   [*] Compile the kernel with debug info</span>
+</code></pre></div>
+<p>Note: This makes the kernel MUCH larger (~500MB vmlinux)!</p>
+<h3 id="challenge-5-build-a-module">Challenge 5: Build a Module<a class="headerlink" href="#challenge-5-build-a-module" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Compile a kernel driver as a loadable module</p>
+<p><strong>Tasks:</strong>
+1. Choose a simple driver (e.g., dummy network driver)
+2. Configure it as <code>&lt;M&gt;</code> (module) instead of <code>&lt;*&gt;</code> (built-in)
+3. Build just that module: <code>make M=drivers/net</code>
+4. Find the .ko file</p>
+<p><strong>Hints:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>make<span class="w"> </span>menuconfig
+<a id="__codelineno-97-2" name="__codelineno-97-2" href="#__codelineno-97-2"></a><span class="c1"># Find a driver, set to &lt;M&gt;</span>
+<a id="__codelineno-97-3" name="__codelineno-97-3" href="#__codelineno-97-3"></a>make<span class="w"> </span>modules
+<a id="__codelineno-97-4" name="__codelineno-97-4" href="#__codelineno-97-4"></a>find<span class="w"> </span>.<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.ko&quot;</span>
+</code></pre></div>
+<p>We'll learn to load modules in Lab 5!</p>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>In this lab, you:</p>
+<p>✅ Cloned the Linux kernel source tree (mainline + stable)<br />
+✅ Checked out a stable LTS version (6.6.x)<br />
+✅ Configured the kernel for ARM64 and BeaglePlay hardware<br />
+✅ Cross-compiled the kernel and Device Tree Blobs<br />
+✅ Set up TFTP server for network-based kernel loading<br />
+✅ Configured U-Boot networking and boot arguments<br />
+✅ Successfully booted a custom Linux kernel via TFTP<br />
+✅ Created U-Boot boot scripts to streamline the process<br />
+✅ Learned to troubleshoot kernel boot issues  </p>
+<h3 id="key-takeaways">Key Takeaways<a class="headerlink" href="#key-takeaways" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Kernel is highly configurable</strong> - Thousands of options affect functionality and size</li>
+<li><strong>Device Tree is critical</strong> - Modern ARM systems require correct DTB for hardware detection</li>
+<li><strong>Network boot is powerful</strong> - TFTP allows rapid testing without SD card writes</li>
+<li><strong>Compression saves space</strong> - Image.gz is ~50% smaller than uncompressed Image</li>
+<li><strong>Boot arguments matter</strong> - Console configuration must match hardware</li>
+</ol>
+<h3 id="whats-next">What's Next?<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h3>
+<p>In <strong>Lab 5</strong>, we'll:
+- Build a minimal root filesystem with BusyBox
+- Create init scripts and startup configuration
+- Mount the root filesystem over NFS
+- Get a working shell prompt
+- Build statically and dynamically linked programs</p>
+<p>The kernel is booting - now we need a userspace!</p>
+<hr />
+<p><strong>Estimated completion time:</strong> 3-4 hours<br />
+<strong>Difficulty:</strong> ⭐⭐⭐ (Intermediate)</p>
+<p><strong>Questions?</strong> Refer to:
+- <a href="https://www.kernel.org/doc/html/latest/">Kernel Documentation</a>
+- <a href="https://www.devicetree.org/">Device Tree Specification</a>
+- <a href="https://www.kernel.org/doc/Documentation/arm64/booting.txt">Linux ARM64 Boot</a></p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

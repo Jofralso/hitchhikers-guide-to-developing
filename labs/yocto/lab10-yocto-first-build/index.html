@@ -1,0 +1,4882 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A structured meta-repository for learning systems engineering, embedded Linux, and infrastructure automation">
+      
+      
+        <meta name="author" content="Jofralso">
+      
+      
+        <link rel="canonical" href="https://jofralso.github.io/hitchhikers-guide-to-developing/labs/yocto/lab10-yocto-first-build/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../lab11-yocto-advanced-config/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Lab 10 - First Yocto Build - The Hitchhiker's Guide to Developing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-10-first-yocto-project-build" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-header__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Hitchhiker's Guide to Developing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 10 - First Yocto Build
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../QUICK_START/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../embedded-linux/" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../THE-JOURNEY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  The Journey
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ROADMAP/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Bibliography
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../submodules/index.md" class="md-tabs__link">
+          
+  
+  
+  Submodules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../templates/lab-template/" class="md-tabs__link">
+          
+  
+  
+  Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../standards/documentation-standards/" class="md-tabs__link">
+          
+  
+  
+  Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Hitchhiker&#39;s Guide to Developing" class="md-nav__button md-logo" aria-label="The Hitchhiker's Guide to Developing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    The Hitchhiker's Guide to Developing
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Jofralso/hitchhikers-guide-to-developing" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Jofralso/hitchhikers-guide-to-developing
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../QUICK_START/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BEAGLEPLAY_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BeaglePlay Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LAB_STRUCTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedded Linux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Embedded Linux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab01-toolchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1 - Toolchain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2 - Hardware Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab03-bootloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3 - U-Boot Bootloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab04-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4 - Linux Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab05-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5 - Root Filesystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab06-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 6 - Hardware Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab07-block-filesystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 7 - Block Filesystems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab08-buildroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 8 - Buildroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../embedded-linux/lab09-application-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 9 - App Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yocto Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Yocto Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 10 - First Yocto Build
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-yocto-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding Yocto Project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding Yocto Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-what-is-yocto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 What is Yocto?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-why-use-yocto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Why Use Yocto?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-yocto-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Yocto Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-system-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. System Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. System Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-prerequisites-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Prerequisites Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-install-build-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Install Build Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-configure-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Configure Git
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-ubuntu-2404-apparmor-workaround" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Ubuntu 24.04 AppArmor Workaround
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-setting-up-the-yocto-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Setting Up the Yocto Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Setting Up the Yocto Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-create-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Create Workspace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-download-poky" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Download Poky
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-download-required-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Download Required Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-understand-layer-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Understand Layer Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-initializing-the-build-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Initializing the Build Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Initializing the Build Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-source-the-environment-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Source the Environment Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-verify-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Verify Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-understand-build-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Understand Build Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-configuring-the-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Configuring the Build
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Configuring the Build">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-configure-target-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Configure Target Machine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-configure-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Configure Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-building-your-first-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Building Your First Image
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Building Your First Image">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-understand-bitbake-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Understand BitBake Images
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-start-the-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Start the Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-monitor-build-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Monitor Build Progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-handle-build-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Handle Build Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-analyzing-build-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Analyzing Build Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Analyzing Build Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-locate-build-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Locate Build Artifacts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-examine-image-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Examine Image Contents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-understand-wic-image-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Understand WIC Image Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-check-build-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Check Build Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-preparing-the-sd-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Preparing the SD Card
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Preparing the SD Card">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-identify-sd-card-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Identify SD Card Device
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-unmount-existing-partitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Unmount Existing Partitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-flash-the-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Flash the Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-serial-console-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Serial Console Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Serial Console Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-connect-serial-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Connect Serial Adapter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-configure-serial-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Configure Serial Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-install-and-use-picocom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Install and Use picocom
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-booting-the-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Booting the Image
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Booting the Image">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-power-on-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Power On Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-observe-boot-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Observe Boot Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Login
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-exploring-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Exploring the System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Exploring the System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-basic-system-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Basic System Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-test-network-if-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Test Network (if available)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-explore-installed-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Explore Installed Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-check-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Check Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-build-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Build Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-boot-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Boot Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-yocto-specific-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Yocto-Specific Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-rebuild-after-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Rebuild After Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-build-different-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Build Different Images
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-explore-bitbake-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Explore BitBake Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#134-speed-up-subsequent-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.4 Speed Up Subsequent Builds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-cleaning-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Cleaning Up
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Cleaning Up">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-preserve-build-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Preserve Build Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-clean-specific-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 Clean Specific Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-disk-space-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Disk Space Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab11-yocto-advanced-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 11 - Advanced Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab12-yocto-custom-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 12 - Custom Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab13-yocto-custom-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 13 - Custom Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab14-yocto-extend-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 14 - Extend Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab15-yocto-custom-machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 15 - Custom Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab16-yocto-custom-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 16 - Custom Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab17-yocto-app-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 17 - SDK Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lab18-yocto-devtool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 18 - Devtool
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Debugging
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab19-system-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 19 - System Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab20-gdb-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 20 - GDB Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab21-strace-ltrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 21 - strace/ltrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab22-valgrind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 22 - Valgrind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab23-perf-ftrace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 23 - perf & ftrace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab24-ebpf-bcc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 24 - eBPF & BCC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab25-kernel-debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 25 - Kernel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../debugging/lab26-kdump-kexec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 26 - kdump & kexec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../THE-JOURNEY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../BIBLIOGRAPHY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Submodules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Submodules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../submodules/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/lab-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/research-note/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../templates/technical-procedure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Procedure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../standards/documentation-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dont-panic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DON'T PANIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-understanding-yocto-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understanding Yocto Project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Understanding Yocto Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-what-is-yocto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 What is Yocto?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-why-use-yocto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Why Use Yocto?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-yocto-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Yocto Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-system-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. System Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. System Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-prerequisites-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Prerequisites Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-install-build-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Install Build Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-configure-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Configure Git
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-ubuntu-2404-apparmor-workaround" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Ubuntu 24.04 AppArmor Workaround
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-setting-up-the-yocto-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Setting Up the Yocto Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Setting Up the Yocto Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-create-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Create Workspace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-download-poky" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Download Poky
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-download-required-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Download Required Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-understand-layer-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Understand Layer Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-initializing-the-build-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Initializing the Build Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Initializing the Build Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-source-the-environment-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Source the Environment Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-verify-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Verify Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-understand-build-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Understand Build Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-configuring-the-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Configuring the Build
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Configuring the Build">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-configure-target-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Configure Target Machine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-configure-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Configure Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-building-your-first-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Building Your First Image
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Building Your First Image">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-understand-bitbake-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Understand BitBake Images
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-start-the-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Start the Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-monitor-build-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Monitor Build Progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-handle-build-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Handle Build Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-analyzing-build-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Analyzing Build Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Analyzing Build Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-locate-build-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Locate Build Artifacts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-examine-image-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Examine Image Contents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-understand-wic-image-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Understand WIC Image Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-check-build-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Check Build Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-preparing-the-sd-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Preparing the SD Card
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Preparing the SD Card">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-identify-sd-card-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Identify SD Card Device
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-unmount-existing-partitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Unmount Existing Partitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-flash-the-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Flash the Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-serial-console-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Serial Console Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Serial Console Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-connect-serial-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Connect Serial Adapter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-configure-serial-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Configure Serial Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-install-and-use-picocom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Install and Use picocom
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-booting-the-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Booting the Image
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Booting the Image">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-power-on-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Power On Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-observe-boot-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Observe Boot Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Login
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-exploring-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Exploring the System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Exploring the System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-basic-system-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Basic System Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-test-network-if-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Test Network (if available)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-explore-installed-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Explore Installed Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-check-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Check Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-build-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Build Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-boot-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Boot Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-yocto-specific-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Yocto-Specific Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-going-further" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Going Further
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Going Further">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-rebuild-after-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Rebuild After Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-build-different-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Build Different Images
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-explore-bitbake-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Explore BitBake Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#134-speed-up-subsequent-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.4 Speed Up Subsequent Builds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-cleaning-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Cleaning Up
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Cleaning Up">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-preserve-build-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Preserve Build Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-clean-specific-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 Clean Specific Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-disk-space-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Disk Space Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="lab-10-first-yocto-project-build">Lab 10: First Yocto Project Build<a class="headerlink" href="#lab-10-first-yocto-project-build" title="Permanent link">&para;</a></h1>
+<h2 id="dont-panic">DON'T PANIC<a class="headerlink" href="#dont-panic" title="Permanent link">&para;</a></h2>
+<p>The Hitchhiker's Guide to Embedded Linux has this to say about Yocto:</p>
+<p><em>"The Yocto Project is a build system of such staggering complexity that it makes the Infinite Improbability Drive look straightforward. However, once you understand it (which will take approximately 42 tries), it's actually quite brilliant."</em></p>
+<h2 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h2>
+<p>Master the fundamentals of the Yocto Project build system by setting up a complete OpenEmbedded environment and building your first custom Linux distribution for the BeaglePlay.</p>
+<p><strong>What You'll Learn:</strong>
+- Set up the Yocto Project/OpenEmbedded build environment
+- Understand BitBake and layer architecture
+- Configure machine-specific builds for TI AM62x (BeaglePlay)
+- Build a minimal root filesystem image
+- Deploy and boot a Yocto-generated image</p>
+<p><strong>Time Required:</strong> 3-4 hours</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p><strong>Hardware:</strong>
+- BeaglePlay board (TI AM62x Cortex-A53)
+- microSD card (16GB+ recommended)
+- USB-C cable for power
+- USB-to-Serial adapter (3.3V UART)
+- Serial terminal software (picocom, minicom)</p>
+<p><strong>Software:</strong>
+- Ubuntu 22.04+ or compatible Linux distribution
+- At least 50GB free disk space (recommend 100GB+)
+- Internet connection for downloading layers</p>
+<p><strong>Knowledge:</strong>
+- Completed embedded Linux track (Labs 1-9)
+- Understanding of cross-compilation
+- Familiarity with Git and Python</p>
+<hr />
+<h2 id="1-understanding-yocto-project">1. Understanding Yocto Project<a class="headerlink" href="#1-understanding-yocto-project" title="Permanent link">&para;</a></h2>
+<h3 id="11-what-is-yocto">1.1 What is Yocto?<a class="headerlink" href="#11-what-is-yocto" title="Permanent link">&para;</a></h3>
+<p>The <strong>Yocto Project</strong> is an open-source collaboration project providing templates, tools, and methods for creating custom Linux-based systems regardless of the hardware architecture.</p>
+<p><strong>Key Components:</strong>
+- <strong>Poky</strong>: Reference distribution and build system
+- <strong>OpenEmbedded-Core</strong>: Core metadata and recipes
+- <strong>BitBake</strong>: Task execution engine (Python-based)
+- <strong>Layers</strong>: Modular metadata organization</p>
+<h3 id="12-why-use-yocto">1.2 Why Use Yocto?<a class="headerlink" href="#12-why-use-yocto" title="Permanent link">&para;</a></h3>
+<p><strong>Advantages over manual approaches:</strong>
+- <strong>Reproducibility</strong>: Builds are deterministic and traceable
+- <strong>Scalability</strong>: Manage hundreds of packages efficiently
+- <strong>Customization</strong>: Full control over every component
+- <strong>Community</strong>: Thousands of ready-to-use recipes
+- <strong>Maintenance</strong>: Upstream tracking and security updates</p>
+<p><strong>Comparison with Buildroot:</strong>
+- More complex but more flexible
+- Recipe-based vs. makefile-based
+- Better for complex products with long lifecycles</p>
+<h3 id="13-yocto-architecture">1.3 Yocto Architecture<a class="headerlink" href="#13-yocto-architecture" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                 BitBake Engine                  │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│         (Task Scheduler &amp; Executor)             │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└─────────────────────────────────────────────────┘
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                        │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        ┌───────────────┼───────────────┐
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        │               │               │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>┌───────▼──────┐ ┌──────▼─────┐ ┌──────▼─────┐
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  meta        │ │ meta-oe    │ │ meta-ti    │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  (Poky core) │ │ (packages) │ │ (BSP)      │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>└──────────────┘ └────────────┘ └────────────┘
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        │               │               │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        └───────────────┼───────────────┘
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                        │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        ┌───────────────▼───────────────┐
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        │     Build Directory           │
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        │  - conf/                      │
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        │  - tmp/                       │
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        │  - downloads/                 │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        │  - sstate-cache/              │
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>        └───────────────────────────────┘
+</code></pre></div>
+<p><strong>Layer Structure:</strong>
+- <strong>meta</strong>: Core OpenEmbedded recipes
+- <strong>meta-poky</strong>: Poky-specific configurations
+- <strong>meta-yocto-bsp</strong>: Reference BSP for QEMU and generic boards
+- <strong>meta-ti</strong>: Texas Instruments BSP (AM62x support)
+- <strong>meta-openembedded</strong>: Community packages (python, networking, etc.)
+- <strong>meta-arm</strong>: ARM-specific toolchains and recipes</p>
+<hr />
+<h2 id="2-system-setup">2. System Setup<a class="headerlink" href="#2-system-setup" title="Permanent link">&para;</a></h2>
+<h3 id="21-prerequisites-check">2.1 Prerequisites Check<a class="headerlink" href="#21-prerequisites-check" title="Permanent link">&para;</a></h3>
+<p><strong>Verify disk space:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>df<span class="w"> </span>-h<span class="w"> </span><span class="nv">$HOME</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># Need at least 50GB free, 100GB+ recommended</span>
+</code></pre></div></p>
+<p><strong>Check Ubuntu version:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>lsb_release<span class="w"> </span>-a
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># Should be Ubuntu 22.04 or 24.04</span>
+</code></pre></div></p>
+<p><strong>Verify no eCryptFS encryption:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ecryptfs
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># Should return nothing - eCryptFS breaks long filenames</span>
+</code></pre></div></p>
+<p>If your home directory uses eCryptFS, create the Yocto workspace on an unencrypted partition.</p>
+<h3 id="22-install-build-dependencies">2.2 Install Build Dependencies<a class="headerlink" href="#22-install-build-dependencies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span>gawk<span class="w"> </span>wget<span class="w"> </span>git<span class="w"> </span>diffstat<span class="w"> </span>unzip<span class="w"> </span>texinfo<span class="w"> </span>gcc<span class="w"> </span>build-essential<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span>chrpath<span class="w"> </span>socat<span class="w"> </span>cpio<span class="w"> </span>python3<span class="w"> </span>python3-pip<span class="w"> </span>python3-pexpect<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span>xz-utils<span class="w"> </span>debianutils<span class="w"> </span>iputils-ping<span class="w"> </span>python3-git<span class="w"> </span>python3-jinja2<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span>python3-subunit<span class="w"> </span>zstd<span class="w"> </span>liblz4-tool<span class="w"> </span>file<span class="w"> </span>locales<span class="w"> </span>libacl1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span>libssl-dev<span class="w"> </span>libgmp-dev<span class="w"> </span>libmpc-dev<span class="w"> </span>lz4<span class="w"> </span>zlib1g-dev
+</code></pre></div>
+<p><strong>What these packages do:</strong>
+- <strong>gawk, diffstat, texinfo</strong>: Build system utilities
+- <strong>python3-</strong><em>: BitBake dependencies
+- </em><em>chrpath, patchelf</em><em>: Binary manipulation
+- </em><em>socat</em><em>: Networking tools for BitBake
+- </em><em>zstd, lz4</em>*: Compression for package caching</p>
+<h3 id="23-configure-git">2.3 Configure Git<a class="headerlink" href="#23-configure-git" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.name<span class="w"> </span><span class="s2">&quot;Your Name&quot;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.email<span class="w"> </span><span class="s2">&quot;your.email@example.com&quot;</span>
+</code></pre></div>
+<p>Yocto tracks all changes via Git - proper configuration is essential.</p>
+<h3 id="24-ubuntu-2404-apparmor-workaround">2.4 Ubuntu 24.04 AppArmor Workaround<a class="headerlink" href="#24-ubuntu-2404-apparmor-workaround" title="Permanent link">&para;</a></h3>
+<p>Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor, which breaks BitBake's network isolation.</p>
+<p><strong>Temporary fix (reboot required):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">echo</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/proc/sys/kernel/apparmor_restrict_unprivileged_userns
+</code></pre></div></p>
+<p><strong>Persistent fix:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;kernel.apparmor_restrict_unprivileged_userns = 0&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/sysctl.d/99-bitbake.conf
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>sysctl<span class="w"> </span>--system
+</code></pre></div></p>
+<p><strong>Verify:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>cat<span class="w"> </span>/proc/sys/kernel/apparmor_restrict_unprivileged_userns
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># Should output: 0</span>
+</code></pre></div></p>
+<hr />
+<h2 id="3-setting-up-the-yocto-environment">3. Setting Up the Yocto Environment<a class="headerlink" href="#3-setting-up-the-yocto-environment" title="Permanent link">&para;</a></h2>
+<h3 id="31-create-workspace">3.1 Create Workspace<a class="headerlink" href="#31-create-workspace" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/yocto-labs
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+</code></pre></div>
+<h3 id="32-download-poky">3.2 Download Poky<a class="headerlink" href="#32-download-poky" title="Permanent link">&para;</a></h3>
+<p><strong>Clone the Scarthgap LTS release (Yocto 5.0):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://git.yoctoproject.org/git/poky
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">cd</span><span class="w"> </span>poky
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>scarthgap-5.0.4<span class="w"> </span>scarthgap-5.0.4
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nb">cd</span><span class="w"> </span>..
+</code></pre></div></p>
+<p><strong>Why Scarthgap?</strong>
+- LTS release (supported until April 2026)
+- TI AM62x well-supported
+- Stable BSP layer ecosystem</p>
+<h3 id="33-download-required-layers">3.3 Download Required Layers<a class="headerlink" href="#33-download-required-layers" title="Permanent link">&para;</a></h3>
+<p><strong>meta-openembedded (community packages):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>scarthgap<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span>https://git.openembedded.org/meta-openembedded
+</code></pre></div></p>
+<p><strong>meta-arm (ARM toolchains):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://git.yoctoproject.org/git/meta-arm
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nb">cd</span><span class="w"> </span>meta-arm
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>yocto-5.0.1<span class="w"> </span>yocto-5.0.1
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="nb">cd</span><span class="w"> </span>..
+</code></pre></div></p>
+<p><strong>meta-ti (BeaglePlay BSP):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://git.yoctoproject.org/git/meta-ti
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nb">cd</span><span class="w"> </span>meta-ti
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>scarthgap-10.01.03<span class="w"> </span><span class="m">10</span>.01.03
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nb">cd</span><span class="w"> </span>..
+</code></pre></div></p>
+<p><strong>Verify layer versions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">for</span><span class="w"> </span>layer<span class="w"> </span><span class="k">in</span><span class="w"> </span>poky<span class="w"> </span>meta-openembedded<span class="w"> </span>meta-arm<span class="w"> </span>meta-ti<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== </span><span class="nv">$layer</span><span class="s2"> ===&quot;</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$layer</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span>git<span class="w"> </span>describe<span class="w"> </span>--tags
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="nb">cd</span><span class="w"> </span>..
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="k">done</span>
+</code></pre></div></p>
+<h3 id="34-understand-layer-structure">3.4 Understand Layer Structure<a class="headerlink" href="#34-understand-layer-structure" title="Permanent link">&para;</a></h3>
+<p><strong>Explore Poky:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/poky
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>ls<span class="w"> </span>-l
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>meta/           # Core OpenEmbedded recipes
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>meta-poky/      # Poky distribution policy
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>meta-yocto-bsp/ # Reference BSPs (QEMU)
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>bitbake/        # BitBake build engine
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>scripts/        # Utility scripts
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>oe-init-build-env  # Environment setup script
+</code></pre></div></p>
+<p><strong>Explore meta-ti:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/meta-ti
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>ls<span class="w"> </span>-l
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>meta-ti-bsp/    # Board support (BeaglePlay)
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>meta-ti-extras/ # Additional TI packages
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>recipes-*/      # Recipe directories
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>conf/           # Layer and machine configurations
+</code></pre></div></p>
+<p><strong>Check BeaglePlay machine config:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>cat<span class="w"> </span>meta-ti-bsp/conf/machine/beagleplay.conf<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-30
+</code></pre></div></p>
+<p>You'll see AM62x-specific settings: SoC family, kernel provider, bootloader configurations.</p>
+<hr />
+<h2 id="4-initializing-the-build-environment">4. Initializing the Build Environment<a class="headerlink" href="#4-initializing-the-build-environment" title="Permanent link">&para;</a></h2>
+<h3 id="41-source-the-environment-script">4.1 Source the Environment Script<a class="headerlink" href="#41-source-the-environment-script" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nb">source</span><span class="w"> </span>poky/oe-init-build-env
+</code></pre></div>
+<p><strong>What this does:</strong>
+- Creates <code>build/</code> directory
+- Generates <code>conf/local.conf</code> and <code>conf/bblayers.conf</code>
+- Sets up BitBake environment variables
+- Changes directory to <code>build/</code></p>
+<p><strong>You're now in:</strong> <code>~/yocto-labs/build/</code></p>
+<h3 id="42-verify-environment">4.2 Verify Environment<a class="headerlink" href="#42-verify-environment" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$BUILDDIR</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="c1"># Output: /home/user/yocto-labs/build</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>which<span class="w"> </span>bitbake
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="c1"># Output: /home/user/yocto-labs/poky/bitbake/bin/bitbake</span>
+</code></pre></div>
+<p><strong>Important (like knowing where your towel is):</strong> You must source <code>oe-init-build-env</code> in every new shell session.</p>
+<h3 id="43-understand-build-directory-structure">4.3 Understand Build Directory Structure<a class="headerlink" href="#43-understand-build-directory-structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>~/yocto-labs/build/
+</code></pre></div>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>conf/           # Configuration files
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>tmp/            # Build artifacts (created during build)
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>downloads/      # Downloaded source tarballs
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>sstate-cache/   # Shared state cache (build acceleration)
+</code></pre></div></p>
+<hr />
+<h2 id="5-configuring-the-build">5. Configuring the Build<a class="headerlink" href="#5-configuring-the-build" title="Permanent link">&para;</a></h2>
+<h3 id="51-configure-target-machine">5.1 Configure Target Machine<a class="headerlink" href="#51-configure-target-machine" title="Permanent link">&para;</a></h3>
+<p><strong>Edit local.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>nano<span class="w"> </span>conf/local.conf
+</code></pre></div></p>
+<p><strong>Find the MACHINE variable (around line 33):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>#MACHINE ??= &quot;qemux86-64&quot;
+</code></pre></div></p>
+<p><strong>Change to BeaglePlay:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>MACHINE ??= &quot;beagleplay&quot;
+</code></pre></div></p>
+<p><strong>Add disk space optimization (optional but recommended):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a># Remove work directories after build to save space
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>INHERIT += &quot;rm_work&quot;
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a># Keep sources for debugging
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>RM_WORK_EXCLUDE += &quot;linux-ti-staging u-boot-ti-staging&quot;
+</code></pre></div></p>
+<p><strong>Add parallel build settings:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a># Use all CPU cores (adjust based on your system)
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>BB_NUMBER_THREADS ?= &quot;${@oe.utils.cpu_count()}&quot;
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>PARALLEL_MAKE ?= &quot;-j ${@oe.utils.cpu_count()}&quot;
+</code></pre></div></p>
+<p><strong>Save and exit</strong> (Ctrl+O, Enter, Ctrl+X).</p>
+<h3 id="52-configure-layers">5.2 Configure Layers<a class="headerlink" href="#52-configure-layers" title="Permanent link">&para;</a></h3>
+<p><strong>Edit bblayers.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>nano<span class="w"> </span>conf/bblayers.conf
+</code></pre></div></p>
+<p><strong>You'll see:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>BBLAYERS ?= &quot; \
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  /home/user/yocto-labs/poky/meta \
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>  /home/user/yocto-labs/poky/meta-poky \
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>  /home/user/yocto-labs/poky/meta-yocto-bsp \
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>  &quot;
+</code></pre></div></p>
+<p><strong>Add required layers:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>BBLAYERS ?= &quot; \
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>  /home/user/yocto-labs/poky/meta \
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>  /home/user/yocto-labs/poky/meta-poky \
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>  /home/user/yocto-labs/poky/meta-yocto-bsp \
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>  /home/user/yocto-labs/meta-openembedded/meta-oe \
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>  /home/user/yocto-labs/meta-openembedded/meta-python \
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>  /home/user/yocto-labs/meta-openembedded/meta-networking \
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>  /home/user/yocto-labs/meta-arm/meta-arm \
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>  /home/user/yocto-labs/meta-arm/meta-arm-toolchain \
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a>  /home/user/yocto-labs/meta-ti/meta-ti-bsp \
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a>  /home/user/yocto-labs/meta-ti/meta-ti-extras \
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a>  &quot;
+</code></pre></div></p>
+<p><strong>Important (like knowing where your towel is):</strong> Use absolute paths. Replace <code>/home/user/</code> with your actual home directory path.</p>
+<p><strong>Quick way to get absolute paths:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># Generate layer paths automatically</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="k">for</span><span class="w"> </span>layer<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span>meta-openembedded/meta-oe<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="w">    </span>meta-openembedded/meta-python<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="w">    </span>meta-openembedded/meta-networking<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="w">    </span>meta-arm/meta-arm<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="w">    </span>meta-arm/meta-arm-toolchain<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a><span class="w">    </span>meta-ti/meta-ti-bsp<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a><span class="w">    </span>meta-ti/meta-ti-extras<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a><span class="w">    </span>realpath<span class="w"> </span><span class="nv">$layer</span>
+<a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a><span class="k">done</span>
+</code></pre></div></p>
+<p>Copy the output and paste into <code>BBLAYERS</code>.</p>
+<h3 id="53-verify-configuration">5.3 Verify Configuration<a class="headerlink" href="#53-verify-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Check layer dependencies:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>bitbake-layers<span class="w"> </span>show-layers
+</code></pre></div></p>
+<p><strong>Expected output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>layer                 path                                      priority
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>==========================================================================
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>meta                  /home/user/yocto-labs/poky/meta           5
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>meta-poky             /home/user/yocto-labs/poky/meta-poky      5
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>meta-yocto-bsp        /home/user/yocto-labs/poky/meta-yocto-bsp 5
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>meta-oe               /home/user/yocto-labs/meta-openembedded/meta-oe  6
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>meta-python           /home/user/yocto-labs/meta-openembedded/meta-python  7
+<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>meta-networking       /home/user/yocto-labs/meta-openembedded/meta-networking  5
+<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a>meta-arm              /home/user/yocto-labs/meta-arm/meta-arm   5
+<a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>meta-arm-toolchain    /home/user/yocto-labs/meta-arm/meta-arm-toolchain  5
+<a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a>meta-ti-bsp           /home/user/yocto-labs/meta-ti/meta-ti-bsp  6
+<a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a>meta-ti-extras        /home/user/yocto-labs/meta-ti/meta-ti-extras  7
+</code></pre></div></p>
+<p><strong>Check for dependency issues:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>bitbake-layers<span class="w"> </span>check-layers
+</code></pre></div></p>
+<p>Should return no errors.</p>
+<hr />
+<h2 id="6-building-your-first-image">6. Building Your First Image<a class="headerlink" href="#6-building-your-first-image" title="Permanent link">&para;</a></h2>
+<h3 id="61-understand-bitbake-images">6.1 Understand BitBake Images<a class="headerlink" href="#61-understand-bitbake-images" title="Permanent link">&para;</a></h3>
+<p><strong>Common image targets:</strong>
+- <strong>core-image-minimal</strong>: Bare minimum (console only, ~10MB rootfs)
+- <strong>core-image-base</strong>: Basic with networking
+- <strong>core-image-full-cmdline</strong>: All console tools
+- <strong>core-image-sato</strong>: Graphical desktop (large)</p>
+<p>We'll build <strong>core-image-minimal</strong> for this first build.</p>
+<h3 id="62-start-the-build">6.2 Start the Build<a class="headerlink" href="#62-start-the-build" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div>
+<p><strong>Expected output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>Loading cache: 100% |##################################| Time: 0:00:05
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>Loaded 4321 entries from dependency cache.
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>Parsing recipes: 100% |################################| Time: 0:00:38
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>Parsing of 2456 .bb files complete (2450 cached, 6 parsed). 4328 targets, 412 skipped, 0 masked, 0 errors.
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>NOTE: Resolving any missing task queue dependencies
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>...
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>NOTE: Tasks Summary: Attempted 3284 tasks of which 0 didn&#39;t need to be rerun and all succeeded.
+</code></pre></div></p>
+<p><strong>First build will take 1-3 hours</strong> depending on:
+- CPU cores (more is better)
+- Internet speed (downloads ~5GB)
+- Disk speed (SSD recommended)</p>
+<p><strong>What's happening:</strong>
+1. BitBake parses all recipes and dependencies
+2. Downloads source tarballs to <code>downloads/</code>
+3. Unpacks, patches, configures, compiles packages
+4. Generates rootfs and bootable image
+5. Caches intermediate results in <code>sstate-cache/</code></p>
+<h3 id="63-monitor-build-progress">6.3 Monitor Build Progress<a class="headerlink" href="#63-monitor-build-progress" title="Permanent link">&para;</a></h3>
+<p><strong>Open another terminal and monitor:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="c1"># Watch disk usage</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>watch<span class="w"> </span>-n<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="s1">&#39;df -h ~/yocto-labs/build/tmp&#39;</span>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="c1"># Monitor currently running tasks</span>
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>tail<span class="w"> </span>-f<span class="w"> </span>~/yocto-labs/build/tmp/log/cooker/beagleplay/console-latest.log
+</code></pre></div></p>
+<p><strong>Common tasks you'll see:</strong>
+- <code>do_fetch</code>: Download sources
+- <code>do_unpack</code>: Extract archives
+- <code>do_patch</code>: Apply patches
+- <code>do_configure</code>: Run ./configure or cmake
+- <code>do_compile</code>: Build the package
+- <code>do_install</code>: Install to staging area
+- <code>do_package</code>: Create binary packages
+- <code>do_rootfs</code>: Assemble root filesystem</p>
+<h3 id="64-handle-build-errors">6.4 Handle Build Errors<a class="headerlink" href="#64-handle-build-errors" title="Permanent link">&para;</a></h3>
+<p><strong>If build fails:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># Check error log</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>cat<span class="w"> </span>tmp/log/cooker/beagleplay/console-latest.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ERROR
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="c1"># Clean specific package and retry</span>
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleansstate<span class="w"> </span>&lt;package-name&gt;
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>bitbake<span class="w"> </span>&lt;package-name&gt;
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a>
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="c1"># Full clean (last resort)</span>
+<a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>&lt;package-name&gt;
+</code></pre></div></p>
+<p><strong>Common issues:</strong>
+- <strong>Network timeouts</strong>: Retry the build
+- <strong>Disk full</strong>: Free up space, adjust <code>tmp/</code> location
+- <strong>Missing dependencies</strong>: Update host packages</p>
+<hr />
+<h2 id="7-analyzing-build-results">7. Analyzing Build Results<a class="headerlink" href="#7-analyzing-build-results" title="Permanent link">&para;</a></h2>
+<h3 id="71-locate-build-artifacts">7.1 Locate Build Artifacts<a class="headerlink" href="#71-locate-build-artifacts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>ls<span class="w"> </span>-lh
+</code></pre></div>
+<p><strong>Key files:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>core-image-minimal-beagleplay.rootfs.tar.xz   # Root filesystem archive
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>core-image-minimal-beagleplay.rootfs.wic.xz   # Complete SD card image
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>Image-beagleplay.bin                          # Kernel binary
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>tiboot3.bin                                   # R5 SPL bootloader
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>tispl.bin                                     # ARM Trusted Firmware + U-Boot SPL
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>u-boot.img                                    # U-Boot proper
+</code></pre></div></p>
+<p><strong>Symlinks point to timestamped versions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>Image-beagleplay.bin
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="c1"># Output: Image-beagleplay.bin -&gt; Image--5.10.168+git0+&lt;hash&gt;-r8a-beagleplay-&lt;timestamp&gt;.bin</span>
+</code></pre></div></p>
+<h3 id="72-examine-image-contents">7.2 Examine Image Contents<a class="headerlink" href="#72-examine-image-contents" title="Permanent link">&para;</a></h3>
+<p><strong>Extract rootfs to inspect:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/rootfs-inspect
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>tar<span class="w"> </span>-xf<span class="w"> </span>core-image-minimal-beagleplay.rootfs.tar.xz<span class="w"> </span>-C<span class="w"> </span>/tmp/rootfs-inspect
+</code></pre></div></p>
+<p><strong>Explore:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>ls<span class="w"> </span>-l<span class="w"> </span>/tmp/rootfs-inspect/
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="c1"># Output: bin/ boot/ dev/ etc/ home/ lib/ media/ mnt/ proc/ run/ sbin/ sys/ tmp/ usr/ var/</span>
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>du<span class="w"> </span>-sh<span class="w"> </span>/tmp/rootfs-inspect/
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="c1"># Output: ~12M (very minimal!)</span>
+</code></pre></div></p>
+<p><strong>Check installed packages:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>cat<span class="w"> </span>/tmp/rootfs-inspect/usr/lib/opkg/status<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^Package:&quot;</span>
+</code></pre></div></p>
+<h3 id="73-understand-wic-image-format">7.3 Understand WIC Image Format<a class="headerlink" href="#73-understand-wic-image-format" title="Permanent link">&para;</a></h3>
+<p><strong>WIC (Wic Image Creator)</strong> is Yocto's partition image tool.</p>
+<p><strong>Inspect partition layout:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>xz<span class="w"> </span>-dc<span class="w"> </span>core-image-minimal-beagleplay.rootfs.wic.xz<span class="w"> </span>&gt;<span class="w"> </span>/tmp/image.wic
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>fdisk<span class="w"> </span>-l<span class="w"> </span>/tmp/image.wic
+</code></pre></div></p>
+<p><strong>Expected output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>Device                                      Boot  Start     End Sectors  Size Id Type
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>/tmp/image.wic1                             *      8192  139263  131072   64M  c W95 FAT32 (LBA)
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>/tmp/image.wic2                                  147456 1196031 1048576  512M 83 Linux
+</code></pre></div></p>
+<p><strong>Partition structure:</strong>
+- <strong>Partition 1 (boot)</strong>: FAT32, contains kernel + Device Tree + bootloader
+- <strong>Partition 2 (rootfs)</strong>: ext4, root filesystem</p>
+<h3 id="74-check-build-statistics">7.4 Check Build Statistics<a class="headerlink" href="#74-check-build-statistics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>bitbake<span class="w"> </span>-g<span class="w"> </span>core-image-minimal
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>cat<span class="w"> </span>pn-buildlist<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="c1"># Output: ~400 packages built</span>
+</code></pre></div>
+<p><strong>View dependency graph:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>bitbake<span class="w"> </span>-g<span class="w"> </span>core-image-minimal<span class="w"> </span>-u<span class="w"> </span>depexp
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a><span class="c1"># Opens graphical dependency explorer (requires X11)</span>
+</code></pre></div></p>
+<p><strong>Build time report:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>cat<span class="w"> </span>tmp/log/cooker/beagleplay/console-latest.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Build Configuration&quot;</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>cat<span class="w"> </span>tmp/log/cooker/beagleplay/console-latest.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Tasks Summary&quot;</span>
+</code></pre></div></p>
+<hr />
+<h2 id="8-preparing-the-sd-card">8. Preparing the SD Card<a class="headerlink" href="#8-preparing-the-sd-card" title="Permanent link">&para;</a></h2>
+<h3 id="81-identify-sd-card-device">8.1 Identify SD Card Device<a class="headerlink" href="#81-identify-sd-card-device" title="Permanent link">&para;</a></h3>
+<p><strong>Insert SD card and check device name:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>lsblk
+</code></pre></div></p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>sda           8:0    0 465.8G  0 disk 
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>└─sda1        8:1    0 465.8G  0 part /
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>sdb           8:16   1  14.9G  0 disk        &lt;-- SD card
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>└─sdb1        8:17   1  14.9G  0 part /media/user/SDCARD
+</code></pre></div></p>
+<p><strong>Your SD card is <code>/dev/sdb</code></strong> (may be different on your system).</p>
+<p><strong>WARNING:</strong> Double-check! Writing to wrong device destroys data.</p>
+<h3 id="82-unmount-existing-partitions">8.2 Unmount Existing Partitions<a class="headerlink" href="#82-unmount-existing-partitions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>sudo<span class="w"> </span>umount<span class="w"> </span>/dev/sdb*
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a><span class="c1"># Ignore errors if not mounted</span>
+</code></pre></div>
+<h3 id="83-flash-the-image">8.3 Flash the Image<a class="headerlink" href="#83-flash-the-image" title="Permanent link">&para;</a></h3>
+<p><strong>Write WIC image to SD card:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs/build/tmp/deploy/images/beagleplay
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>xz<span class="w"> </span>-dc<span class="w"> </span>core-image-minimal-beagleplay.rootfs.wic.xz<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a><span class="w">    </span>sudo<span class="w"> </span>dd<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/sdb<span class="w"> </span><span class="nv">conv</span><span class="o">=</span>fdatasync<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>4M<span class="w"> </span><span class="nv">status</span><span class="o">=</span>progress
+</code></pre></div></p>
+<p><strong>Explanation:</strong>
+- <code>xz -dc</code>: Decompress XZ archive to stdout
+- <code>dd</code>: Write raw data to block device
+- <code>conv=fdatasync</code>: Flush write cache (ensure data integrity)
+- <code>bs=4M</code>: Write in 4MB blocks (faster)
+- <code>status=progress</code>: Show transfer progress</p>
+<p><strong>Wait for completion</strong> (takes 1-2 minutes).</p>
+<p><strong>Sync filesystems:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>sudo<span class="w"> </span>sync
+</code></pre></div></p>
+<p><strong>Safely remove SD card:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>sudo<span class="w"> </span>eject<span class="w"> </span>/dev/sdb
+</code></pre></div></p>
+<hr />
+<h2 id="9-serial-console-setup">9. Serial Console Setup<a class="headerlink" href="#9-serial-console-setup" title="Permanent link">&para;</a></h2>
+<h3 id="91-connect-serial-adapter">9.1 Connect Serial Adapter<a class="headerlink" href="#91-connect-serial-adapter" title="Permanent link">&para;</a></h3>
+<p><strong>BeaglePlay UART pins</strong> (3-pin header next to USB-C):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>Pin 1 (closest to USB-C): TX (Board transmit)
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>Pin 2 (middle):           RX (Board receive)
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>Pin 3 (far from USB-C):   GND (Ground)
+</code></pre></div></p>
+<p><strong>USB-to-Serial adapter connection:</strong>
+- Adapter <strong>RX</strong> → BeaglePlay <strong>TX</strong> (Pin 1)
+- Adapter <strong>TX</strong> → BeaglePlay <strong>RX</strong> (Pin 2)
+- Adapter <strong>GND</strong> → BeaglePlay <strong>GND</strong> (Pin 3)</p>
+<p><strong>Rule:</strong> TX connects to RX, RX connects to TX.</p>
+<h3 id="92-configure-serial-permissions">9.2 Configure Serial Permissions<a class="headerlink" href="#92-configure-serial-permissions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="c1"># Add user to dialout group</span>
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>sudo<span class="w"> </span>usermod<span class="w"> </span>-a<span class="w"> </span>-G<span class="w"> </span>dialout<span class="w"> </span><span class="nv">$USER</span>
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a><span class="c1"># Apply group change (logout/login or use newgrp)</span>
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>newgrp<span class="w"> </span>dialout
+</code></pre></div>
+<p><strong>Verify:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>groups<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>dialout
+</code></pre></div></p>
+<h3 id="93-install-and-use-picocom">9.3 Install and Use picocom<a class="headerlink" href="#93-install-and-use-picocom" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>picocom
+</code></pre></div>
+<p><strong>Connect to serial console:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>picocom<span class="w"> </span>-b<span class="w"> </span><span class="m">115200</span><span class="w"> </span>/dev/ttyUSB0
+</code></pre></div></p>
+<p><strong>Exit picocom:</strong> Press <code>Ctrl+A</code> then <code>Ctrl+X</code></p>
+<p><strong>If <code>/dev/ttyUSB0</code> doesn't exist:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>tty
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a><span class="c1"># Look for: usb 1-2: FTDI USB Serial Device converter now attached to ttyUSB0</span>
+</code></pre></div></p>
+<hr />
+<h2 id="10-booting-the-image">10. Booting the Image<a class="headerlink" href="#10-booting-the-image" title="Permanent link">&para;</a></h2>
+<h3 id="101-power-on-sequence">10.1 Power On Sequence<a class="headerlink" href="#101-power-on-sequence" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Insert SD card</strong> into BeaglePlay</li>
+<li><strong>Press and hold USR button</strong> (near LEDs)</li>
+<li><strong>Connect USB-C power cable</strong> while holding button</li>
+<li><strong>Release USR button after 2 seconds</strong></li>
+</ol>
+<p>This forces boot from SD card instead of eMMC.</p>
+<h3 id="102-observe-boot-logs">10.2 Observe Boot Logs<a class="headerlink" href="#102-observe-boot-logs" title="Permanent link">&para;</a></h3>
+<p><strong>You should see in picocom:</strong></p>
+<p><strong>Stage 1: R5 SPL (tiboot3.bin):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>U-Boot SPL 2023.04 (Nov 20 2024)
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>SYSFW ABI: 3.1 (firmware rev 0x0009 &#39;9.1.8--v09.01.08&#39;)
+<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>Trying to boot from MMC1
+</code></pre></div></p>
+<p><strong>Stage 2: TF-A + A53 SPL (tispl.bin):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>NOTICE:  BL31: v2.9(release):v2.9.0
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>NOTICE:  BL31: Built : 10:23:45, Nov 20 2024
+</code></pre></div></p>
+<p><strong>Stage 3: U-Boot (u-boot.img):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>U-Boot 2023.04 (Nov 20 2024)
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>SoC:   AM62X SR1.0 HS-FS
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>Model: BeagleBoard.org BeaglePlay
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>Hit any key to stop autoboot:  0
+</code></pre></div></p>
+<p><strong>Stage 4: Linux Kernel:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>[    0.000000] Linux version 5.10.168-ti-g12345678 (oe-user@oe-host) (aarch64-oe-linux-gcc ...)
+<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>...
+<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>[    5.234567] Run /sbin/init as init process
+</code></pre></div></p>
+<p><strong>Stage 5: Login Prompt:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>Poky (Yocto Project Reference Distro) 5.0.4 beagleplay /dev/ttyS2
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>beagleplay login:
+</code></pre></div></p>
+<h3 id="103-login">10.3 Login<a class="headerlink" href="#103-login" title="Permanent link">&para;</a></h3>
+<p><strong>Username:</strong> <code>root</code> (no password by default)</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>beagleplay login: root
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>root@beagleplay:~#
+</code></pre></div>
+<p><strong>Congratulations!</strong> You've successfully built and booted a Yocto-based Linux system.</p>
+<hr />
+<h2 id="11-exploring-the-system">11. Exploring the System<a class="headerlink" href="#11-exploring-the-system" title="Permanent link">&para;</a></h2>
+<h3 id="111-basic-system-information">11.1 Basic System Information<a class="headerlink" href="#111-basic-system-information" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a><span class="c1"># Kernel version</span>
+<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>uname<span class="w"> </span>-a
+<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a><span class="c1"># Output: Linux beagleplay 5.10.168-ti-g12345678 #1 SMP PREEMPT Wed Nov 20 10:23:45 UTC 2024 aarch64 GNU/Linux</span>
+<a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a>
+<a id="__codelineno-69-5" name="__codelineno-69-5" href="#__codelineno-69-5"></a><span class="c1"># CPU info</span>
+<a id="__codelineno-69-6" name="__codelineno-69-6" href="#__codelineno-69-6"></a>cat<span class="w"> </span>/proc/cpuinfo<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;model name&quot;</span>
+<a id="__codelineno-69-7" name="__codelineno-69-7" href="#__codelineno-69-7"></a>
+<a id="__codelineno-69-8" name="__codelineno-69-8" href="#__codelineno-69-8"></a><span class="c1"># Memory</span>
+<a id="__codelineno-69-9" name="__codelineno-69-9" href="#__codelineno-69-9"></a>free<span class="w"> </span>-h
+<a id="__codelineno-69-10" name="__codelineno-69-10" href="#__codelineno-69-10"></a>
+<a id="__codelineno-69-11" name="__codelineno-69-11" href="#__codelineno-69-11"></a><span class="c1"># Disk usage</span>
+<a id="__codelineno-69-12" name="__codelineno-69-12" href="#__codelineno-69-12"></a>df<span class="w"> </span>-h
+<a id="__codelineno-69-13" name="__codelineno-69-13" href="#__codelineno-69-13"></a>
+<a id="__codelineno-69-14" name="__codelineno-69-14" href="#__codelineno-69-14"></a><span class="c1"># Running processes</span>
+<a id="__codelineno-69-15" name="__codelineno-69-15" href="#__codelineno-69-15"></a>ps<span class="w"> </span>aux
+</code></pre></div>
+<h3 id="112-test-network-if-available">11.2 Test Network (if available)<a class="headerlink" href="#112-test-network-if-available" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="c1"># Show network interfaces</span>
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>ip<span class="w"> </span>link<span class="w"> </span>show
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a><span class="c1"># Bring up Ethernet (if cable connected)</span>
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>up
+<a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a>udhcpc<span class="w"> </span>-i<span class="w"> </span>eth0
+<a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a>
+<a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a><span class="c1"># Test connectivity</span>
+<a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">8</span>.8.8.8
+</code></pre></div>
+<h3 id="113-explore-installed-packages">11.3 Explore Installed Packages<a class="headerlink" href="#113-explore-installed-packages" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a><span class="c1"># List installed packages</span>
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>opkg<span class="w"> </span>list-installed
+<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>
+<a id="__codelineno-71-4" name="__codelineno-71-4" href="#__codelineno-71-4"></a><span class="c1"># Count packages</span>
+<a id="__codelineno-71-5" name="__codelineno-71-5" href="#__codelineno-71-5"></a>opkg<span class="w"> </span>list-installed<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+<a id="__codelineno-71-6" name="__codelineno-71-6" href="#__codelineno-71-6"></a><span class="c1"># Output: ~50 packages in minimal image</span>
+</code></pre></div>
+<h3 id="114-check-storage">11.4 Check Storage<a class="headerlink" href="#114-check-storage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="c1"># Partition layout</span>
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>cat<span class="w"> </span>/proc/partitions
+<a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>
+<a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a><span class="c1"># Mount points</span>
+<a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a>mount
+<a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a>
+<a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a><span class="c1"># Root filesystem type</span>
+<a id="__codelineno-72-8" name="__codelineno-72-8" href="#__codelineno-72-8"></a>mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;on / &quot;</span>
+<a id="__codelineno-72-9" name="__codelineno-72-9" href="#__codelineno-72-9"></a><span class="c1"># Output: /dev/mmcblk0p2 on / type ext4 (rw,relatime)</span>
+</code></pre></div>
+<hr />
+<h2 id="12-troubleshooting">12. Troubleshooting<a class="headerlink" href="#12-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="121-build-issues">12.1 Build Issues<a class="headerlink" href="#121-build-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> <code>ERROR: Nothing PROVIDES &lt;package&gt;</code></p>
+<p><strong>Solution:</strong> Missing layer dependency. Add the layer containing the package to <code>bblayers.conf</code>.</p>
+<hr />
+<p><strong>Problem:</strong> <code>ERROR: Fetcher failure for URL: 'https://...'</code></p>
+<p><strong>Solution:</strong> Network issue or upstream server down. Check internet connection, retry build. If persistent, check recipe's <code>SRC_URI</code>.</p>
+<hr />
+<p><strong>Problem:</strong> <code>ERROR: Task do_compile failed</code></p>
+<p><strong>Solution:</strong> Compilation error. Check:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>cat<span class="w"> </span>tmp/work/&lt;architecture&gt;/&lt;package&gt;/&lt;version&gt;/temp/log.do_compile
+</code></pre></div>
+May need to patch the recipe or update the package version.</p>
+<hr />
+<p><strong>Problem:</strong> Disk space full</p>
+<p><strong>Solution:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="c1"># Clean all build artifacts</span>
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>core-image-minimal
+<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>
+<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a><span class="c1"># Remove old downloads</span>
+<a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>rm<span class="w"> </span>-rf<span class="w"> </span>downloads/*
+<a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>
+<a id="__codelineno-74-7" name="__codelineno-74-7" href="#__codelineno-74-7"></a><span class="c1"># Clear sstate cache</span>
+<a id="__codelineno-74-8" name="__codelineno-74-8" href="#__codelineno-74-8"></a>rm<span class="w"> </span>-rf<span class="w"> </span>sstate-cache/*
+</code></pre></div></p>
+<h3 id="122-boot-issues">12.2 Boot Issues<a class="headerlink" href="#122-boot-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> "Waiting for root device /dev/mmcblk0p2..."</p>
+<p><strong>Solution:</strong> U-Boot can't find rootfs partition. Check:
+- SD card properly flashed
+- Boot partition contains correct files
+- U-Boot environment variables (printenv in U-Boot)</p>
+<hr />
+<p><strong>Problem:</strong> Kernel panic or immediate reboot</p>
+<p><strong>Solution:</strong>
+- Kernel/Device Tree mismatch
+- Corrupted image - reflash SD card
+- Check Device Tree blob loaded: <code>cat /proc/device-tree/model</code></p>
+<hr />
+<p><strong>Problem:</strong> No serial output</p>
+<p><strong>Solution:</strong>
+- Verify TX/RX crossed correctly
+- Check baud rate (should be 115200)
+- Try different USB port
+- Test serial adapter with loopback (connect TX to RX)</p>
+<h3 id="123-yocto-specific-issues">12.3 Yocto-Specific Issues<a class="headerlink" href="#123-yocto-specific-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> Changes to <code>local.conf</code> not taking effect</p>
+<p><strong>Solution:</strong> BitBake caches configuration. Force re-parse:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>&lt;package&gt;
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a><span class="c1"># Or delete tmp/cache/</span>
+</code></pre></div></p>
+<hr />
+<p><strong>Problem:</strong> Layer version mismatch errors</p>
+<p><strong>Solution:</strong> Ensure all layers use same Yocto release:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a><span class="k">for</span><span class="w"> </span>d<span class="w"> </span><span class="k">in</span><span class="w"> </span>poky<span class="w"> </span>meta-*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a><span class="w">    </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$d</span>
+<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== </span><span class="nv">$d</span><span class="s2"> ===&quot;</span>
+<a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a><span class="w">    </span>git<span class="w"> </span>branch<span class="w"> </span>-v
+<a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a><span class="w">    </span><span class="nb">cd</span><span class="w"> </span>..
+<a id="__codelineno-76-7" name="__codelineno-76-7" href="#__codelineno-76-7"></a><span class="k">done</span>
+</code></pre></div></p>
+<p>All should show <code>scarthgap</code> or <code>yocto-5.0.*</code>.</p>
+<hr />
+<p><strong>Problem:</strong> Python errors during parsing</p>
+<p><strong>Solution:</strong> Virtual environment conflict. Start fresh shell:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a><span class="c1"># Exit any Python venv</span>
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>deactivate
+<a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>
+<a id="__codelineno-77-4" name="__codelineno-77-4" href="#__codelineno-77-4"></a><span class="c1"># Source Yocto environment cleanly</span>
+<a id="__codelineno-77-5" name="__codelineno-77-5" href="#__codelineno-77-5"></a><span class="nb">cd</span><span class="w"> </span>~/yocto-labs
+<a id="__codelineno-77-6" name="__codelineno-77-6" href="#__codelineno-77-6"></a><span class="nb">source</span><span class="w"> </span>poky/oe-init-build-env
+</code></pre></div></p>
+<hr />
+<h2 id="13-going-further">13. Going Further<a class="headerlink" href="#13-going-further" title="Permanent link">&para;</a></h2>
+<h3 id="131-rebuild-after-changes">13.1 Rebuild After Changes<a class="headerlink" href="#131-rebuild-after-changes" title="Permanent link">&para;</a></h3>
+<p><strong>After modifying local.conf:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>bitbake<span class="w"> </span>core-image-minimal
+</code></pre></div></p>
+<p>BitBake is smart - only rebuilds changed components.</p>
+<h3 id="132-build-different-images">13.2 Build Different Images<a class="headerlink" href="#132-build-different-images" title="Permanent link">&para;</a></h3>
+<p><strong>Larger image with networking tools:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>bitbake<span class="w"> </span>core-image-base
+</code></pre></div></p>
+<p><strong>Full command-line tools:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>bitbake<span class="w"> </span>core-image-full-cmdline
+</code></pre></div></p>
+<p><strong>Custom image (we'll create this in Lab 16):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>bitbake<span class="w"> </span>my-custom-image
+</code></pre></div></p>
+<h3 id="133-explore-bitbake-commands">13.3 Explore BitBake Commands<a class="headerlink" href="#133-explore-bitbake-commands" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a><span class="c1"># Show all available images</span>
+<a id="__codelineno-82-2" name="__codelineno-82-2" href="#__codelineno-82-2"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span><span class="s2">&quot;*-image-*&quot;</span>
+<a id="__codelineno-82-3" name="__codelineno-82-3" href="#__codelineno-82-3"></a>
+<a id="__codelineno-82-4" name="__codelineno-82-4" href="#__codelineno-82-4"></a><span class="c1"># Show recipe dependencies</span>
+<a id="__codelineno-82-5" name="__codelineno-82-5" href="#__codelineno-82-5"></a>bitbake<span class="w"> </span>-g<span class="w"> </span>core-image-minimal
+<a id="__codelineno-82-6" name="__codelineno-82-6" href="#__codelineno-82-6"></a>dot<span class="w"> </span>-Tpng<span class="w"> </span>task-depends.dot<span class="w"> </span>-o<span class="w"> </span>task-depends.png
+<a id="__codelineno-82-7" name="__codelineno-82-7" href="#__codelineno-82-7"></a>
+<a id="__codelineno-82-8" name="__codelineno-82-8" href="#__codelineno-82-8"></a><span class="c1"># Show recipe details</span>
+<a id="__codelineno-82-9" name="__codelineno-82-9" href="#__codelineno-82-9"></a>bitbake-layers<span class="w"> </span>show-recipes<span class="w"> </span>busybox
+<a id="__codelineno-82-10" name="__codelineno-82-10" href="#__codelineno-82-10"></a>bitbake<span class="w"> </span>-e<span class="w"> </span>busybox<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^SRC_URI=&quot;</span>
+</code></pre></div>
+<h3 id="134-speed-up-subsequent-builds">13.4 Speed Up Subsequent Builds<a class="headerlink" href="#134-speed-up-subsequent-builds" title="Permanent link">&para;</a></h3>
+<p><strong>Use shared downloads and sstate cache:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a><span class="c1"># Edit conf/local.conf</span>
+<a id="__codelineno-83-2" name="__codelineno-83-2" href="#__codelineno-83-2"></a><span class="nv">DL_DIR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/opt/yocto-shared/downloads&quot;</span>
+<a id="__codelineno-83-3" name="__codelineno-83-3" href="#__codelineno-83-3"></a><span class="nv">SSTATE_DIR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/opt/yocto-shared/sstate-cache&quot;</span>
+<a id="__codelineno-83-4" name="__codelineno-83-4" href="#__codelineno-83-4"></a>
+<a id="__codelineno-83-5" name="__codelineno-83-5" href="#__codelineno-83-5"></a><span class="c1"># Create shared directories</span>
+<a id="__codelineno-83-6" name="__codelineno-83-6" href="#__codelineno-83-6"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/yocto-shared/<span class="o">{</span>downloads,sstate-cache<span class="o">}</span>
+<a id="__codelineno-83-7" name="__codelineno-83-7" href="#__codelineno-83-7"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>/opt/yocto-shared
+</code></pre></div></p>
+<p>This allows multiple build directories to share cached data.</p>
+<hr />
+<h2 id="14-cleaning-up">14. Cleaning Up<a class="headerlink" href="#14-cleaning-up" title="Permanent link">&para;</a></h2>
+<h3 id="141-preserve-build-environment">14.1 Preserve Build Environment<a class="headerlink" href="#141-preserve-build-environment" title="Permanent link">&para;</a></h3>
+<p><strong>DO NOT delete these:</strong>
+- <code>build/conf/</code> - Your configuration
+- <code>build/downloads/</code> - Source tarballs (reused)
+- <code>build/sstate-cache/</code> - Build cache (huge time saver)</p>
+<p><strong>Safe to delete:</strong>
+- <code>build/tmp/</code> - Regenerated on next build
+- <code>build/cache/</code> - Regenerated on parsing</p>
+<h3 id="142-clean-specific-packages">14.2 Clean Specific Packages<a class="headerlink" href="#142-clean-specific-packages" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a><span class="c1"># Remove task outputs but keep downloads</span>
+<a id="__codelineno-84-2" name="__codelineno-84-2" href="#__codelineno-84-2"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>clean<span class="w"> </span>&lt;package&gt;
+<a id="__codelineno-84-3" name="__codelineno-84-3" href="#__codelineno-84-3"></a>
+<a id="__codelineno-84-4" name="__codelineno-84-4" href="#__codelineno-84-4"></a><span class="c1"># Remove shared state cache for package</span>
+<a id="__codelineno-84-5" name="__codelineno-84-5" href="#__codelineno-84-5"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleansstate<span class="w"> </span>&lt;package&gt;
+<a id="__codelineno-84-6" name="__codelineno-84-6" href="#__codelineno-84-6"></a>
+<a id="__codelineno-84-7" name="__codelineno-84-7" href="#__codelineno-84-7"></a><span class="c1"># Complete clean (removes downloads too)</span>
+<a id="__codelineno-84-8" name="__codelineno-84-8" href="#__codelineno-84-8"></a>bitbake<span class="w"> </span>-c<span class="w"> </span>cleanall<span class="w"> </span>&lt;package&gt;
+</code></pre></div>
+<h3 id="143-disk-space-management">14.3 Disk Space Management<a class="headerlink" href="#143-disk-space-management" title="Permanent link">&para;</a></h3>
+<p><strong>Check space usage:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>du<span class="w"> </span>-sh<span class="w"> </span>~/yocto-labs/build/<span class="o">{</span>tmp,downloads,sstate-cache<span class="o">}</span>
+</code></pre></div></p>
+<p><strong>Typical sizes after first build:</strong>
+- <code>tmp/</code>: 20-40GB
+- <code>downloads/</code>: 5-10GB
+- <code>sstate-cache/</code>: 10-20GB</p>
+<hr />
+<h2 id="15-key-takeaways">15. Key Takeaways<a class="headerlink" href="#15-key-takeaways" title="Permanent link">&para;</a></h2>
+<p><strong>What You Accomplished:</strong>
+1. ✅ Set up complete Yocto/OpenEmbedded environment
+2. ✅ Configured build for BeaglePlay (TI AM62x)
+3. ✅ Built minimal Linux distribution from source
+4. ✅ Generated bootable SD card image
+5. ✅ Successfully booted custom Linux on hardware</p>
+<p><strong>Yocto Fundamentals Learned:</strong>
+- <strong>Layers</strong>: Modular metadata organization
+- <strong>BitBake</strong>: Recipe-based build system
+- <strong>Machine configuration</strong>: Hardware-specific settings
+- <strong>WIC images</strong>: Partition layout and bootable media
+- <strong>Shared state caching</strong>: Build acceleration</p>
+<p><strong>Next Steps:</strong>
+- <strong>Lab 11</strong>: Advanced Yocto configuration and customization
+- <strong>Lab 12</strong>: Add custom applications to images
+- <strong>Lab 13</strong>: Create your own meta-layer
+- <strong>Lab 14</strong>: Extend existing recipes with bbappend
+- <strong>Lab 15</strong>: Define custom machine configurations</p>
+<hr />
+<h2 id="16-verification-checklist">16. Verification Checklist<a class="headerlink" href="#16-verification-checklist" title="Permanent link">&para;</a></h2>
+<p><strong>Before proceeding to Lab 11, verify:</strong></p>
+<ul>
+<li>[ ] Yocto environment sources without errors</li>
+<li>[ ] <code>bitbake-layers show-layers</code> shows all 10 layers</li>
+<li>[ ] <code>bitbake core-image-minimal</code> completes successfully</li>
+<li>[ ] SD card image generated (~200MB compressed)</li>
+<li>[ ] BeaglePlay boots to login prompt from SD card</li>
+<li>[ ] Serial console accessible via <code>/dev/ttyUSB0</code></li>
+<li>[ ] Root login works (no password)</li>
+<li>[ ] Basic commands work (ls, ps, mount)</li>
+<li>[ ] Kernel version shows Yocto build</li>
+<li>[ ] Build directory preserved for next lab</li>
+</ul>
+<p><strong>Build time:</strong> ~2 hours first build, ~10 minutes incremental<br />
+<strong>Disk usage:</strong> ~60GB total<br />
+<strong>Success criteria:</strong> Booting to shell on BeaglePlay hardware</p>
+<hr />
+<h2 id="17-additional-resources">17. Additional Resources<a class="headerlink" href="#17-additional-resources" title="Permanent link">&para;</a></h2>
+<p><strong>Official Documentation:</strong>
+- Yocto Project Quick Build: https://docs.yoctoproject.org/brief-yoctoprojectqs/
+- BitBake User Manual: https://docs.yoctoproject.org/bitbake/
+- Yocto Dev Manual: https://docs.yoctoproject.org/dev-manual/</p>
+<p><strong>TI-Specific:</strong>
+- meta-ti Layer: https://git.yoctoproject.org/meta-ti/
+- AM62x Technical Reference: https://www.ti.com/product/AM625
+- BeaglePlay Documentation: https://docs.beagleboard.org/latest/boards/beagleplay/</p>
+<p><strong>Community:</strong>
+- Yocto Mailing Lists: https://lists.yoctoproject.org/
+- #yocto IRC on Libera.Chat
+- BeagleBoard Forums: https://forum.beagleboard.org/</p>
+<hr />
+<p><strong>End of Lab 10</strong></p>
+<p><em>The Guide rates this lab: </em><em>Mostly Harmless</em><em> ⭐⭐⭐⭐</em></p>
+<p>You now have a functional Yocto build environment and understand the fundamentals of embedded Linux distribution creation. The next labs will teach you how to customize and extend this foundation to create production-ready systems.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 30, 2026 15:44:01 UTC">January 30, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jofralso. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Jofralso" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://buymeacoffee.com/jofralso" target="_blank" rel="noopener" title="Buy Me A Coffee" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M152-16c-13.3 0-24 10.7-24 24 0 38.9 23.4 59.4 39.1 73.1l1.1 1C184.5 96.4 192 103.9 192 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C183.5 31.7 176 24.1 176 8c0-13.3-10.7-24-24-24M96 192c-17.7 0-32 14.3-32 32v192c0 53 43 96 96 96h192c41.8 0 77.4-26.7 90.5-64h5.5c70.7 0 128-57.3 128-128s-57.3-128-128-128zm352 192V256c35.3 0 64 28.7 64 64s-28.7 64-64 64M288 8c0-13.3-10.7-24-24-24S240-5.3 240 8c0 38.9 23.4 59.4 39.1 73.1l1.1 1C296.5 96.4 304 103.9 304 120c0 13.3 10.7 24 24 24s24-10.7 24-24c0-38.9-23.4-59.4-39.1-73.1l-1.1-1C295.5 31.7 288 24.1 288 8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

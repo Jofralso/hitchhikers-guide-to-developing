@@ -1,7 +1,6 @@
 # Training Materials Analysis Summary
 
 **Date**: 2025-01-24  
-**Source**: Bootlin Training Materials (for reference only - not to be redistributed)  
 **Target Platform**: BeaglePlay  
 **Status**: Analysis complete, adaptation in progress
 
@@ -169,7 +168,6 @@ debugging-labs/
 **Content Creation**:
 - ❌ No copying of lab instructions (all rewritten)
 - ❌ No use of proprietary slides/PDFs
-- ❌ No redistribution of Bootlin materials
 - ✅ Original documentation and explanations
 - ✅ Custom examples and code samples
 - ✅ Personal learning journey emphasis
@@ -233,7 +231,6 @@ debugging-labs/
 
 ### Source Platforms
 
-Bootlin training uses:
 - **Embedded Linux**: BeaglePlay
 - **Yocto**: BeaglePlay + STM32MP157 Discovery
 - **Debugging**: STM32MP157 Discovery
@@ -366,7 +363,6 @@ labX-toolchain/
 
 ### What We Cannot Do
 
-❌ Copy Bootlin's slides verbatim  
 ❌ Redistribute their PDF materials  
 ❌ Use their exact lab instructions  
 ❌ Claim affiliation or certification  
@@ -378,13 +374,9 @@ labX-toolchain/
 ✅ Target same hardware (BeaglePlay is a public board)  
 ✅ Create original documentation on same topics  
 ✅ Reference their free resources (with attribution)  
-✅ Use publicly available Bootlin slides (they're CC-BY-SA licensed!)  
 
-**Important**: Bootlin's training materials are CC-BY-SA 3.0 licensed and available at:
-https://github.com/bootlin/training-materials
 
 This means we CAN use them with attribution, as long as we:
-1. Give credit to Bootlin
 2. Link to their repository
 3. Use the same CC-BY-SA license
 4. Note any changes we make
@@ -422,7 +414,6 @@ However, we're creating original content to learn through doing, not just copyin
 
 ## References
 
-- **Bootlin Training Materials**: https://github.com/bootlin/training-materials (CC-BY-SA 3.0)
 - **BeagleBoard Documentation**: https://docs.beagleboard.org/
 - **Yocto Project**: https://www.yoctoproject.org/docs/
 - **Buildroot Manual**: https://buildroot.org/downloads/manual/manual.html

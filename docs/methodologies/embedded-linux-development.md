@@ -528,7 +528,6 @@ git tag -a v1.0.0 -m "Release 1.0.0"
 
 ## References
 
-- [Bootlin Embedded Linux Training](https://bootlin.com/training/embedded-linux/)
 - [Yocto Project Documentation](https://docs.yoctoproject.org/)
 - [Buildroot Manual](https://buildroot.org/downloads/manual/manual.html)
 - [U-Boot Documentation](https://u-boot.readthedocs.io/)

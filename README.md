@@ -225,11 +225,6 @@ If this guide has helped you on your journey through the galaxy of software deve
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20The%20Guide-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/jofralso)
 
-**Or support through:**
-
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Support-pink.svg?style=for-the-badge&logo=github)](https://github.com/sponsors/Jofralso)
-[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue.svg?style=for-the-badge&logo=paypal)](https://paypal.me/jofralso)
-
 </div>
 
 Your support helps maintain this guide, create more comprehensive documentation, and acquire hardware for testing across different platforms. Every contribution is appreciated and helps keep the guide freely available to all travelers through the development universe.
